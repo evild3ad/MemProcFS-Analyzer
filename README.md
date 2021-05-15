@@ -21,34 +21,34 @@ Download the latest version of **MemProcFS-Analyzer** from the [Releases](https:
 ## Usage  
 Launch Windows PowerShell ISE or Visual Studio Code (PSVersion: 5.1) as Administrator and open/run MemProcFS-Analyzer.ps1. 
 
-![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/master/Screenshots/File-Browser.png)  
+![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/File-Browser.png)  
 **Fig 1:** Select your Raw Physical Memory Dump
 
-![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/master/Screenshots/Auto-Install.png)  
+![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Auto-Install.png)  
 **Fig 2:** MemProcFS-Analyzer checks for dependencies (First Run)
 
-![Microsoft-Internet-Symbol-Store](https://github.com/evild3ad/MemProcFS-Analyzer/blob/master/Screenshots/Microsoft-Internet-Symbol-Store.png)  
+![Microsoft-Internet-Symbol-Store](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Microsoft-Internet-Symbol-Store.png)  
 **Fig 3:** Accept Terms of Use (First Run)
 
-![ClamAV-Scan](https://github.com/evild3ad/MemProcFS-Analyzer/blob/master/Screenshots/ClamAV-Scan.png)  
+![ClamAV-Scan](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/ClamAV-Scan.png)  
 **Fig 4:** Multi-Threaded ClamAV Scan
 
-![Elasticsearch](https://github.com/evild3ad/MemProcFS-Analyzer/blob/master/Screenshots/Elasticsearch.png)  
+![Elasticsearch](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Elasticsearch.png)  
 **Fig 5:** MemProcFS-Analyzer Analysis
 
-![ELK-Import](https://github.com/evild3ad/MemProcFS-Analyzer/blob/master/Screenshots/ELK-Import.png)  
+![ELK-Import](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/ELK-Import.png)  
 **Fig 6:** ELK Import
 
-![ELK-Timeline](https://github.com/evild3ad/MemProcFS-Analyzer/blob/master/Screenshots/ELK-Timeline.png)  
+![ELK-Timeline](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/ELK-Timeline.png)  
 **Fig 7:** Happy ELK Hunting!
 
-![Secure-Archive-Container](https://github.com/evild3ad/MemProcFS-Analyzer/blob/master/Screenshots/Secure-Archive-Container.png)  
+![Secure-Archive-Container](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Secure-Archive-Container.png)  
 **Fig 8:** ClamAV Scan found 29 infected file(s)
 
-![Message-Box](https://github.com/evild3ad/MemProcFS-Analyzer/blob/master/Screenshots/Message-Box.png)  
+![Message-Box](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Message-Box.png)  
 **Fig 8:** Press **OK** to shutdown MemProcFS and Elastisearch/Kibana
 
-![Output](https://github.com/evild3ad/MemProcFS-Analyzer/blob/master/Screenshots/Output.png)  
+![Output](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Output.png)  
 **Fig 10:** Secure Archive Container (PW: MemProcFS)
 
 ## Prerequisites 
