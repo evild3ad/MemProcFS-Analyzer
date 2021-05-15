@@ -34,7 +34,7 @@ Launch Windows PowerShell ISE or Visual Studio Code (PSVersion: 5.1) as Administ
 **Fig 4:** Multi-Threaded ClamAV Scan
 
 ![Elasticsearch](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Elasticsearch.png)  
-**Fig 5:** MemProcFS-Analyzer Analysis
+**Fig 5:** Processing Windows Event Logs (EVTX)
 
 ![ELK-Import](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/ELK-Import.png)  
 **Fig 6:** ELK Import
