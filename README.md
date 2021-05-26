@@ -78,6 +78,7 @@ https://www.clamav.net/documents/installing-clamav-on-windows
 
 4. Create your free IPinfo account [approx. 1-2 min]  
 https://ipinfo.io/signup?ref=cli  
+Open "MemProcFS-Analyzer.ps1" with your text editor, search for "access_token" and copy/paste your access token.
 
 5. Done! :smiley:  
 
