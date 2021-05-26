@@ -120,7 +120,7 @@ https://binaryforay.blogspot.com/
 ImportExcel 7.1.2 (2020-05-08)  
 https://github.com/dfinke/ImportExcel  
 
-Ipinfo CLI 1.1.5 (2021-05-20)  
+Ipinfo CLI 2.0.0 (2021-05-26)  
 https://github.com/ipinfo/cli  
 
 Kibana 7.13.0 (2021-05-25)  
