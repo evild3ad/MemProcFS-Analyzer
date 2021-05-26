@@ -29,7 +29,7 @@ Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PS
 ![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/File-Browser.png)  
 **Fig 1:** Select your Raw Physical Memory Dump (File Browser)
 
-![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/19c34b0be8066187fd2fe57efd2e21198f60b6c2/Screenshots/1st-Run.png)  
+![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e804fa5bd5195757a5a36d9bed8aa04b83dbbcca/Screenshots/1st-Run.png)  
 **Fig 2:** MemProcFS-Analyzer checks for dependencies (First Run)
 
 ![Microsoft-Internet-Symbol-Store](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Microsoft-Internet-Symbol-Store.png)  
@@ -47,7 +47,7 @@ Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PS
 ![IPinfo](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e5505296fd5ea604af15f4882a5478a44160f321/Screenshots/Map.png)  
 **Fig 7:** Map IPs w/ IPinfo.io
 
-![Elasticsearch](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Elasticsearch.png)  
+![Elasticsearch](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e804fa5bd5195757a5a36d9bed8aa04b83dbbcca/Screenshots/EventLogs.png)  
 **Fig 8:** Processing Windows Event Logs (EVTX)
 
 ![Amcache](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d547838fe2320e8812b3c4c3000a581c9a0e350c/Screenshots/Amcache.png)  
@@ -62,7 +62,7 @@ Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PS
 ![ELK-Timeline](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/ELK-Timeline.png)  
 **Fig 12:** Happy ELK Hunting!
 
-![Secure-Archive-Container](https://github.com/evild3ad/MemProcFS-Analyzer/blob/3be8489b6545345fdb2d5d2d418ca9afd6c304db/Screenshots/Secure-Archive-Container.png)  
+![Secure-Archive-Container](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e804fa5bd5195757a5a36d9bed8aa04b83dbbcca/Screenshots/Secure-Archive-Container.png)  
 **Fig 13:** ClamAV Scan found 29 infected file(s)
 
 ![Message-Box](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Message-Box.png)  
