@@ -44,20 +44,26 @@ Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PS
 ![Elasticsearch](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Elasticsearch.png)  
 **Fig 6:** Processing Windows Event Logs (EVTX)
 
+![Amcache](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d547838fe2320e8812b3c4c3000a581c9a0e350c/Screenshots/Amcache.png)  
+**Fig 7:** Processing extracted Amcache.hve &#8594; XLSX  
+
+![ShimCache](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d547838fe2320e8812b3c4c3000a581c9a0e350c/Screenshots/ShimCache.png)  
+**Fig 8:** Processing ShimCache &#8594; XLSX  
+
 ![ELK-Import](https://github.com/evild3ad/MemProcFS-Analyzer/blob/662aace82f911c1248dee6cbcf4b3a6e78aa8d0d/Screenshots/ELK-Import.png)  
-**Fig 7:** ELK Import
+**Fig 9:** ELK Import
 
 ![ELK-Timeline](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/ELK-Timeline.png)  
-**Fig 8:** Happy ELK Hunting!
+**Fig 10:** Happy ELK Hunting!
 
 ![Secure-Archive-Container](https://github.com/evild3ad/MemProcFS-Analyzer/blob/3be8489b6545345fdb2d5d2d418ca9afd6c304db/Screenshots/Secure-Archive-Container.png)  
-**Fig 9:** ClamAV Scan found 29 infected file(s)
+**Fig 11:** ClamAV Scan found 29 infected file(s)
 
 ![Message-Box](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Message-Box.png)  
-**Fig 10:** Press **OK** to shutdown MemProcFS and Elastisearch/Kibana
+**Fig 12:** Press **OK** to shutdown MemProcFS and Elastisearch/Kibana
 
 ![Output](https://github.com/evild3ad/MemProcFS-Analyzer/blob/8d55333f9c89d120b76d454ce60fca167767ba2b/Screenshots/Output.png)  
-**Fig 11:** Secure Archive Container (PW: MemProcFS)
+**Fig 13:** Secure Archive Container (PW: MemProcFS)
 
 ## Prerequisites 
 1. Download and install the latest Dokany Library Bundle (Redistributable packaged) &#8594; DokanSetup_redist.exe  
