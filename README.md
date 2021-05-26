@@ -27,7 +27,7 @@ Download the latest version of **MemProcFS-Analyzer** from the [Releases](https:
 Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PSVersion: 5.1) as Administrator and open/run MemProcFS-Analyzer.ps1. 
 
 ![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/File-Browser.png)  
-**Fig 1:** Select your Raw Physical Memory Dump
+**Fig 1:** Select your Raw Physical Memory Dump (File Browser)
 
 ![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/19c34b0be8066187fd2fe57efd2e21198f60b6c2/Screenshots/1st-Run.png)  
 **Fig 2:** MemProcFS-Analyzer checks for dependencies (First Run)
@@ -56,7 +56,7 @@ Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PS
 ![Message-Box](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Message-Box.png)  
 **Fig 10:** Press **OK** to shutdown MemProcFS and Elastisearch/Kibana
 
-![Output](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Output.png)  
+![Output](https://github.com/evild3ad/MemProcFS-Analyzer/blob/8d55333f9c89d120b76d454ce60fca167767ba2b/Screenshots/Output.png)  
 **Fig 11:** Secure Archive Container (PW: MemProcFS)
 
 ## Prerequisites 
