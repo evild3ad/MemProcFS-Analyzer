@@ -5,7 +5,7 @@ MemProcFS - The Memory Process File System by Ulf Frisk
 https://github.com/ufrisk/MemProcFS  
 
 Features:
-* Auto-Install of MemProcFS, Elasticsearch, Kibana, EvtxECmd, AmcacheParser, AppcompatCacheParser, ImportExcel, and IPinfo CLI  
+* Auto-Install of MemProcFS, Elasticsearch, Kibana, EvtxECmd, AmcacheParser, AppCompatCacheParser, ImportExcel, and IPinfo CLI  
 * Auto-Update of MemProcFS, Elasticsearch, Kibana, ClamAV Virus Databases (CVD), EvtxECmd (incl. Maps), AmcacheParser, AppCompactCacheParser, Import-Excel, and IPinfo CLI
 * Update-Info when there's a new version of ClamAV or a new Redistributable packaged Dokany Library Bundle available  
 * Multi-Threaded scan w/ ClamAV for Windows  
