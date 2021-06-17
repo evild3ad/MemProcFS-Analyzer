@@ -5,18 +5,22 @@ MemProcFS - The Memory Process File System by Ulf Frisk
 https://github.com/ufrisk/MemProcFS  
 
 Features:
-* Auto-Install of MemProcFS, Elasticsearch, Kibana, EvtxECmd, AmcacheParser, AppCompatCacheParser, ImportExcel, and IPinfo CLI  
-* Auto-Update of MemProcFS, Elasticsearch, Kibana, ClamAV Virus Databases (CVD), EvtxECmd (incl. Maps), AmcacheParser, AppCompactCacheParser, Import-Excel, and IPinfo CLI
+* Auto-Install of MemProcFS, Elasticsearch, Kibana, EvtxECmd, AmcacheParser, AppCompatCacheParser, RECmd, SBECmd, ImportExcel, and IPinfo CLI  
+* Auto-Update of MemProcFS, Elasticsearch, Kibana, ClamAV Virus Databases (CVD), EvtxECmd (incl. Maps), AmcacheParser, AppCompactCacheParser, RECmd, SBECmd, Import-Excel, and IPinfo CLI
 * Update-Info when there's a new version of ClamAV or a new Redistributable packaged Dokany Library Bundle available  
 * Multi-Threaded scan w/ ClamAV for Windows  
+* OS Fingerprinting  
 * Collection of injected modules detected by MemProcFS PE_INJECT for further analysis (PW: infected)
-* Extracting IPv4/IPv6 
-* IP2ASN Mapping w/ [Team Cymru](https://team-cymru.com/community-services/ip-asn-mapping/)  
-* GeoIP w/ [IPinfo CLI](https://github.com/ipinfo/cli)  
+* Extracting IPv4/IPv6  
+* IP2ASN Mapping and GeoIP w/ [IPinfo CLI](https://github.com/ipinfo/cli)  
 * Checking for Unusual Parent-Child Relationships and Number of Instances  
 * Extracting Windows Event Log Files and processing w/ EvtxECmd &#8594; Timeline Explorer ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
 * Analyzing extracted Amcache.hve w/ Amcacheparser ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
 * Analyzing Application Compatibility Cache aka ShimCache w/ AppCompatcacheParser ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
+* Analyzing Syscache w/ RECmd ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
+* Analyzing UserAssist Artifacts w/ RECmd ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
+* Analyzing ShellBags Artifacts w/ RECmd ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
+* Extracting Auto-Start Extensibility Points (ASEPs) w/ RECmd ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman) 
 * Integration of PowerShell module [ImportExcel](https://github.com/dfinke/ImportExcel) by Doug Finke
 * Collecting Evidence Files (Secure Archive Container &#8594; PW: MemProcFS)  
 
@@ -111,7 +115,7 @@ https://www.clamav.net/documents/installing-clamav-on-windows &#8594; First Time
 Dokany Library Bundle v1.4.0.1000 x64 (2020-06-01)  
 https://github.com/dokan-dev/dokany/releases/latest &#8594; DokanSetup_redist.exe  
 
-Elasticsearch 7.13.0 (2021-05-25)  
+Elasticsearch 7.13.2 (2021-06-14)  
 https://www.elastic.co/downloads/elasticsearch  
 
 EvtxECmd v0.6.5.0 (2020-12-21)  
@@ -123,17 +127,20 @@ https://github.com/dfinke/ImportExcel
 Ipinfo CLI 2.0.0 (2021-05-26)  
 https://github.com/ipinfo/cli  
 
-Kibana 7.13.0 (2021-05-25)  
+Kibana 7.13.2 (2021-06-14)  
 https://www.elastic.co/downloads/kibana  
 
-MemProcFS v4.0 - The Memory Process File System (2021-05-24)  
+MemProcFS v4.1.0 - The Memory Process File System (2021-06-13)  
 https://github.com/ufrisk/MemProcFS  
 
-Microsoft Visual C++ Redistributables for Visual Studio 2019
+Microsoft Visual C++ Redistributables for Visual Studio 2019  
 https://go.microsoft.com/fwlink/?LinkId=746572 &#8594; VC_redist.x64.exe  
 
-Netcat v1.11 (2009-04-10)  
-https://joncraton.org/blog/46/netcat-for-windows/  
+Registry Explorer/RECmd v1.6.0.0 (2021-06-08)  
+https://binaryforay.blogspot.com/  
+
+ShellBags Explorer v1.4.0.0 (2021-05-24)  
+https://binaryforay.blogspot.com/  
 
 ## Links
 [MemProcFS](https://github.com/ufrisk/MemProcFS)  
