@@ -96,7 +96,13 @@ https://www.clamav.net/documents/installing-clamav-on-windows
 https://ipinfo.io/signup?ref=cli  
 Open "MemProcFS-Analyzer.ps1" with your text editor, search for "access_token" and copy/paste your access token.
 
-5. Done! :smiley:  
+5. Install the NuGet package provider for PowerShell  
+Check if NuGet is available in the package providers by running the following command:  
+`Get-PackageProvider -ListAvailable`  
+If NuGet is not installed on your system yet, you have to install it.  
+`Install-PackageProvider -Name NuGet -Force`  
+
+6. Done! :smiley:  
 
 ## Dependencies
 7-Zip 9.20 Command Line Version (2010-11-18)  
