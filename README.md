@@ -34,7 +34,7 @@ Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PS
 **Fig 1:** Select your Raw Physical Memory Dump (File Browser)
 
 ![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/195b43a37a11e58998d03213717f70e22c6bae54/Screenshots/02.png)  
-**Fig 2:** MemProcFS-Analyzer checks for dependencies (First Run)
+**Fig 2:** MemProcFS-Analyzer auto-installs multiple dependencies (First Run)
 
 ![Microsoft-Internet-Symbol-Store](https://github.com/evild3ad/MemProcFS-Analyzer/blob/195b43a37a11e58998d03213717f70e22c6bae54/Screenshots/03.png)  
 **Fig 3:** Accept Terms of Use (First Run)  
