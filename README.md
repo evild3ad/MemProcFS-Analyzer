@@ -30,50 +30,53 @@ Download the latest version of **MemProcFS-Analyzer** from the [Releases](https:
 ## Usage  
 Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PSVersion: 5.1) as Administrator and open/run MemProcFS-Analyzer.ps1. 
 
-![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/File-Browser.png)  
+![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/195b43a37a11e58998d03213717f70e22c6bae54/Screenshots/01.png)  
 **Fig 1:** Select your Raw Physical Memory Dump (File Browser)
 
-![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e804fa5bd5195757a5a36d9bed8aa04b83dbbcca/Screenshots/1st-Run.png)  
+![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/195b43a37a11e58998d03213717f70e22c6bae54/Screenshots/02.png)  
 **Fig 2:** MemProcFS-Analyzer checks for dependencies (First Run)
 
-![Microsoft-Internet-Symbol-Store](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Microsoft-Internet-Symbol-Store.png)  
+![Microsoft-Internet-Symbol-Store](https://github.com/evild3ad/MemProcFS-Analyzer/blob/195b43a37a11e58998d03213717f70e22c6bae54/Screenshots/03.png)  
 **Fig 3:** Accept Terms of Use (First Run)  
 
-![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d43487a661be157b1805ce8a4c07fb2274963520/Screenshots/2nd-Run.png)  
-**Fig 4:** MemProcFS-Analyzer checks for dependencies (Second Run)
+![MemProcFS](https://github.com/evild3ad/MemProcFS-Analyzer/blob/195b43a37a11e58998d03213717f70e22c6bae54/Screenshots/04.png)  
+**Fig 4:** If you find MemProcFS useful, please become a sponsor at: https://github.com/sponsors/ufrisk  
+
+![Auto-Update](https://github.com/evild3ad/MemProcFS-Analyzer/blob/195b43a37a11e58998d03213717f70e22c6bae54/Screenshots/05.png)  
+**Fig 5:** MemProcFS-Analyzer checks for dependencies (Second Run)
 
 ![ClamAV-Scan](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d4b43171c4dacaf42cd983b5ea9810ba29e0bd7e/Screenshots/ClamAV-Scan.png)  
-**Fig 5:** Multi-Threaded ClamAV Scan
+**Fig 6:** Multi-Threaded ClamAV Scan
 
 ![IPinfo](https://github.com/evild3ad/MemProcFS-Analyzer/blob/28d128fdf058b056e929dd925433edfd2f10cbfd/Screenshots/IPinfo.png)  
-**Fig 6:** GeoIP w/ IPinfo.io
+**Fig 7:** GeoIP w/ IPinfo.io
 
 ![IPinfo](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e5505296fd5ea604af15f4882a5478a44160f321/Screenshots/Map.png)  
-**Fig 7:** Map IPs w/ IPinfo.io
+**Fig 8:** Map IPs w/ IPinfo.io
 
 ![Elasticsearch](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e804fa5bd5195757a5a36d9bed8aa04b83dbbcca/Screenshots/EventLogs.png)  
-**Fig 8:** Processing Windows Event Logs (EVTX)
+**Fig 9:** Processing Windows Event Logs (EVTX)
 
 ![Amcache](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d547838fe2320e8812b3c4c3000a581c9a0e350c/Screenshots/Amcache.png)  
-**Fig 9:** Processing extracted Amcache.hve &#8594; XLSX  
+**Fig 10:** Processing extracted Amcache.hve &#8594; XLSX  
 
 ![ShimCache](https://github.com/evild3ad/MemProcFS-Analyzer/blob/28d128fdf058b056e929dd925433edfd2f10cbfd/Screenshots/ShimCache.png)  
-**Fig 10:** Processing ShimCache &#8594; XLSX  
+**Fig 11:** Processing ShimCache &#8594; XLSX  
 
 ![ELK-Import](https://github.com/evild3ad/MemProcFS-Analyzer/blob/662aace82f911c1248dee6cbcf4b3a6e78aa8d0d/Screenshots/ELK-Import.png)  
-**Fig 11:** ELK Import
+**Fig 12:** ELK Import
 
 ![ELK-Timeline](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/ELK-Timeline.png)  
-**Fig 12:** Happy ELK Hunting!
+**Fig 13:** Happy ELK Hunting!
 
 ![Secure-Archive-Container](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e804fa5bd5195757a5a36d9bed8aa04b83dbbcca/Screenshots/Secure-Archive-Container.png)  
-**Fig 13:** ClamAV Scan found 29 infected file(s)
+**Fig 14:** ClamAV Scan found 29 infected file(s)
 
 ![Message-Box](https://github.com/evild3ad/MemProcFS-Analyzer/blob/d3bfab5168ed22979338e4a379200020885cdc82/Screenshots/Message-Box.png)  
-**Fig 14:** Press **OK** to shutdown MemProcFS and Elastisearch/Kibana
+**Fig 15:** Press **OK** to shutdown MemProcFS and Elastisearch/Kibana
 
 ![Output](https://github.com/evild3ad/MemProcFS-Analyzer/blob/8d55333f9c89d120b76d454ce60fca167767ba2b/Screenshots/Output.png)  
-**Fig 15:** Secure Archive Container (PW: MemProcFS)
+**Fig 16:** Secure Archive Container (PW: MemProcFS)
 
 ## Prerequisites 
 1. Download and install the latest Dokany Library Bundle (Redistributable packaged) &#8594; DokanSetup_redist.exe  
