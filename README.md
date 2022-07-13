@@ -125,6 +125,8 @@ If NuGet is not installed on your system yet, you have to install it.
 
 7. Done! :smiley:  
 
+Note: Turn off your antivirus protection temporarily or better exclude your MemProcFS-Analyzer directory from scanning. 
+
 ## Dependencies
 7-Zip 22.00 Standalone Console (2022-06-15)  
 https://www.7-zip.org/download.html  
