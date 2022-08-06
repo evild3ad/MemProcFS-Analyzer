@@ -125,7 +125,9 @@ If NuGet is not installed on your system yet, you have to install it.
 
 7. Done! :smiley:  
 
-Note: Turn off your antivirus protection temporarily or better exclude your MemProcFS-Analyzer directory from scanning. 
+Notes: 
+- Turn off your antivirus protection temporarily or better exclude your MemProcFS-Analyzer directory from scanning.  
+- [Elasticsearch Tips](https://github.com/evild3ad/MemProcFS-Analyzer/wiki/Elasticsearch)
 
 ## Dependencies
 7-Zip 22.00 Standalone Console (2022-06-15)  
