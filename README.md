@@ -126,7 +126,7 @@ https://docs.clamav.net/manual/Usage/Configuration.html#windows
 
 5. Create your free IPinfo account [approx. 1-2 min]  
 https://ipinfo.io/signup?ref=cli  
-Open "MemProcFS-Analyzer.ps1" with your text editor, search for "<access_token>" and copy/paste your access token.
+Open "MemProcFS-Analyzer.ps1" with your text editor, search for "Please insert your Access Token here" and copy/paste your access token.
 
 6. Install the NuGet package provider for PowerShell  
 Check if NuGet is available in the package providers by running the following command:  
