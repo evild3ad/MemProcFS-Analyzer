@@ -16,7 +16,10 @@ Features:
 * Collection of injected modules detected by MemProcFS PE_INJECT for further analysis (PW: infected)
 * Extracting IPv4/IPv6  
 * IP2ASN Mapping and GeoIP w/ [IPinfo CLI](https://github.com/ipinfo/cli) &#8594; Get your token for free at [https://ipinfo.io/signup](https://ipinfo.io/signup)  
+* Checking for Suspicious Port Numbers
+* Process Tree (TreeView) including complete Process Call Chain (Special thanks to [DaFuqs](https://github.com/DaFuqs))
 * Checking Processes for Unusual Parent-Child Relationships and Number of Instances  
+* Checking for Process Path Masquerading and Process Name Masquerading (Damerau Levenshtein Distance)
 * Web Browser History (Google Chrome, Microsoft Edge and Firefox) 
 * Extracting Windows Event Log Files and processing w/ EvtxECmd &#8594; Timeline Explorer ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
 * Analyzing extracted Amcache.hve w/ Amcacheparser ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
@@ -40,67 +43,76 @@ Download the latest version of **MemProcFS-Analyzer** from the [Releases](https:
 ## Usage  
 Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PSVersion: 5.1) as Administrator and open/run MemProcFS-Analyzer.ps1. 
 
-![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/01.png)  
+![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/01.png)  
 **Fig 1:** Select your Raw Physical Memory Dump (File Browser)
 
-![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/02.png)  
+![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/02.png)  
 **Fig 2:** MemProcFS-Analyzer auto-installs dependencies (First Run)
 
-![Microsoft-Internet-Symbol-Store](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/03.png)  
+![Microsoft-Internet-Symbol-Store](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/03.png)  
 **Fig 3:** Accept Terms of Use (First Run)  
 
-![MemProcFS](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/04.png)  
+![MemProcFS](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/04.png)  
 **Fig 4:** If you find MemProcFS useful, please become a sponsor at: https://github.com/sponsors/ufrisk  
 
-![Mounted](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/05.png)  
+![Mounted](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/05.png)  
 **Fig 5:** You can investigate the mounted memory dump by exploring drive letter X:
 
-![Auto-Update](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/06.png)  
+![Auto-Update](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/06.png)  
 **Fig 6:** MemProcFS-Analyzer checks for updates (Second Run) 
 
 Note: It's recommended to uncomment/disable the "Updater" function after installation. Check out the "Main" in the bottom of the script.
 
-![ClamAV-Scan](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/07.png)  
+![ClamAV-Scan](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/07.png)  
 **Fig 7:** FindEvil feature and additional analytics
 
-![Processes](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/08.png)  
+![Processes](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/08.png)  
 **Fig 8:** Processes
 
-![RunningAndExited](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/09.png)  
+![RunningAndExited](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/09.png)  
 **Fig 9:** Running and Exited Processes
 
-![IPinfo](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/10.png)  
-**Fig 10:** GeoIP w/ IPinfo.io
+![ProcessTree](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/10.png)  
+**Fig 10:** Process Tree (GUI)
 
-![MapReport](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/11.png)  
-**Fig 11:** Map IPs w/ IPinfo.io
+![ProcessTreeSearch](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/11.png)  
+**Fig 11:** Checking Process Tree (to find anomalies)
 
-![EVTX](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/12.png)  
-**Fig 12:** Processing Windows Event Logs (EVTX)
+![ProcessTreeAlerts](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/12.png)  
+**Fig 12:** Process Tree: Alert Messages w/ Process Call Chain
 
-![Amcache](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/13.png)  
-**Fig 13:** Processing extracted Amcache.hve &#8594; XLSX  
+![IPinfo](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/13.png)  
+**Fig 13:** GeoIP w/ IPinfo.io
 
-![ShimCache](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/14.png)  
-**Fig 14:** Processing ShimCache &#8594; XLSX  
+![MapReport](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/14.png)  
+**Fig 14:** Map IPs w/ IPinfo.io
 
-![Timeline-Explorer](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/15.png)  
-**Fig 15:** Analyze CSV output w/ Timeline Explorer (TLE)
+![EVTX](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/15.png)  
+**Fig 15:** Processing Windows Event Logs (EVTX)
 
-![ELK-Import](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/16.png)  
-**Fig 16:** ELK Import
+![Amcache](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/16.png)  
+**Fig 16:** Processing extracted Amcache.hve &#8594; XLSX  
 
-![ELK-Timeline](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/17.png)  
-**Fig 17:** Happy ELK Hunting!
+![ShimCache](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/17.png)  
+**Fig 17:** Processing ShimCache &#8594; XLSX  
 
-![Secure-Archive-Container](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/18.png)  
-**Fig 18:** Multi-Threaded ClamAV Scan to help you finding evil! ;-)
+![Timeline-Explorer](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/18.png)  
+**Fig 18:** Analyze CSV output w/ Timeline Explorer (TLE)
 
-![Message-Box](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/19.png)  
-**Fig 19:** Press **OK** to shutdown MemProcFS and Elastisearch/Kibana
+![ELK-Import](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/19.png)  
+**Fig 19:** ELK Import
 
-![Output](https://github.com/evild3ad/MemProcFS-Analyzer/blob/aba7e8441da0a05b39882dd92cee7994f1a0daae/Screenshots/20.png)  
-**Fig 20:** Secure Archive Container (PW: MemProcFS)  
+![ELK-Timeline](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/20.png)  
+**Fig 20:** Happy ELK Hunting!
+
+![Secure-Archive-Container](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/21.png)  
+**Fig 21:** Multi-Threaded ClamAV Scan to help you finding evil! ;-)
+
+![Message-Box](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/22.png)  
+**Fig 22:** Press **OK** to shutdown MemProcFS and Elastisearch/Kibana
+
+![Output](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f5f84b6d7b179c43f16913a79353576b42ac339c/Screenshots/23.png)  
+**Fig 23:** Secure Archive Container (PW: MemProcFS)  
 
 ## Introduction MemProcFS and Memory Forensics  
 Check out [Super Easy Memory Forensics](https://www.slideshare.net/IIJ_PR/super-easy-memory-forensics) by [Hiroshi Suzuki](https://twitter.com/herosi_t) and [Hisao Nashiwa](https://twitter.com/unk0unk0).
@@ -153,10 +165,10 @@ https://ericzimmerman.github.io/
 ClamAV - Download &#8594; Alternate Versions &#8594; Windows Packages &#8594; Win64 &#8594; clamav-0.105.1.win.x64.msi (2022-07-26)  
 https://www.clamav.net/downloads#otherversions  
 
-Dokany Library Bundle v2.0.5.1000 (2022-07-04)  
+Dokany Library Bundle v2.0.6.1000 (2022-10-02)  
 https://github.com/dokan-dev/dokany/releases/latest &#8594; DokanSetup.exe  
 
-Elasticsearch 8.4.1 (2022-08-30)  
+Elasticsearch 8.4.3 (2022-10-05)  
 https://www.elastic.co/downloads/elasticsearch  
 
 entropy v1.0 (2022-02-04)  
@@ -168,16 +180,16 @@ https://ericzimmerman.github.io/
 ImportExcel 7.8.1 (2022-09-03)  
 https://github.com/dfinke/ImportExcel  
 
-Ipinfo CLI 2.8.1 (2022-05-23)  
+Ipinfo CLI 2.10.0 (2022-09-28)  
 https://github.com/ipinfo/cli  
 
-Kibana 8.4.1 (2022-08-30)  
+Kibana 8.4.3 (2022-10-05)  
 https://www.elastic.co/downloads/kibana  
 
 lnk_parser v0.2.0 (2022-08-10)  
 https://github.com/AbdulRhmanAlfaifi/lnk_parser  
 
-MemProcFS v5.0.3 - The Memory Process File System (2022-08-04)  
+MemProcFS v5.1.1 - The Memory Process File System (2022-09-26)  
 https://github.com/ufrisk/MemProcFS  
 
 RECmd v2.0.0.0 (.NET 6)  
