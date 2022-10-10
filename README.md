@@ -17,7 +17,7 @@ Features:
 * Extracting IPv4/IPv6  
 * IP2ASN Mapping and GeoIP w/ [IPinfo CLI](https://github.com/ipinfo/cli) &#8594; Get your token for free at [https://ipinfo.io/signup](https://ipinfo.io/signup)  
 * Checking for Suspicious Port Numbers
-* Process Tree (TreeView) including complete Process Call Chain (Special thanks to [DaFuqs](https://github.com/DaFuqs))
+* Process Tree (TreeView) including complete Process Call Chain (Special thanks to [Dominik Schmidt](https://github.com/DaFuqs))
 * Checking Processes for Unusual Parent-Child Relationships and Number of Instances  
 * Checking for Process Path Masquerading and Process Name Masquerading (Damerau Levenshtein Distance)
 * Web Browser History (Google Chrome, Microsoft Edge and Firefox) 
