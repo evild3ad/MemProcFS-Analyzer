@@ -137,7 +137,7 @@ Launch Windows PowerShell console as Administrator.
 https://docs.clamav.net/manual/Usage/Configuration.html#windows  
 
 5. Optimize ClamAV scan speed performance (30% faster)    
-Open "C:\Program Files\ClamAV\clamd.conf" with your text editor and search for: "Don't scan files and directories matching regex"
+Open "C:\Program Files\ClamAV\clamd.conf" with your text editor and search for: "Don't scan files and directories matching regex"  
 `ExcludePath "\\heaps\\"`  
 `ExcludePath "\\handles\\"`  
 `ExcludePath "\\memmap\\vad-v\\"`  
