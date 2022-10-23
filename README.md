@@ -129,24 +129,31 @@ https://www.clamav.net/downloads#otherversions
 
 4. First Time Set-Up of ClamAV  
 Launch Windows PowerShell console as Administrator.  
-`cd "C:\Program Files\clamav"`  
+`cd "C:\Program Files\ClamAV"`  
 `copy .\conf_examples\freshclam.conf.sample .\freshclam.conf`  
 `copy .\conf_examples\clamd.conf.sample .\clamd.conf`  
-`write.exe .\freshclam.conf`  &#8594; Comment or remove the line that says “Example”.  
-`write.exe .\clamd.conf` &#8594; Comment or remove the line that says “Example”.  
+`write.exe .\freshclam.conf`  &#8594; Comment or remove the line that says "Example".  
+`write.exe .\clamd.conf` &#8594; Comment or remove the line that says "Example".  
 https://docs.clamav.net/manual/Usage/Configuration.html#windows  
 
-5. Create your free IPinfo account [approx. 1-2 min]  
+5. Optimize ClamAV scan speed performance (30% faster)    
+Open "C:\Program Files\ClamAV\clamd.conf" with your text editor and search for: "Don't scan files and directories matching regex"
+`ExcludePath "\\heaps\\"`  
+`ExcludePath "\\handles\\"`  
+`ExcludePath "\\memmap\\vad-v\\"`  
+`ExcludePath "\\sys\\pool\\"`  
+
+6. Create your free IPinfo account [approx. 1-2 min]  
 https://ipinfo.io/signup?ref=cli  
 Open "MemProcFS-Analyzer.ps1" with your text editor, search for "Please insert your Access Token here" and copy/paste your access token.
 
-6. Install the NuGet package provider for PowerShell  
+7. Install the NuGet package provider for PowerShell  
 Check if NuGet is available in the package providers by running the following command:  
 `Get-PackageProvider -ListAvailable`  
 If NuGet is not installed on your system yet, you have to install it.  
 `Install-PackageProvider -Name NuGet -Force`  
 
-7. Done! :smiley:  
+8. Done! :smiley:   
 
 Notes: 
 - Turn off your antivirus protection temporarily or better exclude your MemProcFS-Analyzer directory from scanning.  
