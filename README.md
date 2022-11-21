@@ -7,8 +7,8 @@ https://github.com/ufrisk/MemProcFS
 Features:
 * Fast and easy memory analysis!
 * You can mount a Raw Physical Memory Dump like a disk image and handle the memory compression feature on Windows
-* Auto-Install of MemProcFS, AmcacheParser, AppCompatCacheParser, Elasticsearch, entropy, EvtxECmd, ImportExcel, IPinfo CLI, Kibana, lnk_parser, RECmd, SBECmd, xsv, and YARA  
-* Auto-Update of MemProcFS, AmcacheParser, AppCompatCacheParser, Elasticsearch, entropy, EvtxECmd (incl. Maps), ImportExcel, IPinfo CLI, Kibana, lnk_parser, RECmd, SBECmd, xsv, and YARA   
+* Auto-Install of MemProcFS, AmcacheParser, AppCompatCacheParser, Elasticsearch, entropy, EvtxECmd, ImportExcel, IPinfo CLI, Kibana, lnk_parser, RECmd, SBECmd, xsv, YARA, and Zircolite  
+* Auto-Update of MemProcFS, AmcacheParser, AppCompatCacheParser, Elasticsearch, entropy, EvtxECmd (incl. Maps), ImportExcel, IPinfo CLI, Kibana, lnk_parser, RECmd, SBECmd, xsv, YARA, and Zircolite   
 * Update-Info when there's a new version of ClamAV or a new Dokany File System Library Bundle available  
 * Pagefile Support
 * OS Fingerprinting  
@@ -25,7 +25,7 @@ Features:
 * Web Browser History (Google Chrome, Microsoft Edge and Firefox) 
 * Extracting Windows Event Log Files and processing w/ EvtxECmd &#8594; Timeline Explorer ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman) 
 * Event Log Overview  
-* Processing Windows Event Logs w/ Zircolite - A standalone SIGMA-based detection tool for EVTX
+* Processing Windows Event Logs w/ [Zircolite](https://github.com/wagga40/Zircolite) - A standalone SIGMA-based detection tool for EVTX
 * Analyzing extracted Amcache.hve w/ Amcacheparser ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
 * Analyzing Application Compatibility Cache aka ShimCache w/ AppCompatcacheParser ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
 * Analyzing Syscache w/ RECmd ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
