@@ -88,7 +88,7 @@ Note: It's recommended to uncomment/disable the "Updater" function after install
 **Fig 12:** Process Tree: Alert Messages w/ Process Call Chain
 
 ![PropertiesView](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e081cfb94cb4b8b7a8795e99bec28e0a3f7b0432/Screenshots/13.png)  
-**Fig 13:** Process Tree: Properties View &#8594; Double-Click on process or alert message
+**Fig 13:** Process Tree: Properties View &#8594; Double-Click on a process or alert message
 
 ![IPinfo](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e081cfb94cb4b8b7a8795e99bec28e0a3f7b0432/Screenshots/14.png)  
 **Fig 14:** GeoIP w/ IPinfo.io
