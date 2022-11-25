@@ -58,7 +58,7 @@ Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PS
 ![Microsoft-Internet-Symbol-Store](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e081cfb94cb4b8b7a8795e99bec28e0a3f7b0432/Screenshots/03.png)  
 **Fig 3:** Accept Terms of Use (First Run)  
 
-![MemProcFS](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e081cfb94cb4b8b7a8795e99bec28e0a3f7b0432/Screenshots/04.png)  
+![MemProcFS](https://github.com/evild3ad/MemProcFS-Analyzer/blob/f15d4c17150fabb6382d1b261fc52055c6046a88/Screenshots/04.png)  
 **Fig 4:** If you find MemProcFS useful, please become a sponsor at: https://github.com/sponsors/ufrisk  
 
 ![Mounted](https://github.com/evild3ad/MemProcFS-Analyzer/blob/e081cfb94cb4b8b7a8795e99bec28e0a3f7b0432/Screenshots/05.png)  
