@@ -231,4 +231,5 @@ https://github.com/wagga40/Zircolite
 [Demo of MemProcFS with Elasticsearch](https://www.youtube.com/watch?v=JcIlowlrvyI)  
 [Sponsor MemProcFS Project](https://github.com/sponsors/ufrisk)  
 [MemProcFSHunter](https://github.com/memprocfshunt/MemProcFSHunter)  
-[MemProcFS-Plugins](https://github.com/ufrisk/MemProcFS-Plugins)
+[MemProcFS-Plugins](https://github.com/ufrisk/MemProcFS-Plugins)  
+[SANS FOR532 - Enterprise Memory Forensics In-Depth](https://www.sans.org/cyber-security-courses/enterprise-memory-forensics-in-depth/)  
