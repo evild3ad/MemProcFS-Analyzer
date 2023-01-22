@@ -7,8 +7,8 @@ https://github.com/ufrisk/MemProcFS
 Features:
 * Fast and easy memory analysis!
 * You can mount a Raw Physical Memory Dump like a disk image and handle the memory compression feature on Windows
-* Auto-Install of MemProcFS, AmcacheParser, AppCompatCacheParser, Elasticsearch, entropy, EvtxECmd, ImportExcel, IPinfo CLI, Kibana, lnk_parser, RECmd, SBECmd, xsv, YARA, and Zircolite  
-* Auto-Update of MemProcFS, AmcacheParser, AppCompatCacheParser, Elasticsearch, entropy, EvtxECmd (incl. Maps), ImportExcel, IPinfo CLI, Kibana, lnk_parser, RECmd, SBECmd, xsv, YARA, and Zircolite   
+* Auto-Install of MemProcFS, AmcacheParser, AppCompatCacheParser, Elasticsearch, entropy, EvtxECmd, ImportExcel, IPinfo CLI, jq, Kibana, lnk_parser, RECmd, SBECmd, xsv, YARA, and Zircolite  
+* Auto-Update of MemProcFS, AmcacheParser, AppCompatCacheParser, Elasticsearch, entropy, EvtxECmd (incl. Maps), ImportExcel, IPinfo CLI, jq, Kibana, lnk_parser, RECmd, SBECmd, xsv, YARA, and Zircolite   
 * Update-Info when there's a new version of ClamAV or a new Dokany File System Library Bundle available  
 * Pagefile Support
 * OS Fingerprinting  
@@ -18,7 +18,7 @@ Features:
 * Extracting IPv4/IPv6  
 * IP2ASN Mapping and GeoIP w/ [IPinfo CLI](https://github.com/ipinfo/cli) &#8594; Get your token for free at [https://ipinfo.io/signup](https://ipinfo.io/signup)  
 * Checking for Suspicious Port Numbers
-* Process Tree (TreeView) including complete Process Call Chain (Special thanks to [Dominik Schmidt](https://github.com/DaFuqs))
+* [Process Tree](https://github.com/evild3ad/MemProcFS-Analyzer/wiki/Process-Tree) (TreeView) including complete Process Call Chain (Special thanks to [Dominik Schmidt](https://github.com/DaFuqs))
 * Checking Processes for Unusual Parent-Child Relationships and Number of Instances  
 * Checking Processes for Unusual User Context
 * Checking for Process Path Masquerading and Process Name Masquerading (Damerau Levenshtein Distance)
@@ -181,34 +181,37 @@ https://ericzimmerman.github.io/
 AppCompatCacheParser v1.5.0.0 (.NET 6)  
 https://ericzimmerman.github.io/  
 
-ClamAV - Download &#8594; Alternate Versions &#8594; Windows Packages &#8594; Win64 &#8594; clamav-0.105.1.win.x64.msi (2022-07-26)  
-https://www.clamav.net/downloads#otherversions  
+ClamAV - Download &#8594; Windows &#8594; clamav-1.0.0.win.x64.msi (2022-11-23)  
+https://www.clamav.net/downloads    
 
 Dokany Library Bundle v2.0.6.1000 (2022-10-02)  
 https://github.com/dokan-dev/dokany/releases/latest &#8594; DokanSetup.exe  
 
-Elasticsearch 8.5.1 (2022-11-15)  
+Elasticsearch 8.6.0 (2023-01-10)  
 https://www.elastic.co/downloads/elasticsearch  
 
 entropy v1.0 (2022-02-04)  
 https://github.com/merces/entropy  
 
-EvtxECmd v1.0.0.0 (.NET 6)  
+EvtxECmd v1.0.0.1 (.NET 6)  
 https://ericzimmerman.github.io/  
 
-ImportExcel v7.8.2 (2022-10-22)  
+ImportExcel v7.8.4 (2022-12-11)  
 https://github.com/dfinke/ImportExcel  
 
-Ipinfo CLI 2.10.0 (2022-09-28)  
+IPinfo CLI 2.10.0 (2022-09-28)  
 https://github.com/ipinfo/cli  
 
-Kibana 8.5.1 (2022-11-15)  
+jq v1.6 (2019-11-02)  
+https://github.com/stedolan/jq  
+
+Kibana 8.6.0 (2023-01-10)  
 https://www.elastic.co/downloads/kibana  
 
 lnk_parser v0.2.0 (2022-08-10)  
 https://github.com/AbdulRhmanAlfaifi/lnk_parser  
 
-MemProcFS v5.2.0 - The Memory Process File System (2022-11-16)  
+MemProcFS v5.3.0 - The Memory Process File System (2023-01-19)  
 https://github.com/ufrisk/MemProcFS  
 
 RECmd v2.0.0.0 (.NET 6)  
@@ -230,6 +233,5 @@ https://github.com/wagga40/Zircolite
 [MemProcFS](https://github.com/ufrisk/MemProcFS)  
 [Demo of MemProcFS with Elasticsearch](https://www.youtube.com/watch?v=JcIlowlrvyI)  
 [Sponsor MemProcFS Project](https://github.com/sponsors/ufrisk)  
-[MemProcFSHunter](https://github.com/memprocfshunt/MemProcFSHunter)  
 [MemProcFS-Plugins](https://github.com/ufrisk/MemProcFS-Plugins)  
 [SANS FOR532 - Enterprise Memory Forensics In-Depth](https://www.sans.org/cyber-security-courses/enterprise-memory-forensics-in-depth/)  
