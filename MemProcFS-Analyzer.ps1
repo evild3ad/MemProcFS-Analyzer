@@ -9938,13 +9938,13 @@ $Host.UI.RawUI.WindowTitle = "$DefaultWindowsTitle"
 
 # Main
 Header
-#Updater
+Updater
 #Elasticsearch
 MicrosoftDefender
 MemProcFS
 #ELKImport
-#ClamAVUpdate
-#ClamAV
+ClamAVUpdate
+ClamAV
 Documents
 KrollBatch
 #LNK
