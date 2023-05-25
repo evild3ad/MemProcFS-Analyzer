@@ -1,10 +1,10 @@
-﻿# MemProcFS-Analyzer v0.8
+﻿# MemProcFS-Analyzer v0.9
 #
 # @author:    Martin Willing
 # @copyright: Copyright (c) 2021-2023 Martin Willing. All rights reserved.
 # @contact:   Any feedback or suggestions are always welcome and much appreciated - mwilling@lethal-forensics.com
-# @url:		  https://lethal-forensics.com/
-# @date:	  2023-01-22
+# @url:       https://lethal-forensics.com/
+# @date:      2023-05-25
 #
 #
 # ██╗     ███████╗████████╗██╗  ██╗ █████╗ ██╗      ███████╗ ██████╗ ██████╗ ███████╗███╗   ██╗███████╗██╗ ██████╗███████╗
@@ -25,7 +25,7 @@
 # AppCompatCacheParser v1.5.0.0 (.NET 6)
 # https://ericzimmerman.github.io/
 #
-# ClamAV - Download --> Windows --> clamav-1.0.0.win.x64.msi (2022-11-23)
+# ClamAV - Download --> Windows --> clamav-1.0.1.win.x64.msi (2023-02-14)
 # https://www.clamav.net/downloads
 # https://docs.clamav.net/manual/Usage/Configuration.html#windows --> First Time Set-Up
 # https://blog.clamav.net/
@@ -33,13 +33,13 @@
 # Dokany Library Bundle v2.0.6.1000 (2022-10-02)
 # https://github.com/dokan-dev/dokany/releases/latest --> DokanSetup.exe
 #
-# Elasticsearch 8.6.0 (2023-01-10)
+# Elasticsearch 8.7.1 (2023-05-02)
 # https://www.elastic.co/downloads/elasticsearch
 #
 # entropy v1.0 (2022-02-04)
 # https://github.com/merces/entropy
 #
-# EvtxECmd v1.0.0.1 (.NET 6)
+# EvtxECmd v1.5.0.0 (.NET 6)
 # https://ericzimmerman.github.io/
 #
 # ImportExcel v7.8.4 (2022-12-11)
@@ -51,13 +51,13 @@
 # jq v1.6 (2019-11-02)
 # https://github.com/stedolan/jq
 #
-# Kibana 8.6.0 (2023-01-10)
+# Kibana 8.7.1 (2023-05-02)
 # https://www.elastic.co/downloads/kibana
 #
 # lnk_parser v0.2.0 (2022-08-10)
 # https://github.com/AbdulRhmanAlfaifi/lnk_parser
 #
-# MemProcFS v5.3.0 - The Memory Process File System (2023-01-19)
+# MemProcFS v5.6.4 - The Memory Process File System (2023-05-01)
 # https://github.com/ufrisk/MemProcFS
 #
 # RECmd v2.0.0.0 (.NET 6)
@@ -69,10 +69,10 @@
 # xsv v0.13.0 (2018-05-12)
 # https://github.com/BurntSushi/xsv
 #
-# YARA v4.2.3 (2022-08-09)
+# YARA v4.3.1 (2023-04-21)
 # https://virustotal.github.io/yara/
 #
-# Zircolite v2.9.7 (2022-10-08)
+# Zircolite v2.9.9 (2023-04-16)
 # https://github.com/wagga40/Zircolite
 #
 #
@@ -164,8 +164,24 @@
 # Added: Status Bar (User Interface)
 # Fixed: Other minor fixes and improvements
 #
+# Version 0.9
+# Release Date: 2023-05-25
+# Added: FS_Forensic_Yara (YARA Custom Rules)
+# Added: FS_Forensic_Files (incl. ClamAV)
+# Added: Checking for suspicious processes with double file extensions
+# Added: Checking for Command and Scripting Interpreters
+# Added: Recent Folder Artifacts
+# Added: Hunting Suspicious Image Mounts
+# Added: OpenSaveMRU (OpenSavePidlMRU)
+# Added: LastVisitedMRU (LastVisitedPidlMRU)
+# Added: Terminal Server Client (RDP)
+# Added: Kroll RECmd Batch File v1.21 (2023-03-04)
+# Added: Improved Microsoft Defender AntiVirus Handling
+# Added: Improved Drive Letter (Mount Point) Handling
+# Fixed: Other minor fixes and improvements
 #
-# Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.2486) and PowerShell 5.1 (5.1.19041.2364)
+#
+# Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.2965) and PowerShell 5.1 (5.1.19041.2673)
 #
 #
 #############################################################################################################################################################################################
@@ -173,7 +189,7 @@
 
 <#
 .SYNOPSIS
-  MemProcFS-Analyzer v0.8 - Automated Forensic Analysis of Windows Memory Dumps for DFIR
+  MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR
 
 .DESCRIPTION
   MemProcFS-Analyzer.ps1 is a PowerShell script utilized to simplify the usage of MemProcFS and to assist with the memory analysis workflow.
@@ -210,9 +226,6 @@ else
 # Analysis date (ISO 8601)
 $script:Date = [datetime]::Now.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss") # YYYY-MM-DDThh:mm:ss
 $script:Timestamp = $Date -replace ":", "" # YYYY-MM-DDThhmmss
-
-# Drive Letter (Mount Point)
-$script:DriveLetter = "X:"
 
 # Tools
 
@@ -273,6 +286,14 @@ $script:zircolite = "$SCRIPT_DIR\Tools\Zircolite\zircolite_win10.exe"
 # Archive Password
 $script:PASSWORD = "MemProcFS"
 
+# Process Whitelist (Forensic Mode)
+# https://github.com/ufrisk/MemProcFS/wiki/_CommandLine#-forensic-process-skip
+$script:ForensicProcessWhitelist = "cyserver.exe,MsMpEng.exe,tlaworker.exe"
+
+# MsMpEng.exe   = Microsoft Defender
+# cyserver.exe  = Palo Alto Cortex XDR
+# tlaworker.exe = Palo Alto Cortex XDR
+
 #endregion Declarations
 
 #############################################################################################################################################################################################
@@ -295,7 +316,7 @@ Function Header {
 
 # Windows Title
 $script:DefaultWindowsTitle = $Host.UI.RawUI.WindowTitle
-$Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v0.8 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+$Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
 
 # Check if the PowerShell script is being run with admin rights
 if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
@@ -309,7 +330,7 @@ if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]
 
 # Dokany File System Library
 $Dokany = "$env:SystemDrive\Windows\System32\dokan2.dll"
-if (!(Test-Path "$Dokany"))
+if (!(Test-Path "$($Dokany)"))
 {
     Write-Host "[Error] Dokany File System Library NOT found." -ForegroundColor Red
     Write-Host "        Please download/install the latest release of Dokany File System Library manually:" -ForegroundColor Red
@@ -366,20 +387,22 @@ Function Show-UserInterface
     # Form Objects
     [System.Windows.Forms.Application]::EnableVisualStyles()
     $FormMemProcFSAnalyzer = New-Object 'System.Windows.Forms.Form'
+    $Checkbox1 = New-Object 'System.Windows.Forms.CheckBox'
+    $Checkbox2 = New-Object 'System.Windows.Forms.CheckBox'
     $StatusBar = New-Object 'System.Windows.Forms.StatusBar'
     $StatusBarPanel1 = New-Object 'System.Windows.Forms.StatusBarPanel'
-	$LabelMemoryDump = New-Object 'System.Windows.Forms.Label'
-	$LabelPageFile = New-Object 'System.Windows.Forms.Label'
+    $LabelMemoryDump = New-Object 'System.Windows.Forms.Label'
+    $LabelPageFile = New-Object 'System.Windows.Forms.Label'
     $ButtonBrowse1 = New-Object 'System.Windows.Forms.Button'
-	$ButtonBrowse2 = New-Object 'System.Windows.Forms.Button'
-	$TextBoxFile1 = New-Object 'System.Windows.Forms.TextBox'
+    $ButtonBrowse2 = New-Object 'System.Windows.Forms.Button'
+    $TextBoxFile1 = New-Object 'System.Windows.Forms.TextBox'
     $TextBoxFile2 = New-Object 'System.Windows.Forms.TextBox'
     $OpenFileDialog1 = New-Object 'System.Windows.Forms.OpenFileDialog'
-	$OpenFileDialog2 = New-Object 'System.Windows.Forms.OpenFileDialog'
-	$ButtonStart = New-Object 'System.Windows.Forms.Button'
+    $OpenFileDialog2 = New-Object 'System.Windows.Forms.OpenFileDialog'
+    $ButtonStart = New-Object 'System.Windows.Forms.Button'
     $ButtonExit = New-Object 'System.Windows.Forms.Button'
     $LinkLabel = New-Object 'System.Windows.Forms.LinkLabel'
-	$ToolTip1 = New-Object 'System.Windows.Forms.ToolTip'
+    $ToolTip1 = New-Object 'System.Windows.Forms.ToolTip'
     $MenuStrip1 = New-Object 'System.Windows.Forms.MenuStrip'
     $FileToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
     $CheckForUpdatesToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
@@ -388,10 +411,11 @@ Function Show-UserInterface
     $WikiToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
     $MemProcFSToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
     $SANSFOR532ToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
-	$AboutToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
+    $AboutToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
     $GitHubToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
-	$InitialFormWindowState = New-Object 'System.Windows.Forms.FormWindowState'
+    $InitialFormWindowState = New-Object 'System.Windows.Forms.FormWindowState'
 
+    # Events
     $ButtonBrowseMemory_Click={
 	
         if($OpenFileDialog1.ShowDialog() -eq 'OK')
@@ -424,7 +448,7 @@ Function Show-UserInterface
 
     $CheckForUpdatesToolStripMenuItem_Click={
 
-        $CurrentVersion = "0.8"
+        $CurrentVersion = "0.9"
 
         $StatusBar.Text = "Checking latest release on GitHub ..."
 
@@ -508,46 +532,76 @@ Function Show-UserInterface
 	}
 
     $AboutToolStripMenuItem_Click = {
-        $MessageBody = "MemProcFS-Analyzer v0.8`nCopyright (c) 2021-2023 Martin Willing"
+        $MessageBody = "MemProcFS-Analyzer v0.9`nCopyright (c) 2021-2023 Martin Willing"
         $MessageTitle = "MemProcFS-Analyzer"
         $ButtonType = "OK"
         $MessageIcon = "Info"
         [System.Windows.Forms.MessageBox]::Show($MessageBody, $MessageTitle, $ButtonType, $MessageIcon)
 	}
 
-    # Events
+    $Checkbox1_CheckedChanged =
+    {
+        if($Checkbox1.Checked -eq $true)
+	    {
+            # Custom YARA Rules - Enabled
+            $script:YaraRules = "$SCRIPT_DIR\yara\index.yar"
+        }
+        
+        if($Checkbox1.Checked -eq $false)
+        {
+            # Custom YARA Rules - Disabled
+            $script:YaraRules = $null
+        }
+    }
+
+    $Checkbox2_CheckedChanged =
+    {
+        if($Checkbox2.Checked -eq $true)
+	    {
+            # ClamAV Scan - Enabled
+            $script:ClamAV = "Enabled"
+        }
+        
+        if($Checkbox2.Checked -eq $false)
+        {
+            # ClamAV Scan - Disabled
+            $script:ClamAV = $null
+        }
+    }
 
     $Form_StateCorrection_Load =
     {
         $FormMemProcFSAnalyzer.WindowState = $InitialFormWindowState
     }
 
-    $Form_StoreValues_Closing=
+    $Form_StoreValues_Closing =
     {
         $script:MemoryDump = $TextBoxFile1.Text
         $script:Pagefile = $TextBoxFile2.Text
     }
 
-    $Form_Cleanup_FormClosed=
+    $Form_Cleanup_FormClosed =
     {
         try
         {
+            $Checkbox1.remove_CheckedChanged($Checkbox1_CheckedChanged)
+            $Checkbox2.remove_CheckedChanged($Checkbox2_CheckedChanged)
             $ButtonBrowse1.remove_Click($ButtonBrowseMemory_Click)
-		    $ButtonBrowse2.remove_Click($ButtonBrowsePagefile_Click)
-		    $ButtonStart.remove_MouseClick($ButtonStart_Click)
-		    $ButtonExit.remove_MouseClick($ButtonExit_Click)
+            $ButtonBrowse2.remove_Click($ButtonBrowsePagefile_Click)
+            $ButtonStart.remove_MouseClick($ButtonStart_Click)
+            $ButtonExit.remove_MouseClick($ButtonExit_Click)
             $LinkLabel.remove_LinkClicked($LinkLabel_LinkClicked)
-		    $FormMemProcFSAnalyzer.remove_Load($FormMemProcFSAnalyzer_Load)
+            $FormMemProcFSAnalyzer.remove_Load($FormMemProcFSAnalyzer_Load)
             $CheckForUpdatesToolStripMenuItem.remove_Click($checkForUpdatesToolStripMenuItem_Click)
             $ExitToolStripMenuItem.remove_Click($exitToolStripMenuItem_Click)
-			$WikiToolStripMenuItem.remove_Click($wikiToolStripMenuItem_Click)
+            $WikiToolStripMenuItem.remove_Click($wikiToolStripMenuItem_Click)
             $MemProcFSToolStripMenuItem.remove_Click($MemProcFSToolStripMenuItem_Click)
-			$SANSFOR532ToolStripMenuItem.remove_Click($SANSFOR532ToolStripMenuItem_Click)
-			$AboutToolStripMenuItem.remove_Click($AboutToolStripMenuItem_Click)
-			$GitHubToolStripMenuItem.remove_Click($GitHubToolStripMenuItem_Click)
-		    $FormMemProcFSAnalyzer.remove_Load($Form_StateCorrection_Load)
-		    $FormMemProcFSAnalyzer.remove_Closing($Form_StoreValues_Closing)
-		    $FormMemProcFSAnalyzer.remove_FormClosed($Form_Cleanup_FormClosed)
+            $SANSFOR532ToolStripMenuItem.remove_Click($SANSFOR532ToolStripMenuItem_Click)
+            $AboutToolStripMenuItem.remove_Click($AboutToolStripMenuItem_Click)
+            $GitHubToolStripMenuItem.remove_Click($GitHubToolStripMenuItem_Click)
+            $FormMemProcFSAnalyzer.remove_Load($Form_StateCorrection_Load)
+            $FormMemProcFSAnalyzer.remove_Closing($Form_StoreValues_Closing)
+            $FormMemProcFSAnalyzer.remove_FormClosed($Form_Cleanup_FormClosed)
         }
         catch { Out-Null }
     }
@@ -557,38 +611,58 @@ Function Show-UserInterface
     $MenuStrip1.SuspendLayout()
 
     # FormMemProcFSAnalyzer
+    $FormMemProcFSAnalyzer.Controls.Add($Checkbox1)
+    $FormMemProcFSAnalyzer.Controls.Add($Checkbox2)
     $FormMemProcFSAnalyzer.Controls.Add($StatusBar)
-	$FormMemProcFSAnalyzer.Controls.Add($LabelMemoryDump)
-	$FormMemProcFSAnalyzer.Controls.Add($LabelPageFile)
+    $FormMemProcFSAnalyzer.Controls.Add($LabelMemoryDump)
+    $FormMemProcFSAnalyzer.Controls.Add($LabelPageFile)
     $FormMemProcFSAnalyzer.Controls.Add($ButtonBrowse1)
 	$FormMemProcFSAnalyzer.Controls.Add($ButtonBrowse2)
     $FormMemProcFSAnalyzer.Controls.Add($TextBoxFile1)
-	$FormMemProcFSAnalyzer.Controls.Add($TextBoxFile2)
-	$FormMemProcFSAnalyzer.Controls.Add($ButtonStart)
+    $FormMemProcFSAnalyzer.Controls.Add($TextBoxFile2)
+    $FormMemProcFSAnalyzer.Controls.Add($ButtonStart)
     $FormMemProcFSAnalyzer.Controls.Add($ButtonExit)
     $FormMemProcFSAnalyzer.Controls.Add($LinkLabel)
     $FormMemProcFSAnalyzer.Controls.Add($MenuStrip1)
-	$FormMemProcFSAnalyzer.AutoScaleDimensions = New-Object System.Drawing.SizeF(6, 13)
-	$FormMemProcFSAnalyzer.AutoScaleMode = 'Font'
-	$FormMemProcFSAnalyzer.ClientSize = New-Object System.Drawing.Size(626, 262)
+    $FormMemProcFSAnalyzer.AutoScaleDimensions = New-Object System.Drawing.SizeF(6, 13)
+    $FormMemProcFSAnalyzer.AutoScaleMode = 'Font'
+    $FormMemProcFSAnalyzer.ClientSize = New-Object System.Drawing.Size(626, 262)
 	$FormMemProcFSAnalyzer.FormBorderStyle = 'FixedDialog'
     $FormMemProcFSAnalyzer.MainMenuStrip = $Menustrip1
-	$FormMemProcFSAnalyzer.MaximizeBox = $False
-	$FormMemProcFSAnalyzer.MinimizeBox = $False
-	$FormMemProcFSAnalyzer.Name = 'FormMemProcFSAnalyzer'
-	$FormMemProcFSAnalyzer.StartPosition = 'CenterScreen'
-	$FormMemProcFSAnalyzer.Text = 'MemProcFS-Analyzer v0.8 - Automated Forensic Analysis of Windows Memory Dumps for DFIR'
+    $FormMemProcFSAnalyzer.MaximizeBox = $False
+    $FormMemProcFSAnalyzer.MinimizeBox = $False
+    $FormMemProcFSAnalyzer.Name = 'FormMemProcFSAnalyzer'
+    $FormMemProcFSAnalyzer.StartPosition = 'CenterScreen'
+    $FormMemProcFSAnalyzer.Text = 'MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR'
     $FormMemProcFSAnalyzer.TopLevel = $True
     $FormMemProcFSAnalyzer.TopMost = $True
     $FormMemProcFSAnalyzer.Add_Shown({$FormMemProcFSAnalyzer.Activate()})
 
+    # Checkbox1
+    $Checkbox1.Location = New-Object System.Drawing.Point(96, 131)
+	$Checkbox1.Name = 'Checkbox1'
+	$Checkbox1.Size = New-Object System.Drawing.Size(172, 24)
+	$Checkbox1.TabIndex = 9
+	$Checkbox1.Text = 'Enable Custom YARA rules'
+	$Checkbox1.UseVisualStyleBackColor = $True
+    $Checkbox1.add_CheckedChanged($Checkbox1_CheckedChanged)
+
+    # Checkbox2
+    $Checkbox2.Location = New-Object System.Drawing.Point(96, 151)
+	$Checkbox2.Name = 'Checkbox2'
+	$Checkbox2.Size = New-Object System.Drawing.Size(155, 24)
+	$Checkbox2.TabIndex = 10
+	$Checkbox2.Text = 'Enable ClamAV Scan'
+	$Checkbox2.UseVisualStyleBackColor = $True
+	$Checkbox2.add_CheckedChanged($Checkbox2_CheckedChanged)
+
     # Status Bar
     $StatusBar.Location = New-Object System.Drawing.Point(0, 240)
-	$StatusBar.Name = 'StatusBar'
+    $StatusBar.Name = 'StatusBar'
     [void]$StatusBar.Panels.Add($StatusBarPanel1)
-	$StatusBar.Size = New-Object System.Drawing.Size(626, 22)
-	$StatusBar.SizingGrip = $False
-	$StatusBar.TabIndex = 0
+    $StatusBar.Size = New-Object System.Drawing.Size(626, 22)
+    $StatusBar.SizingGrip = $False
+    $StatusBar.TabIndex = 0
 
     # LabelMemoryDump
     $LabelMemoryDump.AutoSize = $True
@@ -660,15 +734,15 @@ Function Show-UserInterface
     $ToolTip1.SetToolTip($TextBoxFile2, 'Select your pagefile.sys (Optional)')
 
     # OpenFileDialog1
-    $OpenFileDialog1.Filter = 'Memory Dump Files (*.001;*.bin;*.img;*.mem;*.raw;*.vmem)|*.001;*.bin;*.img;*.mem;*.raw;*.vmem|All Files (*.*)|*.*'
+    $OpenFileDialog1.Filter = 'Memory Dump Files (*.001;*.bin;*.dmp;*.img;*.mem;*.raw;*.vmem)|*.001;*.bin;*.dmp;*.img;*.mem;*.raw;*.vmem|All Files (*.*)|*.*'
     $OpenFileDialog1.InitialDirectory = "::{20D04FE0-3AEA-1069-A2D8-08002B30309D}" # MyComputer
     $OpenFileDialog1.ReadOnlyChecked = $True
-    $OpenFileDialog1.Title = 'MemProcFS-Analyzer v0.8 - Select your Raw Physical Memory Dump'
+    $OpenFileDialog1.Title = 'MemProcFS-Analyzer v0.9 - Select your Raw Physical Memory Dump'
 
     # OpenFileDialog2
     $OpenFileDialog2.Filter = 'Page Files (*.sys)|*.sys|All Files (*.*)|*.*'
     $OpenFileDialog2.ReadOnlyChecked = $True
-    $OpenFileDialog2.Title = 'MemProcFS-Analyzer v0.8 - Select your pagefile.sys (Optional)'
+    $OpenFileDialog2.Title = 'MemProcFS-Analyzer v0.9 - Select your pagefile.sys (Optional)'
 
     # ButtonStart
     $ButtonStart.DialogResult = 'OK'
@@ -706,78 +780,78 @@ Function Show-UserInterface
 
     # MenuStrip1
     [void]$MenuStrip1.Items.Add($FileToolStripMenuItem)
-	[void]$MenuStrip1.Items.Add($HelpToolStripMenuItem)
-	$MenuStrip1.Location = New-Object System.Drawing.Point(0, 0)
-	$MenuStrip1.Name = 'MenuStrip1'
-	$MenuStrip1.Size = New-Object System.Drawing.Size(626, 24)
-	$MenuStrip1.TabIndex = 8
-	$MenuStrip1.Text = 'MenuStrip1'
+    [void]$MenuStrip1.Items.Add($HelpToolStripMenuItem)
+    $MenuStrip1.Location = New-Object System.Drawing.Point(0, 0)
+    $MenuStrip1.Name = 'MenuStrip1'
+    $MenuStrip1.Size = New-Object System.Drawing.Size(626, 24)
+    $MenuStrip1.TabIndex = 8
+    $MenuStrip1.Text = 'MenuStrip1'
 
     # FileToolStripMenuItem
     [void]$fileToolStripMenuItem.DropDownItems.Add($CheckForUpdatesToolStripMenuItem)
-	[void]$FileToolStripMenuItem.DropDownItems.Add($ExitToolStripMenuItem)
-	$FileToolStripMenuItem.Name = 'FileToolStripMenuItem'
-	$FileToolStripMenuItem.Size = New-Object System.Drawing.Size(37, 20)
-	$FileToolStripMenuItem.Text = 'File'
+    [void]$FileToolStripMenuItem.DropDownItems.Add($ExitToolStripMenuItem)
+    $FileToolStripMenuItem.Name = 'FileToolStripMenuItem'
+    $FileToolStripMenuItem.Size = New-Object System.Drawing.Size(37, 20)
+    $FileToolStripMenuItem.Text = 'File'
 
     # HelpToolStripMenuItem
-	[void]$HelpToolStripMenuItem.DropDownItems.Add($GitHubToolStripMenuItem)
-	[void]$HelpToolStripMenuItem.DropDownItems.Add($WikiToolStripMenuItem)
+    [void]$HelpToolStripMenuItem.DropDownItems.Add($GitHubToolStripMenuItem)
+    [void]$HelpToolStripMenuItem.DropDownItems.Add($WikiToolStripMenuItem)
     [void]$HelpToolStripMenuItem.DropDownItems.Add($MemProcFSToolStripMenuItem)
-	[void]$HelpToolStripMenuItem.DropDownItems.Add($SANSFOR532ToolStripMenuItem)
-	[void]$HelpToolStripMenuItem.DropDownItems.Add($AboutToolStripMenuItem)
-	$HelpToolStripMenuItem.Name = 'HelpToolStripMenuItem'
-	$HelpToolStripMenuItem.Size = New-Object System.Drawing.Size(44, 20)
-	$HelpToolStripMenuItem.Text = 'Help'
+    [void]$HelpToolStripMenuItem.DropDownItems.Add($SANSFOR532ToolStripMenuItem)
+    [void]$HelpToolStripMenuItem.DropDownItems.Add($AboutToolStripMenuItem)
+    $HelpToolStripMenuItem.Name = 'HelpToolStripMenuItem'
+    $HelpToolStripMenuItem.Size = New-Object System.Drawing.Size(44, 20)
+    $HelpToolStripMenuItem.Text = 'Help'
 
     # CheckForUpdatesToolStripMenuItem
 	$CheckForUpdatesToolStripMenuItem.Name = 'CheckForUpdatesToolStripMenuItem'
-	$CheckForUpdatesToolStripMenuItem.Size = New-Object System.Drawing.Size(180, 22)
-	$CheckForUpdatesToolStripMenuItem.Text = 'Check for Updates...'
-	$CheckForUpdatesToolStripMenuItem.ToolTipText = 'Check for Updates...'
-	$CheckForUpdatesToolStripMenuItem.add_Click($CheckForUpdatesToolStripMenuItem_Click)
+    $CheckForUpdatesToolStripMenuItem.Size = New-Object System.Drawing.Size(180, 22)
+    $CheckForUpdatesToolStripMenuItem.Text = 'Check for Updates...'
+    $CheckForUpdatesToolStripMenuItem.ToolTipText = 'Check for Updates...'
+    $CheckForUpdatesToolStripMenuItem.add_Click($CheckForUpdatesToolStripMenuItem_Click)
 
     # ExitToolStripMenuItem
-	$ExitToolStripMenuItem.Name = 'ExitToolStripMenuItem'
-	$ExitToolStripMenuItem.Size = New-Object System.Drawing.Size(180, 22)
-	$ExitToolStripMenuItem.Text = 'Exit'
-	$ExitToolStripMenuItem.ToolTipText = 'Exit'
-	$ExitToolStripMenuItem.Add_Click($ExitToolStripMenuItem_Click)
+    $ExitToolStripMenuItem.Name = 'ExitToolStripMenuItem'
+    $ExitToolStripMenuItem.Size = New-Object System.Drawing.Size(180, 22)
+    $ExitToolStripMenuItem.Text = 'Exit'
+    $ExitToolStripMenuItem.ToolTipText = 'Exit'
+    $ExitToolStripMenuItem.Add_Click($ExitToolStripMenuItem_Click)
 
     # GitHubToolStripMenuItem
-	$GitHubToolStripMenuItem.Name = 'GitHubToolStripMenuItem'
-	$GitHubToolStripMenuItem.Size = New-Object System.Drawing.Size(152, 22)
-	$GitHubToolStripMenuItem.Text = 'GitHub'
-	$GitHubToolStripMenuItem.ToolTipText = 'GitHub'
-	$GitHubToolStripMenuItem.Add_Click($GitHubToolStripMenuItem_Click)
+    $GitHubToolStripMenuItem.Name = 'GitHubToolStripMenuItem'
+    $GitHubToolStripMenuItem.Size = New-Object System.Drawing.Size(152, 22)
+    $GitHubToolStripMenuItem.Text = 'GitHub'
+    $GitHubToolStripMenuItem.ToolTipText = 'GitHub'
+    $GitHubToolStripMenuItem.Add_Click($GitHubToolStripMenuItem_Click)
 
     # WikiToolStripMenuItem
-	$WikiToolStripMenuItem.Name = 'WikiToolStripMenuItem'
-	$WikiToolStripMenuItem.Size = New-Object System.Drawing.Size(152, 22)
-	$WikiToolStripMenuItem.Text = 'GitHub Wiki'
-	$WikiToolStripMenuItem.ToolTipText = 'GitHub Wiki'
-	$WikiToolStripMenuItem.Add_Click($WikiToolStripMenuItem_Click)
+    $WikiToolStripMenuItem.Name = 'WikiToolStripMenuItem'
+    $WikiToolStripMenuItem.Size = New-Object System.Drawing.Size(152, 22)
+    $WikiToolStripMenuItem.Text = 'GitHub Wiki'
+    $WikiToolStripMenuItem.ToolTipText = 'GitHub Wiki'
+    $WikiToolStripMenuItem.Add_Click($WikiToolStripMenuItem_Click)
 
     # MemProcFSToolStripMenuItem
-	$MemProcFSToolStripMenuItem.Name = 'MemProcFSToolStripMenuItem'
-	$MemProcFSToolStripMenuItem.Size = New-Object System.Drawing.Size(152, 22)
-	$MemProcFSToolStripMenuItem.Text = 'MemProcFS'
-	$MemProcFSToolStripMenuItem.ToolTipText = 'MemProcFS - The Memory Process File System'
-	$MemProcFSToolStripMenuItem.Add_Click($MemProcFSToolStripMenuItem_Click)
+    $MemProcFSToolStripMenuItem.Name = 'MemProcFSToolStripMenuItem'
+    $MemProcFSToolStripMenuItem.Size = New-Object System.Drawing.Size(152, 22)
+    $MemProcFSToolStripMenuItem.Text = 'MemProcFS'
+    $MemProcFSToolStripMenuItem.ToolTipText = 'MemProcFS - The Memory Process File System'
+    $MemProcFSToolStripMenuItem.Add_Click($MemProcFSToolStripMenuItem_Click)
 
     # SANSFOR532ToolStripMenuItem
-	$SANSFOR532ToolStripMenuItem.Name = 'SANSFOR532ToolStripMenuItem'
-	$SANSFOR532ToolStripMenuItem.Size = New-Object System.Drawing.Size(152, 22)
-	$SANSFOR532ToolStripMenuItem.Text = 'SANS FOR532'
-	$SANSFOR532ToolStripMenuItem.ToolTipText = 'FOR532: Enterprise Memory Forensics In-Depth'
-	$SANSFOR532ToolStripMenuItem.Add_Click($SANSFOR532ToolStripMenuItem_Click)
+    $SANSFOR532ToolStripMenuItem.Name = 'SANSFOR532ToolStripMenuItem'
+    $SANSFOR532ToolStripMenuItem.Size = New-Object System.Drawing.Size(152, 22)
+    $SANSFOR532ToolStripMenuItem.Text = 'SANS FOR532'
+    $SANSFOR532ToolStripMenuItem.ToolTipText = 'FOR532: Enterprise Memory Forensics In-Depth'
+    $SANSFOR532ToolStripMenuItem.Add_Click($SANSFOR532ToolStripMenuItem_Click)
 
     # AboutToolStripMenuItem
-	$AboutToolStripMenuItem.Name = 'AboutToolStripMenuItem'
-	$AboutToolStripMenuItem.Size = New-Object System.Drawing.Size(152, 22)
-	$AboutToolStripMenuItem.Text = 'About'
-	$AboutToolStripMenuItem.ToolTipText = 'About'
-	$AboutToolStripMenuItem.Add_Click($AboutToolStripMenuItem_Click)
+    $AboutToolStripMenuItem.Name = 'AboutToolStripMenuItem'
+    $AboutToolStripMenuItem.Size = New-Object System.Drawing.Size(152, 22)
+    $AboutToolStripMenuItem.Text = 'About'
+    $AboutToolStripMenuItem.ToolTipText = 'About'
+    $AboutToolStripMenuItem.Add_Click($AboutToolStripMenuItem_Click)
 
     $MenuStrip1.ResumeLayout()
     $FormMemProcFSAnalyzer.ResumeLayout()
@@ -813,6 +887,16 @@ $script:FileName = $MemoryDump.Split('\')[-1] | ForEach-Object{($_ -replace "\..
 # Output Directory
 $script:OUTPUT_FOLDER = "$SCRIPT_DIR\$Timestamp-$FileName"
 
+# Drive Letter (Mount Point)
+[char[]]$Taken = (Get-PSDrive -Name [A-Z]).Name
+$script:DriveLetter = ([char[]]([int][char]"D" .. [int][char]"Z")).Where({ $_ -notin $Taken }, "First")[0] + ":"
+if (!$script:DriveLetter)
+{
+    Write-Host "[Error] No Drive Letter available." -ForegroundColor Red
+    $Host.UI.RawUI.WindowTitle = "$DefaultWindowsTitle"
+    Exit
+}
+
 # Create a record of your PowerShell session to a text file
 Start-Transcript -Path "$SCRIPT_DIR\$Timestamp-$FileName.txt"
 
@@ -835,7 +919,7 @@ Write-Host "$Logo"
 
 # Header
 Write-Output ""
-Write-Output "MemProcFS-Analyzer v0.8 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+Write-Output "MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
 Write-Output "(c) 2021-2023 Martin Willing at Lethal-Forensics (https://lethal-forensics.com/)"
 Write-Output ""
 
@@ -895,7 +979,7 @@ if ($NetworkListManager -eq "True")
 Function Get-MemProcFS {
 
 # Check Current Version of MemProcFS
-if (Test-Path "$MemProcFS")
+if (Test-Path "$($MemProcFS)")
 {
     if (Test-Path "$SCRIPT_DIR\Tools\MemProcFS\Version.txt")
     {
@@ -951,7 +1035,7 @@ if ($CurrentVersion -ne $LatestRelease -Or $null -eq $CurrentVersion)
         # New Version
         $CurrentVersion = ([System.Diagnostics.FileVersionInfo]::GetVersionInfo($MemProcFS).FileVersion).SubString(0,5)
         & $MemProcFS | Out-File "$SCRIPT_DIR\Tools\MemProcFS\help.txt"
-        (Get-Content "$SCRIPT_DIR\Tools\MemProcFS\help.txt" | Select-String -Pattern "COMMAND LINE REFERENCE" | ForEach-Object{($_ -split "\s+")[6]}).Substring(1) | Out-File "$SCRIPT_DIR\Tools\MemProcFS\Version.txt"
+        Get-Content "$SCRIPT_DIR\Tools\MemProcFS\help.txt" | Select-String -Pattern "COMMAND LINE REFERENCE:" | ForEach-Object{($_ -split "v")[1]} | ForEach-Object{($_ -split "COMMAND LINE REFERENCE:")[0]} | Out-File "$SCRIPT_DIR\Tools\MemProcFS\Version.txt"
     } 
 }
 else
@@ -967,7 +1051,7 @@ Function Get-Dokany {
 
 # Check Current Version of Dokany File System Library
 $Dokany = "$env:SystemDrive\Windows\System32\dokan2.dll"
-if (Test-Path "$Dokany")
+if (Test-Path "$($Dokany)")
 {
     $CurrentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($Dokany).FileVersion
     $LastWriteTime = ((Get-Item $Dokany).LastWriteTime).ToString("yyyy-MM-dd")
@@ -1020,7 +1104,7 @@ Function Get-Elasticsearch {
 # https://github.com/elastic/elasticsearch
 
 # Check Current Version of Elasticsearch
-if (Test-Path "$Elasticsearch")
+if (Test-Path "$($Elasticsearch)")
 {
     $CurrentVersion = & $Elasticsearch --version | ForEach-Object{($_ -split "\s+")[1]} | ForEach-Object{($_ -replace ",","")}
     Write-Output "[Info]  Current Version: Elasticsearch v$CurrentVersion"
@@ -1100,7 +1184,7 @@ Function Get-Kibana {
 # https://github.com/elastic/kibana
 
 # Check Current Version of Kibana
-if (Test-Path "$Kibana")
+if (Test-Path "$($Kibana)")
 {
     $CurrentVersion = & $Kibana --version
     Write-Output "[Info]  Current Version: Kibana v$CurrentVersion"
@@ -1154,7 +1238,7 @@ if ($CurrentVersion -ne $LatestRelease -Or $null -eq $CurrentVersion)
 
         # Unpacking Archive File
         Write-Output "[Info]  Extracting Files ..."
-        if (Test-Path "$7za")
+        if (Test-Path "$($7za)")
         {
             $DestinationPath = "$SCRIPT_DIR\Tools"
             & $7za x "$SCRIPT_DIR\Tools\$Zip" "-o$DestinationPath" > $null 2>&1
@@ -1191,7 +1275,7 @@ Function Get-AmcacheParser {
 # https://ericzimmerman.github.io
 
 # Check Current Version and SHA1 of AmcacheParser
-if (Test-Path "$AmcacheParser")
+if (Test-Path "$($AmcacheParser)")
 {
     # Current Version
     $CurrentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($AmcacheParser).FileVersion
@@ -1265,7 +1349,7 @@ Function Get-AppCompatCacheParser {
 # https://ericzimmerman.github.io
 
 # Check Current Version and SHA1 of AppCompatCacheParser
-if (Test-Path "$AppCompatCacheParser")
+if (Test-Path "$($AppCompatCacheParser)")
 {
     # Current Version
     $CurrentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($AppCompatCacheParser).FileVersion
@@ -1339,7 +1423,7 @@ Function Get-Entropy {
 # https://github.com/merces/entropy
 
 # Check Current Version of entropy.exe
-if (Test-Path "$entropy")
+if (Test-Path "$($entropy)")
 {
     # Current Version
     if (Test-Path "$SCRIPT_DIR\Tools\entropy\Version.txt")
@@ -1427,7 +1511,7 @@ Function Get-EvtxECmd {
 # https://ericzimmerman.github.io
 
 # Check Current Version and SHA1 of EvtxECmd
-if (Test-Path "$EvtxECmd")
+if (Test-Path "$($EvtxECmd)")
 {
     # Current Version
     $CurrentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($EvtxECmd).FileVersion
@@ -1581,7 +1665,7 @@ Function Get-IPinfo {
 # https://github.com/ipinfo/cli
 
 # Check Current Version of IPinfo CLI
-if (Test-Path "$IPinfo")
+if (Test-Path "$($IPinfo)")
 {
     $CurrentVersion = & $IPinfo version
     $LastWriteTime = ((Get-Item $IPinfo).LastWriteTime).ToString("yyyy-MM-dd")
@@ -1672,7 +1756,7 @@ Function Get-jq {
 # https://github.com/stedolan/jq
 
 # Check Current Version of jq
-if (Test-Path "$jq")
+if (Test-Path "$($jq)")
 {
     $CurrentVersion = & $jq --version | ForEach-Object{($_ -split "-")[1]}
     Write-Output "[Info]  Current Version: jq v$CurrentVersion"
@@ -1735,7 +1819,7 @@ Function Get-lnk_parser {
 # https://github.com/AbdulRhmanAlfaifi/lnk_parser
 
 # Check Current Version of lnk_parser
-if (Test-Path "$lnk_parser")
+if (Test-Path "$($lnk_parser)")
 {
     $CurrentVersion = & $lnk_parser --version | ForEach-Object{($_ -split "\s+")[1]}
     $LastWriteTime = ((Get-Item $lnk_parser).LastWriteTime).ToString("yyyy-MM-dd")
@@ -1800,7 +1884,7 @@ Function Get-RECmd {
 # https://ericzimmerman.github.io
 
 # Check Current Version and SHA1 of RECmd
-if (Test-Path "$RECmd")
+if (Test-Path "$($RECmd)")
 {
     # Current Version
     $CurrentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($RECmd).FileVersion
@@ -1874,7 +1958,7 @@ Function Get-SBECmd {
 # https://ericzimmerman.github.io
 
 # Check Current Version and SHA1 of SBECmd
-if (Test-Path "$SBECmd")
+if (Test-Path "$($SBECmd)")
 {
     # Current Version
     $CurrentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($SBECmd).FileVersion
@@ -1948,7 +2032,7 @@ Function Get-XSV {
 # https://github.com/BurntSushi/xsv
 
 # Check Current Version of xsv
-if (Test-Path "$xsv")
+if (Test-Path "$($xsv)")
 {
     $CurrentVersion = & $xsv --version
     $LastWriteTime = ((Get-Item $xsv).LastWriteTime).ToString("yyyy-MM-dd")
@@ -2021,7 +2105,7 @@ Function Get-Yara {
 # https://github.com/VirusTotal/yara
 
 # Check Current Version of YARA
-if (Test-Path "$yara64")
+if (Test-Path "$($yara64)")
 {
     $CurrentVersion = & $yara64 --version
     $LastWriteTime = ((Get-Item $yara64).LastWriteTime).ToString("yyyy-MM-dd")
@@ -2092,7 +2176,7 @@ else
 Function Get-Zircolite {
 
 # Check Current Version of Zircolite
-if (Test-Path "$Zircolite")
+if (Test-Path "$($Zircolite)")
 {
     $MyLocation = $pwd
     Set-Location "$SCRIPT_DIR\Tools\Zircolite"
@@ -2164,7 +2248,7 @@ if ($CurrentVersion -ne $Tag -Or $null -eq $CurrentVersion)
         }
 
         # Unpacking Archive File
-        if (Test-Path "$7za")
+        if (Test-Path "$($7za)")
         {
             Write-Output "[Info]  Extracting Files ..."
             & $7za x "$SCRIPT_DIR\Tools\$7Zip" "-o$SCRIPT_DIR\Tools" 2>&1 | Out-Null
@@ -2262,13 +2346,13 @@ Function MemProcFS {
 # https://github.com/ufrisk/MemProcFS
 
 # Mount the physical memory dump file with a corresponding Pagefile and enable forensic mode
-if (Test-Path "$MemProcFS")
+if (Test-Path "$($MemProcFS)")
 {
-    if (Test-Path "$MemoryDump")
+    if (Test-Path "$($MemoryDump)")
     {
         if ($Pagefile)
         {
-            if (Test-Path "$Pagefile")
+            if (Test-Path "$($Pagefile)")
             {
                 Write-Output "[Info]  Mounting the Physical Memory Dump file with a corresponding Pagefile as $DriveLetter ..."
 
@@ -2277,16 +2361,44 @@ if (Test-Path "$MemProcFS")
 
                 $PagefileSize = Get-FileSize((Get-Item "$Pagefile").Length)
                 Write-Output "[Info]  Pagefile Size: $PagefileSize"
-
-                Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
-                Write-Output "[Info]  Processing $MemoryDump incl. Pagefile [approx. 10-45 min] ..."
                 New-Item "$OUTPUT_FOLDER" -ItemType Directory -Force | Out-Null
                 $Mount = $DriveLetter -replace ":", ""
                 $StartTime_MemProcFS = (Get-Date)
-                Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -pagefile0 `"$Pagefile`" -forensic 4"
+
+                # Check if a Custom Yara rule or Yara index file was provided
+                if ($null -eq $YaraRules)
+                {
+                    Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+                    Write-Output "[Info]  Processing $MemoryDump incl. Pagefile [approx. 10-45 min] ..."
+                    Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -pagefile0 `"$Pagefile`" -forensic 4"
+                }
+                else
+                {
+                    if ((Test-Path "$YaraRules") -And ((Get-Item "$YaraRules").length -gt 0kb))
+                    {
+                        # Check if Process Skiplist is inactive
+                        if ($null -eq $ForensicProcessWhitelist)
+                        {
+                            $Count_YaraRules = (Get-Content -Path $YaraRules | Select-String -Pattern "^include" | Measure-Object).Count
+                            Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+                            Write-Output "[Info]  YARA scan initialized with $Count_YaraRules rules ..."
+                            Write-Output "[Info]  Processing $MemoryDump incl. Pagefile [approx. 10-45 min] ..."
+                            Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -pagefile0 `"$Pagefile`" -forensic-yara-rules `"$YaraRules`" -forensic 4 -loglevel forensic:5"
+                        }
+                        else
+                        {
+                            $Count_YaraRules = (Get-Content -Path $YaraRules | Select-String -Pattern "^include" | Measure-Object).Count
+                            $Count_ProcessSkip = ($ForensicProcessWhitelist.Split(",") | Where-Object {$_.Trim() -ne "" }).Count
+                            Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+                            Write-Output "[Info]  YARA scan initialized with $Count_YaraRules rules ($Count_ProcessSkip Process Names will be skipped) ..."
+                            Write-Output "[Info]  Processing $MemoryDump incl. Pagefile [approx. 10-45 min] ..."
+                            Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -pagefile0 `"$Pagefile`" -forensic-yara-rules `"$YaraRules`" -forensic 4 -loglevel forensic:5 -forensic-process-skip `"$ForensicProcessWhitelist`""
+                        }
+                    }
+                }
 
                 # Check if successfully mounted
-                while (!(Test-Path "$DriveLetter"))
+                while (!(Test-Path "$($DriveLetter)"))
                 {
                     Start-Sleep -Seconds 2
                 }
@@ -2305,22 +2417,50 @@ if (Test-Path "$MemProcFS")
     }
 
     # Mount the physical memory dump file and enable forensic mode
-    if ((Test-Path "$MemoryDump") -and (!("$Pagefile")))
+    if ((Test-Path "$($MemoryDump)") -and (!("$($Pagefile)")))
     {
         Write-Output "[Info]  Mounting the Physical Memory Dump file as $DriveLetter ..."
 
         $MemorySize = Get-FileSize((Get-Item "$MemoryDump").Length)
         Write-Output "[Info]  Physical Memory Dump File Size: $MemorySize"
-
-        Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
-        Write-Output "[Info]  Processing $MemoryDump [approx. 1-10 min] ..."
         New-Item "$OUTPUT_FOLDER" -ItemType Directory -Force | Out-Null
         $Mount = $DriveLetter -replace ":", ""
         $StartTime_MemProcFS = (Get-Date)
-        Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -forensic 4"
+        
+        # Check if a Custom Yara rule or Yara index file was provided
+        if ($null -eq $YaraRules)
+        {
+            Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+            Write-Output "[Info]  Processing $MemoryDump [approx. 1-10 min] ..."
+            Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -forensic 4 -forensic-process-skip `"$ForensicProcessWhitelist`""
+        }
+        else
+        {
+            if ((Test-Path "$YaraRules") -And ((Get-Item "$YaraRules").length -gt 0kb))
+            {
+                # Check if Process Skiplist is inactive
+                if ($null -eq $ForensicProcessWhitelist)
+                {
+                    $Count_YaraRules = (Get-Content -Path $YaraRules | Select-String -Pattern "^include" | Measure-Object).Count
+                    Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+                    Write-Output "[Info]  YARA scan initialized with $Count_YaraRules rules ..."
+                    Write-Output "[Info]  Processing $MemoryDump [approx. 1-10 min] ..."
+                    Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -forensic-yara-rules `"$YaraRules`" -forensic 4 -loglevel forensic:5"
+                }
+                else
+                {
+                    $Count_YaraRules = (Get-Content -Path $YaraRules | Select-String -Pattern "^include" | Measure-Object).Count
+                    $Count_ProcessSkip = ($ForensicProcessWhitelist.Split(",") | Where-Object {$_.Trim() -ne "" }).Count
+                    Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+                    Write-Output "[Info]  YARA scan initialized with $Count_YaraRules rules ($Count_ProcessSkip Process Names will be skipped) ..."
+                    Write-Output "[Info]  Processing $MemoryDump [approx. 1-10 min] ..."
+                    Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -forensic-yara-rules `"$YaraRules`" -forensic 4 -loglevel forensic:5 -forensic-process-skip `"$ForensicProcessWhitelist`""
+                }
+            }
+        }
 
         # Check if successfully mounted
-        while (!(Test-Path "$DriveLetter"))
+        while (!(Test-Path "$($DriveLetter)"))
         {
             Start-Sleep -Seconds 2
         }
@@ -2342,7 +2482,7 @@ if (Test-Path "$MemProcFS")
         # CurrentControlSet
         $RegistryValue = "$DriveLetter\registry\HKLM\SYSTEM\Select\Current.txt"
 
-        if (Test-Path "$RegistryValue")
+        if (Test-Path "$($RegistryValue)")
         {
             $CurrentControlSet = Get-Content "$RegistryValue" | Select-Object -Skip 2 | ForEach-Object {$_ -replace "^0+", ""}
         }
@@ -2350,7 +2490,7 @@ if (Test-Path "$MemProcFS")
         # ComputerName
         $RegistryValue = "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ComputerName\ComputerName\ComputerName.txt"
 
-        if (Test-Path "$RegistryValue")
+        if (Test-Path "$($RegistryValue)")
         {
             $ComputerName = Get-Content "$RegistryValue" | Select-Object -Skip 2
             Write-Output "[Info]  Host Name: $ComputerName"
@@ -2498,7 +2638,7 @@ if (Test-Path "$MemProcFS")
         # InstallDate (ISO 8601)
         $RegistryValue = "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\InstallDate.txt"
 
-        if (Test-Path "$RegistryValue")
+        if (Test-Path "$($RegistryValue)")
         {
             $HexadecimalBigEndian = Get-Content "$RegistryValue" | Select-Object -Skip 2
             $UnixSeconds = [Convert]::ToInt64("$HexadecimalBigEndian",16)
@@ -2600,7 +2740,7 @@ if (Test-Path "$MemProcFS")
         # LastLoggedOnUser
         $RegistryValue = "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\LastLoggedOnUser.txt"
 
-        if (Test-Path "$RegistryValue")
+        if (Test-Path "$($RegistryValue)")
         {
             $LastLoggedOnUser = (Get-Content "$RegistryValue" | Select-Object -Skip 2) -creplace '(?s)^.*\\', ''
             Write-Output "[Info]  Last Logged On User: $LastLoggedOnUser"
@@ -2634,6 +2774,8 @@ if (Test-Path "$MemProcFS")
         # PROC_NOLINK    PROC_NOLINK will flag if the process does not exist in the kernel _EPROCESS linked list.
         # PROC_PARENT    PROC_PARENT will flag if a well known process has a bad parent process.
         # PROC_USER      PROC_USER may trigger if well known processes are executing as a strange user. Example cmd.exe as SYSTEM.
+        # PROC_DEBUG     PROC_DEBUG flag non-SYSTEM processes with the SeDebugPrivilege.
+        # THREAD         THREAD flag various thread related issues.
         # PE_NOLINK      PE_NOLINK locates malware in image virtual address descriptors which is not linked from the in-process PEB/Ldr lists.
         # PE_PATCHED     PE_PATCHED locates malware in image virtual address descriptors which executable pages (in the page tables) differs from kernel prototype memory.
         # DRIVER_PATH    DRIVER_PATH flag kernel drivers that are loaded from a non-standard path. DRIVER_PATH also flag if no corresponding module could be located.
@@ -2717,7 +2859,7 @@ if (Test-Path "$MemProcFS")
             }
 
             # Collecting PE_INJECT (Injected Modules)
-            if (Test-Path "$7za")
+            if (Test-Path "$($7za)")
             {
                 if (Test-Path "$OUTPUT_FOLDER\forensic\findevil\PE_INJECT\PE_INJECT.txt")
                 {
@@ -2754,6 +2896,46 @@ if (Test-Path "$MemProcFS")
             Write-Output "        Note: FindEvil is only available on 64-bit Windows 11, 10 and 8.1."
         }
 
+        # FS_Forensic_Yara
+        # https://github.com/ufrisk/MemProcFS/wiki/FS_Forensic_Yara
+        if (Test-Path "$DriveLetter\forensic\yara\*.txt")
+        {
+            New-Item "$OUTPUT_FOLDER\forensic\yara" -ItemType Directory -Force | Out-Null
+            Copy-Item "$DriveLetter\forensic\yara\*.txt" -Destination "$OUTPUT_FOLDER\forensic\yara"
+
+            # Match Count
+            if (!($null -eq $YaraRules))
+            {
+                if (Test-Path "$DriveLetter\forensic\yara\match-count.txt")
+                {
+                    [int]$Count = Get-Content -Path "$DriveLetter\forensic\yara\match-count.txt"
+                    if ($Count -gt 0)
+                    {
+                        Write-Host "[Alert] $Count YARA rule matches" -ForegroundColor Red
+                
+                        # Result
+                        if (Test-Path "$DriveLetter\forensic\yara\result.txt")
+                        {
+                            (Get-Content -Path "$DriveLetter\forensic\yara\result.txt" | Select-String -Pattern "threat_name" | Sort-Object -Unique | ForEach-Object{($_ -split "threat_name:")[1]}).Trim() | Out-File "$OUTPUT_FOLDER\forensic\yara\threat_name.txt"
+                            (Get-Content "$OUTPUT_FOLDER\forensic\yara\threat_name.txt") -replace "^", "        "  | Write-Host -ForegroundColor Red
+                        }
+                    }
+                    else
+                    {
+                        Write-Output "[Info]  0 YARA rule matches"
+                    }
+                }
+            }
+        }
+
+        # FS_Forensic_Files
+        # https://github.com/ufrisk/MemProcFS/wiki/FS_Forensic_Files
+        if (Test-Path "$DriveLetter\forensic\files\files.txt")
+        {
+            New-Item "$OUTPUT_FOLDER\forensic\files" -ItemType Directory -Force | Out-Null
+            Copy-Item -Path "$DriveLetter\forensic\files\files.txt" -Destination "$OUTPUT_FOLDER\forensic\files\files.txt"
+        }
+
         # FS_Forensic_CSV
         # https://github.com/ufrisk/MemProcFS/wiki/FS_Forensic_CSV
         if (Test-Path "$DriveLetter\forensic\csv\*.csv")
@@ -2767,24 +2949,80 @@ if (Test-Path "$MemProcFS")
         {
             New-Item "$OUTPUT_FOLDER\forensic\xlsx" -ItemType Directory -Force | Out-Null
 
-            # drivers.csv
+            # devices.csv --> Device Drivers
+            if (Test-Path "$OUTPUT_FOLDER\forensic\csv\devices.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\devices.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\devices.csv" -Delimiter ","
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\devices.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Device Drivers" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:H1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Left" of column A
+                    $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Left"
+                    # HorizontalAlignment "Center" of columns B-E and G
+                    $WorkSheet.Cells["B:E"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["G:G"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
+            # drivers.csv --> Kernel Drivers
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\drivers.csv")
             {
                 if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\drivers.csv") -gt 0)
                 {
                     $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\drivers.csv" -Delimiter ","
-                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\drivers.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Drivers" -CellStyleSB {
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\drivers.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Kernel Drivers" -CellStyleSB {
                     param($WorkSheet)
                     # BackgroundColor and FontColor for specific cells of TopRow
                     $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
                     Set-Format -Address $WorkSheet.Cells["A1:H1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Left" of column A
+                    $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Left"
                     # HorizontalAlignment "Center" of columns B-E
                     $WorkSheet.Cells["B:E"].Style.HorizontalAlignment="Center"
                     }
                 }
             }
 
-            # handles.csv
+            # files.csv --> Recoverable Files
+            if (Test-Path "$OUTPUT_FOLDER\forensic\csv\files.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\files.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\files.csv" -Delimiter ","
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\files.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Files" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:E1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A-C
+                    $WorkSheet.Cells["A:C"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
+            # findevil.csv --> Indicators of Evil
+            if (Test-Path "$OUTPUT_FOLDER\forensic\csv\findevil.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\findevil.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\findevil.csv" -Delimiter "," | Sort-Object PID
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\findevil.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "FindEvil" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:E1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A-D
+                    $WorkSheet.Cells["A:D"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
+            # handles.csv --> Handles related to all processes
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\handles.csv")
             {
                 if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\handles.csv") -gt 0)
@@ -2801,7 +3039,7 @@ if (Test-Path "$MemProcFS")
                 }
             }
 
-            # modules.csv
+            # modules.csv --> Loaded Modules Information
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\modules.csv")
             {
                 if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\modules.csv") -gt 0)
@@ -2811,15 +3049,32 @@ if (Test-Path "$MemProcFS")
                     param($WorkSheet)
                     # BackgroundColor and FontColor for specific cells of TopRow
                     $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
-                    Set-Format -Address $WorkSheet.Cells["A1:W1"] -BackgroundColor $BackgroundColor -FontColor White
-                    # HorizontalAlignment "Center" of columns A-J and N-W
+                    Set-Format -Address $WorkSheet.Cells["A1:X1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A-J and M-W
                     $WorkSheet.Cells["A:J"].Style.HorizontalAlignment="Center"
-                    $WorkSheet.Cells["N:W"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["M:W"].Style.HorizontalAlignment="Center"
                     }
                 }
             }
 
-            # process.csv
+            # net.csv --> Network Connection Information
+            if (Test-Path "$OUTPUT_FOLDER\forensic\csv\net.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\net.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\net.csv" -Delimiter ","
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\net.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Network" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A-J
+                    $WorkSheet.Cells["A:J"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
+            # process.csv --> Process Information
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\process.csv")
             {
                 if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\process.csv") -gt 0)
@@ -2837,7 +3092,7 @@ if (Test-Path "$MemProcFS")
                 }
             }
 
-            # services.csv
+            # services.csv --> Services (user mode and kernel drivers)
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\services.csv")
             {
                 if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\services.csv") -gt 0)
@@ -2855,7 +3110,7 @@ if (Test-Path "$MemProcFS")
                 }
             }
 
-            # tasks.csv
+            # tasks.csv --> Scheduled Tasks
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\tasks.csv")
             {
                 if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\tasks.csv") -gt 0)
@@ -2874,7 +3129,7 @@ if (Test-Path "$MemProcFS")
                 }
             }
 
-            # threads.csv
+            # threads.csv --> Information about all threads on the system
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\threads.csv")
             {
                 if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\threads.csv") -gt 0)
@@ -2884,21 +3139,21 @@ if (Test-Path "$MemProcFS")
                     param($WorkSheet)
                     # BackgroundColor and FontColor for specific cells of TopRow
                     $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
-                    Set-Format -Address $WorkSheet.Cells["A1:T1"] -BackgroundColor $BackgroundColor -FontColor White
-                    # HorizontalAlignment "Center" of columns A-T
-                    $WorkSheet.Cells["A:T"].Style.HorizontalAlignment="Center"
+                    Set-Format -Address $WorkSheet.Cells["A1:V1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A-V
+                    $WorkSheet.Cells["A:V"].Style.HorizontalAlignment="Center"
                     }
                 }
             }
 
             # timeline_all.csv --> \forensic\timeline\timeline-reverse.csv
 
-            # timeline_kernelobject.csv
+            # timeline_kernelobject.csv --> Kernel Object Manager Objects
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\timeline_kernelobject.csv")
             {
                 if((Get-Item "$OUTPUT_FOLDER\forensic\csv\timeline_kernelobject.csv").length -gt 0kb)
                 {
-                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_kernelobject.csv" -Delimiter "," | Sort-Object { $_.Time -as [datetime] } -Descending
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_kernelobject.csv" -Delimiter "," | Select-Object Time, Type, Action, PID, Value32, Value64, Text | Sort-Object { $_.Time -as [datetime] } -Descending
                     $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\timeline_kernelobject.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "timeline_kernelobject" -CellStyleSB {
                     param($WorkSheet)
                     # BackgroundColor and FontColor for specific cells of TopRow
@@ -2910,12 +3165,12 @@ if (Test-Path "$MemProcFS")
                 }
             }
 
-            # timeline_net.csv
+            # timeline_net.csv --> Network Timeline
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\timeline_net.csv")
             {
                 if((Get-Item "$OUTPUT_FOLDER\forensic\csv\timeline_net.csv").length -gt 0kb)
                 {
-                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_net.csv" -Delimiter "," | Sort-Object { $_.Time -as [datetime] } -Descending
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_net.csv" -Delimiter "," | Select-Object Time, Type, Action, PID, Value32, Value64, Text | Sort-Object { $_.Time -as [datetime] } -Descending
                     $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\timeline_net.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "timeline_net" -CellStyleSB {
                     param($WorkSheet)
                     # BackgroundColor and FontColor for specific cells of TopRow
@@ -2929,12 +3184,12 @@ if (Test-Path "$MemProcFS")
 
             # timeline_ntfs.csv --> \forensic\timeline\timeline-reverse.csv
 
-            # timeline_process.csv
+            # timeline_process.csv --> Process Timeline
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\timeline_process.csv")
             {
                 if((Get-Item "$OUTPUT_FOLDER\forensic\csv\timeline_process.csv").length -gt 0kb)
                 {
-                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_process.csv" -Delimiter "," | Sort-Object { $_.Time -as [datetime] } -Descending
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_process.csv" -Delimiter "," | Select-Object Time, Type, Action, PID, Value32, Value64, Text | Sort-Object { $_.Time -as [datetime] } -Descending
                     $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\timeline_process.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "timeline_process" -CellStyleSB {
                     param($WorkSheet)
                     # BackgroundColor and FontColor for specific cells of TopRow
@@ -2946,12 +3201,12 @@ if (Test-Path "$MemProcFS")
                 }
             }
 
-            # timeline_registry.csv
+            # timeline_registry.csv --> Registry Timeline
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\timeline_registry.csv")
             {
                 if((Get-Item "$OUTPUT_FOLDER\forensic\csv\timeline_registry.csv").length -gt 0kb)
                 {
-                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_registry.csv" -Delimiter "," | Sort-Object { $_.Time -as [datetime] } -Descending
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_registry.csv" -Delimiter "," | Select-Object Time, Type, Action, PID, Value32, Value64, Text | Sort-Object { $_.Time -as [datetime] } -Descending
                     $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\timeline_registry.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "timeline_registry" -CellStyleSB {
                     param($WorkSheet)
                     # BackgroundColor and FontColor for specific cells of TopRow
@@ -2963,12 +3218,12 @@ if (Test-Path "$MemProcFS")
                 }
             }
 
-            # timeline_task.csv
+            # timeline_task.csv --> Scheduled Tasks Timeline
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\timeline_task.csv")
             {
                 if((Get-Item "$OUTPUT_FOLDER\forensic\csv\timeline_task.csv").length -gt 0kb)
                 {
-                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_task.csv" -Delimiter "," | Sort-Object { $_.Time -as [datetime] } -Descending
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_task.csv" -Delimiter "," | Select-Object Time, Type, Action, PID, Value32, Value64, Text | Sort-Object { $_.Time -as [datetime] } -Descending
                     $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\timeline_task.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "timeline_task" -CellStyleSB {
                     param($WorkSheet)
                     # BackgroundColor and FontColor for specific cells of TopRow
@@ -2980,12 +3235,12 @@ if (Test-Path "$MemProcFS")
                 }
             }
 
-            # timeline_thread.csv
+            # timeline_thread.csv --> Threading Timeline
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\timeline_thread.csv")
             {
                 if((Get-Item "$OUTPUT_FOLDER\forensic\csv\timeline_thread.csv").length -gt 0kb)
                 {
-                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_thread.csv" -Delimiter "," | Sort-Object { $_.Time -as [datetime] } -Descending
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_thread.csv" -Delimiter "," | Select-Object Time, Type, Action, PID, Value32, Value64, Text | Sort-Object { $_.Time -as [datetime] } -Descending
                     $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\timeline_thread.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "timeline_thread" -CellStyleSB {
                     param($WorkSheet)
                     # BackgroundColor and FontColor for specific cells of TopRow
@@ -2997,10 +3252,10 @@ if (Test-Path "$MemProcFS")
                 }
             }
 
-            # timeline_web
+            # timeline_web --> Web Timeline
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\timeline_web.csv")
             {
-                if((Get-Item "$OUTPUT_FOLDER\forensic\csv\timeline_web.csv").length -gt 0kb)
+                if((Get-Item "$OUTPUT_FOLDER\forensic\csv\timeline_web.csv").length -gt 46)
                 {
                     $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_web.csv" -Delimiter "," | Sort-Object { $_.Time -as [datetime] } -Descending
                     $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\timeline_web.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "timeline_web" -CellStyleSB {
@@ -3014,20 +3269,44 @@ if (Test-Path "$MemProcFS")
                 }
             }
 
-            # unloaded_modules.csv
+            # unloaded_modules.csv --> Unloaded Modules Information
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\unloaded_modules.csv")
             {
                 if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\unloaded_modules.csv") -gt 0)
                 {
-                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\unloaded_modules.csv" -Delimiter "," | Sort-Object { $_.Time -as [datetime] } -Descending
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\unloaded_modules.csv" -Delimiter "," | Sort-Object PID
                     $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\unloaded_modules.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "unloaded_modules" -CellStyleSB {
                     param($WorkSheet)
                     # BackgroundColor and FontColor for specific cells of TopRow
                     $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
-                    Set-Format -Address $WorkSheet.Cells["A1:G1"] -BackgroundColor $BackgroundColor -FontColor White
-                    # HorizontalAlignment "Center" of columns A and 
+                    Set-Format -Address $WorkSheet.Cells["A1:H1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A and C-H
                     $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
-                    $WorkSheet.Cells["C:G"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["C:H"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
+            # yara.csv --> Summary forensic yara scan results
+            if (Test-Path "$OUTPUT_FOLDER\forensic\csv\yara.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\yara.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\yara.csv" -Delimiter "," | Sort-Object { $_.Time -as [datetime] } -Descending
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\yara.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "YARA" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:Y1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A-B, D-J, L-O, Q, S, U, W and Y
+                    $WorkSheet.Cells["A:B"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["D:J"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["L:O"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["Q:Q"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["S:S"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["U:U"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["W:W"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["Y:Y"].Style.HorizontalAlignment="Center"
                     }
                 }
             }
@@ -3320,7 +3599,7 @@ if (Test-Path "$MemProcFS")
                 }
 
                 # IPinfo CLI (50000 requests per month)
-                if (Test-Path "$IPinfo")
+                if (Test-Path "$($IPinfo)")
                 {
                     if (Test-Path "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt")
                     {
@@ -3362,7 +3641,7 @@ if (Test-Path "$MemProcFS")
 
                                     # Access Token
                                     # https://ipinfo.io/signup?ref=cli
-                                    $Token = "access_token" # Please insert your Access Token here
+                                    $Token = "b6f095752b5cf9" # Please insert your Access Token here
 
                                     if (!("$Token" -eq "access_token"))
                                     {
@@ -3421,7 +3700,7 @@ if (Test-Path "$MemProcFS")
                 Write-Output "[Info]  $Count IPv6 addresses found ($Total)"
 
                 # IPinfo CLI (50000 requests per month)
-                if (Test-Path "$IPinfo")
+                if (Test-Path "$($IPinfo)")
                 {
                     if (Test-Path "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt")
                     {
@@ -3800,7 +4079,7 @@ if (Test-Path "$MemProcFS")
                     if([int](& $xsv count -d "`t" "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv") -gt 0)
                     {
                         New-Item "$OUTPUT_FOLDER\sys\proc\XLSX" -ItemType Directory -Force | Out-Null
-                        $IMPORT = Import-Csv "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv" -Delimiter "`t" | Sort-Object "Create Time" -Descending
+                        $IMPORT = Import-Csv "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv" -Delimiter "`t" | Sort-Object { $_."Create Time" -as [datetime] } -Descending
                         $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\sys\proc\XLSX\Processes.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Processes" -CellStyleSB {
                         param($WorkSheet)
                         # BackgroundColor and FontColor for specific cells of TopRow
@@ -3825,7 +4104,7 @@ if (Test-Path "$MemProcFS")
                         Write-Output "[Info]  Launching Process Tree (TreeView) ... "
                         Start-Process -FilePath "powershell" -NoNewWindow -ArgumentList "-NoProfile", "-File", "$SCRIPT_DIR\Scripts\Get-ProcessTree\Get-ProcessTree.ps1", "-CSVPath", "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv"
                         Start-Sleep -Seconds 3
-                        $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v0.8 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+                        $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
                     }
                 }
             }
@@ -3838,7 +4117,7 @@ if (Test-Path "$MemProcFS")
                     if([int](& $xsv count -d "`t" "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv") -gt 0)
                     {
                         New-Item "$OUTPUT_FOLDER\sys\proc\XLSX" -ItemType Directory -Force | Out-Null
-                        $IMPORT = Import-Csv "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv" -Delimiter "`t" | Sort-Object "Create Time" -Descending
+                        $IMPORT = Import-Csv "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv" -Delimiter "`t" | Sort-Object { $_."Create Time" -as [datetime] } -Descending
                         $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\sys\proc\XLSX\RunningAndExited.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Processes" -CellStyleSB {
                         param($WorkSheet)
                         # BackgroundColor and FontColor for specific cells of TopRow
@@ -5217,6 +5496,246 @@ if (Test-Path "$MemProcFS")
 
 #############################################################################################################################################################################################
 
+        Function Get-DoubleFileExtensions {
+
+        # Double File Extension (Masquerading)
+        # https://attack.mitre.org/techniques/T1036/007/
+        # Note: This simple search looks for processes launched from files that have double extensions in the file name.
+        if (Test-Path "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv")
+        {
+            if([int](& $xsv count -d "`t" "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv") -gt 0)
+            {
+                Write-Output "[Info]  Checking for Processes with Suspicious Double File Extension ..."
+
+                # Whitelist
+                $Whitelist = "(Microsoft.Photos.exe|WinStore.App.exe)"
+
+                $Processes = Import-Csv "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv" -Delimiter "`t" | Where-Object {$_."Process Name" -notmatch "$Whitelist"}
+
+                foreach ($Process in $Processes)
+                {
+                    $ProcessName = $Process | Select-Object -ExpandProperty "Process Name"
+
+                    $DotCount = ($ProcessName.ToCharArray() | Where-Object {$_ -eq "."} | Measure-Object).Count
+                    if($DotCount -gt 1)
+                    {
+                        Write-Host "[Alert] Suspicious Double File Extension detected: $ProcessName [T1036.007]" -ForegroundColor Red
+                        New-Item "$OUTPUT_FOLDER\sys\proc\Suspicious-Double-File-Extension" -ItemType Directory -Force | Out-Null
+                        $Process | Export-Excel -Path "$OUTPUT_FOLDER\sys\proc\Suspicious-Double-File-Extension\Double-File-Extension_$ProcessName.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Double File Extension" -CellStyleSB {
+                        param($WorkSheet)
+                        # BackgroundColor and FontColor for specific cells of TopRow
+                        $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                        Set-Format -Address $WorkSheet.Cells["A1:M1"] -BackgroundColor $BackgroundColor -FontColor White
+                        # HorizontalAlignment "Center" of columns A-F, H-I and L-M
+                        $WorkSheet.Cells["A:F"].Style.HorizontalAlignment="Center"
+                        $WorkSheet.Cells["H:I"].Style.HorizontalAlignment="Center"
+                        $WorkSheet.Cells["L:M"].Style.HorizontalAlignment="Center"
+                        # BackgroundColor and FontColor for specific cells
+                        $BackgroundColor = [System.Drawing.Color]::FromArgb(255,0,0)
+                        $FontColor = [System.Drawing.Color]::FromArgb(255,255,255)
+                        $LastRow = $WorkSheet.Dimension.End.Row
+                        Set-Format -Address $WorkSheet.Cells["B2:B$LastRow"] -BackgroundColor $BackgroundColor -FontColor $FontColor -Bold
+                        }
+                    }
+                }
+            }
+        }
+
+        }
+
+        Get-DoubleFileExtensions
+
+#############################################################################################################################################################################################
+
+        Function Get-CommandAndScriptingInterpreters {
+
+        # Command and Scripting Interpreters
+        # https://attack.mitre.org/techniques/T1059/
+        # Note: This simple search looks for process names of Command and Scripting Interpreters. Adversaries abuse command and script interpreters to execute commands, scripts or binaries.
+        if (Test-Path "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv")
+        {
+            if([int](& $xsv count -d "`t" "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv") -gt 0)
+            {
+                Write-Output "[Info]  Checking for Command and Scripting Interpreters ..."
+
+                $Import = Import-Csv "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv" -Delimiter "`t" | Sort-Object @{Expression={$_.PID -as [int]}}
+
+                # cmd.exe
+                $Data = $Import | Where-Object { $_."Process Name" -eq "cmd.exe" }
+                $Count = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Command and Scripting Interpreter detected: cmd.exe ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter" -ItemType Directory -Force | Out-Null
+                    $Data | Export-Excel -Path "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter\cmd.exe.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "cmd.exe" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:M1"] -BackgroundColor $BackgroundColor -FontColor White
+                    $WorkSheet.Cells["A:F"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["H:I"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["L:M"].Style.HorizontalAlignment="Center"
+                    # BackgroundColor and FontColor for specific cells
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(255,0,0)
+                    $FontColor = [System.Drawing.Color]::FromArgb(255,255,255)
+                    $LastRow = $WorkSheet.Dimension.End.Row
+                    Set-Format -Address $WorkSheet.Cells["B2:B$LastRow"] -BackgroundColor $BackgroundColor -FontColor $FontColor -Bold
+                    }
+                }
+
+                # cscript.exe
+                $Data = $Import | Where-Object { $_."Process Name" -eq "cscript.exe" }
+                $Count = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Command and Scripting Interpreter detected: cscript.exe ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter" -ItemType Directory -Force | Out-Null
+                    $Data | Export-Excel -Path "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter\cscript.exe.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "cscript.exe" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:M1"] -BackgroundColor $BackgroundColor -FontColor White
+                    $WorkSheet.Cells["A:F"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["H:I"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["L:M"].Style.HorizontalAlignment="Center"
+                    # BackgroundColor and FontColor for specific cells
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(255,0,0)
+                    $FontColor = [System.Drawing.Color]::FromArgb(255,255,255)
+                    $LastRow = $WorkSheet.Dimension.End.Row
+                    Set-Format -Address $WorkSheet.Cells["B2:B$LastRow"] -BackgroundColor $BackgroundColor -FontColor $FontColor -Bold
+                    }
+                }
+
+                # mshta.exe
+                $Data = $Import | Where-Object { $_."Process Name" -eq "mshta.exe" }
+                $Count = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Command and Scripting Interpreter detected: mshta.exe ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter" -ItemType Directory -Force | Out-Null
+                    $Data | Export-Excel -Path "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter\mshta.exe.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "mshta.exe" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:M1"] -BackgroundColor $BackgroundColor -FontColor White
+                    $WorkSheet.Cells["A:F"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["H:I"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["L:M"].Style.HorizontalAlignment="Center"
+                    # BackgroundColor and FontColor for specific cells
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(255,0,0)
+                    $FontColor = [System.Drawing.Color]::FromArgb(255,255,255)
+                    $LastRow = $WorkSheet.Dimension.End.Row
+                    Set-Format -Address $WorkSheet.Cells["B2:B$LastRow"] -BackgroundColor $BackgroundColor -FontColor $FontColor -Bold
+                    }
+                }
+
+                # powershell.exe
+                $Data = $Import | Where-Object { $_."Process Name" -eq "powershell.exe" }
+                $Count = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Command and Scripting Interpreter detected: powershell.exe ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter" -ItemType Directory -Force | Out-Null
+                    $Data | Export-Excel -Path "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter\powershell.exe.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "powershell.exe" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:M1"] -BackgroundColor $BackgroundColor -FontColor White
+                    $WorkSheet.Cells["A:F"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["H:I"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["L:M"].Style.HorizontalAlignment="Center"
+                    # BackgroundColor and FontColor for specific cells
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(255,0,0)
+                    $FontColor = [System.Drawing.Color]::FromArgb(255,255,255)
+                    $LastRow = $WorkSheet.Dimension.End.Row
+                    Set-Format -Address $WorkSheet.Cells["B2:B$LastRow"] -BackgroundColor $BackgroundColor -FontColor $FontColor -Bold
+                    }
+                }
+
+                # pwsh.exe
+                $Data = $Import | Where-Object { $_."Process Name" -eq "pwsh.exe" }
+                $Count = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Command and Scripting Interpreter detected: pwsh.exe ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter" -ItemType Directory -Force | Out-Null
+                    $Data | Export-Excel -Path "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter\pwsh.exe.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "pwsh.exe" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:M1"] -BackgroundColor $BackgroundColor -FontColor White
+                    $WorkSheet.Cells["A:F"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["H:I"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["L:M"].Style.HorizontalAlignment="Center"
+                    # BackgroundColor and FontColor for specific cells
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(255,0,0)
+                    $FontColor = [System.Drawing.Color]::FromArgb(255,255,255)
+                    $LastRow = $WorkSheet.Dimension.End.Row
+                    Set-Format -Address $WorkSheet.Cells["B2:B$LastRow"] -BackgroundColor $BackgroundColor -FontColor $FontColor -Bold
+                    }
+                }
+
+                # python.exe
+                $Data = $Import | Where-Object { $_."Process Name" -eq "python.exe" }
+                $Count = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Command and Scripting Interpreter detected: python.exe ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter" -ItemType Directory -Force | Out-Null
+                    $Data | Export-Excel -Path "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter\python.exe.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "python.exe" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:M1"] -BackgroundColor $BackgroundColor -FontColor White
+                    $WorkSheet.Cells["A:F"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["H:I"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["L:M"].Style.HorizontalAlignment="Center"
+                    # BackgroundColor and FontColor for specific cells
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(255,0,0)
+                    $FontColor = [System.Drawing.Color]::FromArgb(255,255,255)
+                    $LastRow = $WorkSheet.Dimension.End.Row
+                    Set-Format -Address $WorkSheet.Cells["B2:B$LastRow"] -BackgroundColor $BackgroundColor -FontColor $FontColor -Bold
+                    }
+                }
+
+                # wscript.exe
+                $Data = $Import | Where-Object { $_."Process Name" -eq "wscript.exe" }
+                $Count = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Command and Scripting Interpreter detected: wscript.exe ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter" -ItemType Directory -Force | Out-Null
+                    $Data | Export-Excel -Path "$OUTPUT_FOLDER\sys\proc\Command-and-Scripting-Interpreter\wscript.exe.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "wscript.exe" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:M1"] -BackgroundColor $BackgroundColor -FontColor White
+                    $WorkSheet.Cells["A:F"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["H:I"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["L:M"].Style.HorizontalAlignment="Center"
+                    # BackgroundColor and FontColor for specific cells
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(255,0,0)
+                    $FontColor = [System.Drawing.Color]::FromArgb(255,255,255)
+                    $LastRow = $WorkSheet.Dimension.End.Row
+                    Set-Format -Address $WorkSheet.Cells["B2:B$LastRow"] -BackgroundColor $BackgroundColor -FontColor $FontColor -Bold
+                    }
+                }
+            }
+        }
+        
+        }
+
+        Get-CommandAndScriptingInterpreters
+
+#############################################################################################################################################################################################
+
         Function Get-MiniDumps {
         
         # MiniDumps
@@ -5742,7 +6261,7 @@ if (Test-Path "$MemProcFS")
 
             # CSV --> Timeline Explorer (TLE)
             New-Item "$OUTPUT_FOLDER\forensic\timeline\CSV" -ItemType Directory -Force | Out-Null
-            Get-Content "$DriveLetter\forensic\json\timeline.json" | ConvertFrom-Json | Export-Csv -Path "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv" -Delimiter "," -NoTypeInformation
+            Get-Content "$DriveLetter\forensic\json\timeline.json" | ConvertFrom-Json | Export-Csv -Path "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv" -Delimiter "," -NoTypeInformation -Encoding UTF8
 
             # File Size (CSV)
             if (Test-Path "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv")
@@ -5767,7 +6286,7 @@ if (Test-Path "$MemProcFS")
 
                         if ($Count -gt "1048576")
                         {
-                            Write-Output "[Info]  ImportExcel: timeline.csv will be splitted ..."
+                            Write-Output "[Info]  ImportExcel: timeline.csv will be splitted [time-consuming task] ..."
                             & $xsv sort -R -s "date" "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv" --delimiter "," -o "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline-reverse.csv"
                             & $xsv split -s 1000000 "$OUTPUT_FOLDER\forensic\timeline\CSV" --filename "timeline-{}.csv" --delimiter "," "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline-reverse.csv"
 
@@ -5860,6 +6379,102 @@ if (Test-Path "$MemProcFS")
         Get-Prefetch
 
 #############################################################################################################################################################################################
+
+        Function Get-RecentFiles {
+        
+        # Recent Folder Artifacts
+        if (Test-Path "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv")
+        {
+            Write-Output "[Info]  Extracting Recent Folder Artifacts from Forensic Timeline ..."
+            New-Item "$OUTPUT_FOLDER\RecentFiles" -ItemType Directory -Force | Out-Null
+
+            # TXT (FS_Forensic_Ntfs)
+            if (Test-Path "$DriveLetter\forensic\ntfs\_\Users\*\AppData\Roaming\Microsoft\Windows\Recent\*.lnk")
+            {
+                Get-ChildItem -Path "$DriveLetter\forensic\ntfs\_\Users\*\AppData\Roaming\Microsoft\Windows\Recent\*.lnk" | Select-Object -ExpandProperty FullName | Out-File "$OUTPUT_FOLDER\RecentFiles\RecentFiles.txt"
+            }
+
+            # CSV
+            Import-Csv "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv" -Delimiter "," | Where-Object { $_.desc -match "\\AppData\\Roaming\\Microsoft\\Windows\\Recent\\.*\.lnk" } | Export-Csv "$OUTPUT_FOLDER\RecentFiles\RecentFiles.csv" -NoTypeInformation -Encoding UTF8
+
+            # File Size (CSV)
+            if (Test-Path "$OUTPUT_FOLDER\RecentFiles\RecentFiles.csv")
+            {
+                $Size = Get-FileSize((Get-Item "$OUTPUT_FOLDER\RecentFiles\RecentFiles.csv").Length)
+                Write-Output "[Info]  File Size (CSV): $Size"
+            }
+
+            # Count rows of CSV (w/ thousands separators)
+            [int]$Count = & $xsv count "$OUTPUT_FOLDER\RecentFiles\RecentFiles.csv"
+            $Rows = '{0:N0}' -f $Count
+            Write-Output "[Info]  Total Lines (CSV): $Rows"
+
+            # MOD - Last Write Time
+            # CRE - Creation Time
+            # RD  - Last Access Time
+
+            # XLSX
+            if (Get-Module -ListAvailable -Name ImportExcel) 
+            {
+                if (Test-Path "$OUTPUT_FOLDER\RecentFiles\RecentFiles.csv")
+                {
+                    if([int](& $xsv count "$OUTPUT_FOLDER\RecentFiles\RecentFiles.csv") -gt 0)
+                    {
+                        $IMPORT = Import-Csv "$OUTPUT_FOLDER\RecentFiles\RecentFiles.csv" -Delimiter "," -Encoding UTF8 | Select-Object @{Name='Timestamp [UTC]';Expression={([datetime]$_.date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}},@{Name='Name';Expression={$_.desc | ForEach-Object{($_ -split "\\")[-1]}}},@{Name='Type';Expression={$_.type}},@{Name='Action';Expression={$_.action}},@{Name='File Path';Expression={$_.desc}},@{Name='Bytes';Expression={$_.num}} | Sort-Object { $_."Timestamp [UTC]" -as [datetime] } -Descending
+                        $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\RecentFiles\RecentFiles.xlsx" -NoNumberConversion * -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "RecentFiles" -CellStyleSB {
+                        param($WorkSheet)
+                        # BackgroundColor and FontColor for specific cells of TopRow
+                        $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                        Set-Format -Address $WorkSheet.Cells["A1:G1"] -BackgroundColor $BackgroundColor -FontColor White
+                        # HorizontalAlignment "Center" of columns A, C-D and F
+                        $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                        $WorkSheet.Cells["C:D"].Style.HorizontalAlignment="Center"
+                        $WorkSheet.Cells["F:F"].Style.HorizontalAlignment="Center"
+                        }
+                    }
+                }
+            }
+
+            # JumpList Artifacts
+            New-Item "$OUTPUT_FOLDER\JumpLists" -ItemType Directory -Force | Out-Null
+
+            # TXT (FS_Forensic_Ntfs)
+            if (Test-Path "$DriveLetter\forensic\ntfs\_\Users\*\AppData\Roaming\Microsoft\Windows\Recent\*.lnk")
+            {
+                Get-ChildItem -Path "$DriveLetter\forensic\ntfs\_\Users\*\AppData\Roaming\Microsoft\Windows\Recent\*Destinations\*" -File | Select-Object -ExpandProperty FullName | Where-Object { $_ -notmatch "`$_INFO" } | Out-File "$OUTPUT_FOLDER\JumpLists\JumpLists.txt"
+            }
+
+            # CSV
+            Import-Csv "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv" -Delimiter "," | Where-Object { $_.desc -match "\\Microsoft\\Windows\\Recent\\(AutomaticDestinations|CustomDestinations)\\" } | Export-Csv "$OUTPUT_FOLDER\JumpLists\JumpLists.csv" -NoTypeInformation -Encoding UTF8
+
+            # XLSX
+            if (Get-Module -ListAvailable -Name ImportExcel) 
+            {
+                if (Test-Path "$OUTPUT_FOLDER\JumpLists\JumpLists.csv")
+                {
+                    if([int](& $xsv count "$OUTPUT_FOLDER\JumpLists\JumpLists.csv") -gt 0)
+                    {
+                        $IMPORT = Import-Csv "$OUTPUT_FOLDER\JumpLists\JumpLists.csv" -Delimiter "," | Select-Object @{Name='Timestamp [UTC]';Expression={([datetime]$_.date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}},@{Name='Name';Expression={$_.desc | ForEach-Object{($_ -split "\\")[-1]} }},@{Name='Type';Expression={$_.type}},@{Name='Action';Expression={$_.action}},@{Name='File Path';Expression={$_.desc}},@{Name='Bytes';Expression={$_.num}} | Sort-Object { $_."Timestamp [UTC]" -as [datetime] } -Descending
+                        $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\JumpLists\JumpLists.xlsx" -NoNumberConversion * -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "JumpLists" -CellStyleSB {
+                        param($WorkSheet)
+                        # BackgroundColor and FontColor for specific cells of TopRow
+                        $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                        Set-Format -Address $WorkSheet.Cells["A1:G1"] -BackgroundColor $BackgroundColor -FontColor White
+                        # HorizontalAlignment "Center" of columns A, C-D and F
+                        $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                        $WorkSheet.Cells["C:D"].Style.HorizontalAlignment="Center"
+                        $WorkSheet.Cells["F:F"].Style.HorizontalAlignment="Center"
+                        }
+                    }
+                }
+            }
+        }
+
+        }
+
+        Get-RecentFiles
+
+#############################################################################################################################################################################################
         
         Function Get-EventLogs {
 
@@ -5900,7 +6515,6 @@ if (Test-Path "$MemProcFS")
         else
         {
             # Check if GitHub is reachable
-            #$global:ProgressPreference = "SilentlyContinue"
             if (!(Test-NetConnection -ComputerName github.com -Port 443).TcpTestSucceeded)
             {
                 Write-Host "[Error] github.com is NOT reachable. Event Log Maps cannot be updated." -ForegroundColor Red
@@ -5916,7 +6530,7 @@ if (Test-Path "$MemProcFS")
                 }
 
                 # Sync for EvtxECmd Maps with GitHub
-                if (Test-Path "$EvtxECmd")
+                if (Test-Path "$($EvtxECmd)")
                 {
                     & $EvtxECmd --sync > "$SCRIPT_DIR\Tools\EvtxECmd\Maps.log" 2> $null
                 }
@@ -5925,7 +6539,6 @@ if (Test-Path "$MemProcFS")
                     Write-Host "[Error] EvtxECmd.exe NOT found." -ForegroundColor Red
                 }
             }
-            #$global:ProgressPreference = "Continue"
         }
 
         }
@@ -5935,7 +6548,7 @@ if (Test-Path "$MemProcFS")
         Function Invoke-EvtxECmd {
 
         # EvtxECmd --> Timeline Explorer
-        if (Test-Path "$EvtxECmd")
+        if (Test-Path "$($EvtxECmd)")
         {
             $Count = (Get-ChildItem "$SCRIPT_DIR\Tools\EvtxECmd\Maps\*" -Include *.map | Measure-Object).Count
             Write-Output "[Info]  $Count Event Log Maps will be initiated by EvtxECmd ..."
@@ -5953,7 +6566,7 @@ if (Test-Path "$MemProcFS")
                 }
 
                 # Windows Title (Default)
-                $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v0.8 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+                $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
             }
         }
         else
@@ -5970,7 +6583,7 @@ if (Test-Path "$MemProcFS")
         Function Update-ZircoliteRules {
 
         # Zircolite
-        if (Test-Path "$Zircolite")
+        if (Test-Path "$($Zircolite)")
         {
             # Update
             Write-Output "[Info]  Updating SIGMA Rulesets ... "
@@ -6033,7 +6646,7 @@ if (Test-Path "$MemProcFS")
         Function Invoke-Zircolite {
 
         # Zircolite
-        if (Test-Path "$Zircolite")
+        if (Test-Path "$($Zircolite)")
         {
             if (Test-Path "$OUTPUT_FOLDER\EventLogs\EventLogs\*.evtx") 
             {
@@ -6662,7 +7275,7 @@ if (Test-Path "$MemProcFS")
         Function Get-Timesketch {
 
         # Timesketch
-        if (Test-Path "$Zircolite")
+        if (Test-Path "$($Zircolite)")
         {
             Write-Output "[Info]  Creating Timesketch output ..."
             New-Item "$OUTPUT_FOLDER\EventLogs\Zircolite\Timesketch" -ItemType Directory -Force | Out-Null
@@ -6772,7 +7385,7 @@ if (Test-Path "$MemProcFS")
         # AmcacheParser
         if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*Amcache*.reghive") 
         {
-            if (Test-Path "$AmcacheParser")
+            if (Test-Path "$($AmcacheParser)")
             {
                 Write-Output "[Info]  Analyzing Amcache Hive ... "
 
@@ -7015,7 +7628,7 @@ if (Test-Path "$MemProcFS")
         # AppCompatCacheParser (ShimCache)
         if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*SYSTEM*.reghive") 
         {
-            if (Test-Path "$AppCompatCacheParser")
+            if (Test-Path "$($AppCompatCacheParser)")
             {
                 Write-Output "[Info]  Analyzing Application Compatibility Cache aka ShimCache ... "
 
@@ -7080,7 +7693,7 @@ if (Test-Path "$MemProcFS")
         if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*Syscachehve*.reghive") 
         {
             # Check if RECmd.exe exists
-            if (Test-Path "$RECmd")
+            if (Test-Path "$($RECmd)")
             {
                 Write-Output "[Info]  Analyzing Syscache Hive ... "
 
@@ -7167,7 +7780,7 @@ if (Test-Path "$MemProcFS")
         Function Get-UserAssist {
 
         # Check if RECmd.exe exists
-        if (Test-Path "$RECmd")
+        if (Test-Path "$($RECmd)")
         {
             # Check if batch processing file exists
             if (Test-Path "$SCRIPT_DIR\Tools\RECmd_BatchFiles\UserAssist.reb")
@@ -7210,7 +7823,7 @@ if (Test-Path "$MemProcFS")
                                     {
                                         # Count
                                         $Total = Get-Content "$OUTPUT_FOLDER\Registry\UserAssist\$SID-UserAssist.log" | Select-String -Pattern "key/value pairs"
-                                        Write-Host "[Info]  $Total ($SID)"
+                                        Write-Output "[Info]  $Total ($SID)"
 
                                         # Array
                                         $Array = @()
@@ -7334,7 +7947,7 @@ if (Test-Path "$MemProcFS")
         Function Get-BAM {
 
         # Check if RECmd.exe exists
-        if (Test-Path "$RECmd")
+        if (Test-Path "$($RECmd)")
         {
             # Check if batch processing file exists
             if (Test-Path "$SCRIPT_DIR\Tools\RECmd_BatchFiles\BAM.reb")
@@ -7426,7 +8039,7 @@ if (Test-Path "$MemProcFS")
         Function Get-MUICache {
 
         # Check if RECmd.exe exists
-        if (Test-Path "$RECmd")
+        if (Test-Path "$($RECmd)")
         {
             # Check if batch processing file exists
             if (Test-Path "$SCRIPT_DIR\Tools\RECmd_BatchFiles\MUICache.reb")
@@ -7457,7 +8070,7 @@ if (Test-Path "$MemProcFS")
                             {
                                 # Count
                                 $Total = Get-Content "$OUTPUT_FOLDER\Registry\MUICache\$SID-MUICache.log" | Select-String -Pattern "key/value pairs"
-                                Write-Host "[Info]  $Total ($SID)"
+                                Write-Output "[Info]  $Total ($SID)"
                             }
                         }
 
@@ -7574,6 +8187,326 @@ if (Test-Path "$MemProcFS")
 
 #############################################################################################################################################################################################
 
+        # MRU Opened-Saved Files (OpenSavePidlMRU)
+
+        # Files that are accessed by a Windows (Vista+) application using the common Open File or Save File dialog found at:
+        # NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU
+
+        Function Get-OpenSaveMRU {
+        
+        # Check if RECmd.exe exists
+        if (Test-Path "$($RECmd)")
+        {
+            # Check if batch processing file exists
+            if (Test-Path "$SCRIPT_DIR\Tools\RECmd_BatchFiles\OpenSavePidlMRU.reb")
+            {
+                # Analyzing OpenSaveMRU Artifacts (OpenSavePidlMRU)
+                Write-Output "[Info]  Analyzing OpenSaveMRU Artifacts ... "
+                New-Item "$OUTPUT_FOLDER\Registry\OpenSaveMRU\CSV" -ItemType Directory -Force | Out-Null
+                New-Item "$OUTPUT_FOLDER\Registry\OpenSaveMRU\XLSX" -ItemType Directory -Force | Out-Null
+
+                $FilePathList = (Get-ChildItem "$OUTPUT_FOLDER\Registry\Registry" | Where-Object {($_.FullName -match "ntuserdat")} | Foreach-Object FullName)
+
+                ForEach( $FilePath in $FilePathList )
+                {
+                    $FileName = $FilePath | ForEach-Object{($_ -split "\\")[-1]} | ForEach-Object{($_ -split "\.")[0]}
+                    $SID = $FileName | ForEach-Object{($_ -split "_")[1]}
+
+                    # Check if OpenSavePidlMRU key exists
+                    if (Test-Path "$DriveLetter\registry\by-hive\$FileName\ROOT\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU")
+                    {
+                        # CSV
+                        & $RECmd -f "$FilePath" --bn "$SCRIPT_DIR\Tools\RECmd_BatchFiles\OpenSavePidlMRU.reb" --csv "$OUTPUT_FOLDER\Registry\OpenSaveMRU\CSV" --csvf "$SID-OpenSavePidlMRU.csv" > "$OUTPUT_FOLDER\Registry\OpenSaveMRU\$SID-OpenSavePidlMRU.log" 2> $null
+
+                        # RegistryPlugin.OpenSavePidlMRU.dll
+                        if (Test-Path "$OUTPUT_FOLDER\Registry\OpenSaveMRU\CSV\*\$SID-OpenSavePidlMRU_OpenSavePidlMRU.csv")
+                        {
+                            Move-Item -Path "$OUTPUT_FOLDER\Registry\OpenSaveMRU\CSV\*\$SID-OpenSavePidlMRU_OpenSavePidlMRU.csv" -Destination "$OUTPUT_FOLDER\Registry\OpenSaveMRU\CSV\$SID-OpenSavePidlMRU_PluginDetailFile.csv"
+                            Get-ChildItem -Path "$OUTPUT_FOLDER\Registry\OpenSaveMRU\CSV\*" -Directory | ForEach-Object FullName | Remove-Item -Force -Recurse
+                        }
+
+                        # Stats
+                        if (Test-Path "$OUTPUT_FOLDER\Registry\OpenSaveMRU\$SID-OpenSavePidlMRU.log")
+                        {
+                            # Check if key/value pairs were found
+                            if (!(Get-Content -Path "$OUTPUT_FOLDER\Registry\OpenSaveMRU\$SID-OpenSavePidlMRU.log" | Select-String -Pattern "Found 0 key/value pairs across 1 file" -Quiet))
+                            {
+                                # Count
+                                $Total = Get-Content "$OUTPUT_FOLDER\Registry\OpenSaveMRU\$SID-OpenSavePidlMRU.log" | Select-String -Pattern "key/value pairs"
+                                Write-Output "[Info]  $Total ($SID)"
+                            }
+                        }
+
+                        # XLSX
+
+                        # OpenSavePidlMRU.csv
+                        if (Test-Path "$OUTPUT_FOLDER\Registry\OpenSaveMRU\CSV\$SID-OpenSavePidlMRU.csv")
+                        {
+                            if([int](& $xsv count "$OUTPUT_FOLDER\Registry\OpenSaveMRU\CSV\$SID-OpenSavePidlMRU.csv") -gt 0)
+                            {
+                                $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\OpenSaveMRU\CSV\$SID-OpenSavePidlMRU.csv" -Delimiter "," -Encoding UTF8
+                                $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\OpenSaveMRU\XLSX\$SID-OpenSavePidlMRU.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "OpenSavePidlMRU" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:O1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns B-F, I and K-N
+                                $WorkSheet.Cells["B:F"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["I:I"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["K:N"].Style.HorizontalAlignment="Center"
+                                }
+                            }
+                        }
+
+                        # OpenSavePidlMRU_PluginDetailFile.csv
+                        if (Test-Path "$OUTPUT_FOLDER\Registry\OpenSaveMRU\CSV\$SID-OpenSavePidlMRU_PluginDetailFile.csv")
+                        {
+                            if([int](& $xsv count "$OUTPUT_FOLDER\Registry\OpenSaveMRU\CSV\$SID-OpenSavePidlMRU_PluginDetailFile.csv") -gt 0)
+                            {
+                                $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\OpenSaveMRU\CSV\$SID-OpenSavePidlMRU_PluginDetailFile.csv" -Delimiter "," -Encoding UTF8
+                                $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\OpenSaveMRU\XLSX\$SID-OpenSavePidlMRU_PluginDetailFile.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "OpenSavePidlMRU (Plugin)" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:H1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, C-E and G
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["C:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["G:G"].Style.HorizontalAlignment="Center"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Write-Host "[Error] OpenSavePidlMRU.reb NOT found." -ForegroundColor Red
+            }
+        }
+        else
+        {
+            Write-Host "[Error] RECmd.exe NOT found." -ForegroundColor Red
+        }
+        
+        }
+
+        Get-OpenSaveMRU
+
+        # LastVisitedPidlMRU
+
+        # Tracks the specific executable used by an application to open the files documented in OpenSavePidlMRU found at:
+        # NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedPidlMRU
+
+        Function Get-LastVisitedMRU {
+        
+        # Check if RECmd.exe exists
+        if (Test-Path "$($RECmd)")
+        {
+            # Check if batch processing file exists
+            if (Test-Path "$SCRIPT_DIR\Tools\RECmd_BatchFiles\LastVisitedPidlMRU.reb")
+            {
+                # Analyzing LastVisitedMRU Artifacts (LastVisitedPidlMRU)
+                Write-Output "[Info]  Analyzing LastVisitedMRU Artifacts ... "
+                New-Item "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV" -ItemType Directory -Force | Out-Null
+                New-Item "$OUTPUT_FOLDER\Registry\LastVisitedMRU\XLSX" -ItemType Directory -Force | Out-Null
+
+                $FilePathList = (Get-ChildItem "$OUTPUT_FOLDER\Registry\Registry" | Where-Object {($_.FullName -match "ntuserdat")} | Foreach-Object FullName)
+
+                ForEach( $FilePath in $FilePathList )
+                {
+                    $FileName = $FilePath | ForEach-Object{($_ -split "\\")[-1]} | ForEach-Object{($_ -split "\.")[0]}
+                    $SID = $FileName | ForEach-Object{($_ -split "_")[1]}
+
+                    # Check if LastVisitedPidlMRU key exists
+                    if (Test-Path "$DriveLetter\registry\by-hive\$FileName\ROOT\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedPidlMRU")
+                    {
+                        # CSV
+                        & $RECmd -f "$FilePath" --bn "$SCRIPT_DIR\Tools\RECmd_BatchFiles\LastVisitedPidlMRU.reb" --csv "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV" --csvf "$SID-LastVisitedPidlMRU.csv" > "$OUTPUT_FOLDER\Registry\LastVisitedMRU\$SID-LastVisitedPidlMRU.log" 2> $null
+                        
+                        # RegistryPlugin.LastVisitedPidlMRU.dll
+                        if (Test-Path "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\*\$SID-LastVisitedPidlMRU_LastVisitedPidlMRU.csv")
+                        {
+                            Move-Item -Path "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\*\$SID-LastVisitedPidlMRU_LastVisitedPidlMRU.csv" -Destination "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\$SID-LastVisitedPidlMRU_PluginDetailFile.csv"
+                            Get-ChildItem -Path "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\*" -Directory | ForEach-Object FullName | Remove-Item -Force -Recurse
+                        }
+
+                        # Stats
+                        if (Test-Path "$OUTPUT_FOLDER\Registry\LastVisitedMRU\$SID-LastVisitedPidlMRU.log")
+                        {
+                            # Check if key/value pairs were found
+                            if (!(Get-Content -Path "$OUTPUT_FOLDER\Registry\LastVisitedMRU\$SID-LastVisitedPidlMRU.log" | Select-String -Pattern "Found 0 key/value pairs across 1 file" -Quiet))
+                            {
+                                # Count
+                                $Total = Get-Content "$OUTPUT_FOLDER\Registry\LastVisitedMRU\$SID-LastVisitedPidlMRU.log" | Select-String -Pattern "key/value pairs"
+                                Write-Output "[Info]  $Total ($SID)"
+                            }
+                        }
+
+                        # XLSX
+
+                        # LastVisitedPidlMRU.csv
+                        if (Test-Path "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\$SID-LastVisitedPidlMRU.csv")
+                        {
+                            if([int](& $xsv count "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\$SID-LastVisitedPidlMRU.csv") -gt 0)
+                            {
+                                $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\$SID-LastVisitedPidlMRU.csv" -Delimiter "," -Encoding UTF8
+                                $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\LastVisitedMRU\XLSX\$SID-LastVisitedPidlMRU.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "LastVisitedPidlMRU" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:O1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns B-G, I and K-N
+                                $WorkSheet.Cells["B:G"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["I:I"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["K:N"].Style.HorizontalAlignment="Center"
+                                }
+                            }
+                        }
+
+                        # LastVisitedPidlMRU_PluginDetailFile.csv
+                        if (Test-Path "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\$SID-LastVisitedPidlMRU_PluginDetailFile.csv")
+                        {
+                            if([int](& $xsv count "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\$SID-LastVisitedPidlMRU_PluginDetailFile.csv") -gt 0)
+                            {
+                                $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\$SID-LastVisitedPidlMRU_PluginDetailFile.csv" -Delimiter "," -Encoding UTF8
+                                $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\LastVisitedMRU\XLSX\$SID-LastVisitedPidlMRU_PluginDetailFile.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "LastVisitedPidlMRU (Plugin)" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:H1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, C-E and G
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["C:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["G:G"].Style.HorizontalAlignment="Center"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Write-Host "[Error] LastVisitedPidlMRU.reb NOT found." -ForegroundColor Red
+            }
+        }
+        else
+        {
+            Write-Host "[Error] RECmd.exe NOT found." -ForegroundColor Red
+        }
+
+        }
+
+        Get-LastVisitedMRU
+
+#############################################################################################################################################################################################
+        
+        Function Get-TerminalServerClient {
+        
+        # Check if RECmd.exe exists
+        if (Test-Path "$($RECmd)")
+        {
+            # Check if batch processing file exists
+            if (Test-Path "$SCRIPT_DIR\Tools\RECmd_BatchFiles\TerminalServerClient.reb")
+            {
+                # Analyzing Terminal Server Client (RDP)
+                $FilePathList = (Get-ChildItem "$OUTPUT_FOLDER\Registry\Registry" | Where-Object {($_.FullName -match "ntuserdat")} | Foreach-Object FullName)
+
+                ForEach( $FilePath in $FilePathList )
+                {
+                    $FileName = $FilePath | ForEach-Object{($_ -split "\\")[-1]} | ForEach-Object{($_ -split "\.")[0]}
+                    $SID = $FileName | ForEach-Object{($_ -split "_")[1]}
+
+                    # Check if LastVisitedPidlMRU key exists
+                    if (Test-Path "$DriveLetter\registry\by-hive\$FileName\ROOT\SOFTWARE\Microsoft\Terminal Server Client")
+                    {
+                        # CSV
+                        New-Item "$OUTPUT_FOLDER\Registry\TerminalServerClient\CSV" -ItemType Directory -Force | Out-Null
+                        New-Item "$OUTPUT_FOLDER\Registry\TerminalServerClient\XLSX" -ItemType Directory -Force | Out-Null
+                        & $RECmd -f "$FilePath" --bn "$SCRIPT_DIR\Tools\RECmd_BatchFiles\TerminalServerClient.reb" --csv "$OUTPUT_FOLDER\Registry\TerminalServerClient\CSV" --csvf "$SID-TerminalServerClient.csv" > "$OUTPUT_FOLDER\Registry\TerminalServerClient\$SID-TerminalServerClient.log" 2> $null
+                        
+                        # RegistryPlugin.TerminalServerClient.dll
+                        if (Test-Path "$OUTPUT_FOLDER\Registry\TerminalServerClient\CSV\*\$SID-TerminalServerClient_TerminalServerClient.csv")
+                        {
+                            Move-Item -Path "$OUTPUT_FOLDER\Registry\TerminalServerClient\CSV\*\$SID-TerminalServerClient_TerminalServerClient.csv" -Destination "$OUTPUT_FOLDER\Registry\TerminalServerClient\CSV\$SID-TerminalServerClient_TerminalServerClient.csv"
+                            Get-ChildItem -Path "$OUTPUT_FOLDER\Registry\TerminalServerClient\CSV\*" -Directory | ForEach-Object FullName | Remove-Item -Force -Recurse
+                        }
+
+                        # Stats
+                        if (Test-Path "$OUTPUT_FOLDER\Registry\TerminalServerClient\$SID-TerminalServerClient.log")
+                        {
+                            # Check if key/value pairs were found
+                            if (!(Get-Content -Path "$OUTPUT_FOLDER\Registry\TerminalServerClient\$SID-TerminalServerClient.log" | Select-String -Pattern "Found 0 key/value pairs across 1 file" -Quiet))
+                            {
+                                # Count
+                                $Total = Get-Content "$OUTPUT_FOLDER\Registry\TerminalServerClient\$SID-TerminalServerClient.log" | Select-String -Pattern "key/value pair"
+                                Write-Output "[Info]  $Total ($SID)"
+                            }
+                        }
+
+                        # XLSX
+
+                        # TerminalServerClient.csv
+                        if (Test-Path "$OUTPUT_FOLDER\Registry\TerminalServerClient\CSV\$SID-TerminalServerClient.csv")
+                        {
+                            if([int](& $xsv count "$OUTPUT_FOLDER\Registry\TerminalServerClient\CSV\$SID-TerminalServerClient.csv") -gt 0)
+                            {
+                                $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\TerminalServerClient\CSV\$SID-TerminalServerClient.csv" -Delimiter "," -Encoding UTF8
+                                $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\TerminalServerClient\XLSX\$SID-TerminalServerClient.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "TerminalServerClient" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:O1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns B-D, F-J and L-N
+                                $WorkSheet.Cells["B:D"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["F:J"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["L:N"].Style.HorizontalAlignment="Center"
+                                }
+                            }
+                        }
+
+                        # TerminalServerClient_PluginDetailFile.csv
+                        if (Test-Path "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\$SID-TerminalServerClient_PluginDetailFile.csv")
+                        {
+                            if([int](& $xsv count "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\$SID-TerminalServerClient_PluginDetailFile.csv") -gt 0)
+                            {
+                                $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\LastVisitedMRU\CSV\$SID-TerminalServerClient_PluginDetailFile.csv" -Delimiter "," -Encoding UTF8
+                                $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\LastVisitedMRU\XLSX\$SID-TerminalServerClient_PluginDetailFile.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "TerminalServerClient (Plugin)" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:F1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, C-F
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["C:F"].Style.HorizontalAlignment="Center"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Write-Host "[Error] TerminalServerClient.reb NOT found." -ForegroundColor Red
+            }
+        }
+        else
+        {
+            Write-Host "[Error] RECmd.exe NOT found." -ForegroundColor Red
+        }
+
+        }
+
+        Get-TerminalServerClient
+
+        # RegistryPlugin.TerminalServerClient.dll
+
+        # Displays the IP addresses/hostnames of devices this system has connected to (Outbound RDP)
+        # Default subkey stores previous RDP connection entries the user has connected to.
+        # UsernameHint value stores the username used on remote machine during RDP session.
+
+#############################################################################################################################################################################################
+
         # SBECCmd
 
         Function Get-ShellBags {
@@ -7581,7 +8514,7 @@ if (Test-Path "$MemProcFS")
         # Check ShellBags Location
         if ((Test-Path "$OUTPUT_FOLDER\Registry\Registry\*ntuserdat*") -or (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*UsrClassdat*"))
         {
-            if (Test-Path "$SBECmd")
+            if (Test-Path "$($SBECmd)")
             {
                 Write-Output "[Info]  Analyzing ShellBags Artifacts ... "
                 New-Item "$OUTPUT_FOLDER\Registry\ShellBags\CSV" -ItemType Directory -Force | Out-Null
@@ -7620,7 +8553,7 @@ if (Test-Path "$MemProcFS")
                 {
                     $FileName = $FilePath | ForEach-Object{($_ -split "-USER_")[1]} | ForEach-Object{($_ -split "\.csv")[0]}
 
-                    if (Test-Path "$FilePath")
+                    if (Test-Path "$($FilePath)")
                     {
                         if([int](& $xsv count "$FilePath") -gt 0)
                         {
@@ -7655,7 +8588,7 @@ if (Test-Path "$MemProcFS")
         # Registry ASEPs (Auto-Start Extensibility Points)
         if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive") 
         {
-            if (Test-Path "$RECmd")
+            if (Test-Path "$($RECmd)")
             {
                 # Check if batch processing file exists
                 if (Test-Path "$SCRIPT_DIR\Tools\RECmd_BatchFiles\RegistryASEPs.reb")
@@ -7792,7 +8725,7 @@ if (Test-Path "$DriveLetter\forensic\json\elastic_import.ps1")
     Start-Process -FilePath "powershell" -Verb RunAs -Wait -ArgumentList "-File $Elastic_Import", "$Argument"
 
     # Cleaning up
-    if (Test-Path "$Elastic_Import")
+    if (Test-Path "$($Elastic_Import)")
     {
         Remove-Item "$Elastic_Import" -Force
     }
@@ -7822,17 +8755,20 @@ if (Test-Path "$DriveLetter\forensic\json\elastic_import.ps1")
 Function MicrosoftDefender {
 
 # Turning Microsoft Defender AntiVirus off (Real-Time Protection)
-
-# Real-Time Protection Activation Status
 # Note: Tamper Protection must be disabled.
-$DisableRealtimeMonitoring = ((Get-MpPreference | Select-Object DisableRealtimeMonitoring).DisableRealtimeMonitoring | Out-String).Trim()
-
-# Disable Real-Time Protection
-if ($DisableRealtimeMonitoring -eq "False")
+if ((Get-MpComputerStatus).RealTimeProtectionEnabled)
 {
-    Write-Output "[Info]  Microsoft Defender (Real-Time Protection) will be disabled temporarily ..."
-    Set-MpPreference -DisableRealtimeMonitoring $true
-    Start-Sleep 10
+    # Real-Time Protection Activation Status
+    $DisableRealtimeMonitoring = ((Get-MpPreference | Select-Object DisableRealtimeMonitoring).DisableRealtimeMonitoring | Out-String).Trim()
+    if ($DisableRealtimeMonitoring -eq "False")
+    {
+        # Disable Real-Time Protection
+        Write-Output "[Info]  Microsoft Defender (Real-Time Protection) will be disabled temporarily ..."
+        try { Set-MpPreference -DisableRealtimeMonitoring $true }
+        catch [Microsoft.Management.Infrastructure.CimException] { Write-Host $Error[0].Exception.InnerException.Message }
+        catch { }
+        Start-Sleep 10
+    }
 }
 
 }
@@ -7870,7 +8806,7 @@ if (!(Test-Path "C:\Program Files\ClamAV\clamd.conf"))
 }
 
 # Update
-if (Test-Path "$freshclam")
+if (Test-Path "$($freshclam)")
 {
     # Internet Connectivity Check (Vista+)
     $NetworkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]‘{DCB00C01-570F-4A9B-8D69-199FDBA5723B}’)).IsConnectedToInternet
@@ -7922,7 +8858,7 @@ else
 }
 
 # Engine Version
-if (Test-Path "$clamscan")
+if (Test-Path "$($clamscan)")
 {
     $Version = & $clamscan -V
     $EngineVersion = $Version.Split('/')[0]
@@ -7950,39 +8886,13 @@ Function ClamAV {
 
 # Custom Scan
 # Note: By default ClamAV will not scan files larger than 100MB.
-$ScanPath = "$DriveLetter\name"
-
-# Drive Letter Scan Mode
-if ((Get-Item $ScanPath) -is [System.IO.DirectoryInfo])
-{
-    if ($ScanPath -match ":$")
-    {
-        Write-Output "[Info]  Custom scan w/ ClamAV is running ($ScanPath) ..."
-        Write-Output "[Info]  Drive Letter Scan Mode enabled [time-consuming task] ..."
-    }
-}
-
-# Directory Scan Mode
-if ((Get-Item $ScanPath) -is [System.IO.DirectoryInfo])
-{
-    if (!($ScanPath -match ":$"))
-    {
-        Write-Output "[Info]  Custom scan w/ ClamAV is running ($ScanPath) ..."
-        Write-Output "[Info]  Directory Scan Mode enabled [time-consuming task] ..."
-    }
-}
-
-# File Scan Mode
-if ((Get-Item $ScanPath) -is [System.IO.FileInfo])
-{
-    Write-Output "[Info]  Custom scan w/ ClamAV is running ($ScanPath) ..."
-    Write-Output "[Info]  File Scan Mode enabled"
-}
+$ScanPath1 = "$DriveLetter\name"
+$ScanPath2 = "$DriveLetter\forensic\files"
 
 # Start ClamAV Daemon
-if (Test-Path "$clamd")
+if (Test-Path "$($clamd)")
 {
-    if (Test-Path "$clamdscan")
+    if (Test-Path "$($clamdscan)")
     {
         Write-Output "[Info]  Starting ClamAV Daemon ..."
         Start-Process powershell.exe -FilePath "$clamd" -WindowStyle Minimized
@@ -7996,8 +8906,9 @@ if (Test-Path "$clamd")
         $StartTime_ClamAV = (Get-Date)
 
         # ClamAV Daemon Scan (Multi-Threaded)
+        Write-Output "[Info]  Custom scan w/ ClamAV is running [time-consuming task] ..."
         $LogFile = "$OUTPUT_FOLDER\ClamAV\LogFile.txt"
-        Start-Process -FilePath "$clamdscan" -ArgumentList "$ScanPath --quiet --multiscan --log=$LogFile" -WindowStyle Minimized -Wait
+        Start-Process -FilePath "$clamdscan" -ArgumentList "$ScanPath1 $ScanPath2 --quiet --multiscan --log=$LogFile" -WindowStyle Minimized -Wait
         Stop-Process -Name "clamdscan" -ErrorAction SilentlyContinue
         Stop-Process -Name "clamd" -ErrorAction SilentlyContinue
 
@@ -8021,8 +8932,13 @@ if (Test-Path "$clamd")
         else
         {
             ($InfectedFilesMatches | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\ClamAV\Infected\InfectedFiles.txt"
-            Get-Content "$OUTPUT_FOLDER\ClamAV\Infected\InfectedFiles.txt" | Where-Object {$_ -notmatch "MsMpEng.exe"} | Out-File "$OUTPUT_FOLDER\ClamAV\Infected\InfectedFiles-filtered.txt"
-    
+
+            # Whitelist
+            # MsMpEng.exe   = Microsoft Defender
+            # cyserver.exe  = Palo Alto Cortex XDR
+            # tlaworker.exe = Palo Alto Cortex XDR
+            $Whitelist = "(cyserver.exe|MsMpEng.exe|tlaworker.exe)"
+            Get-Content "$OUTPUT_FOLDER\ClamAV\Infected\InfectedFiles.txt" | Where-Object {$_ -notmatch "$Whitelist"} | Out-File "$OUTPUT_FOLDER\ClamAV\Infected\InfectedFiles-filtered.txt"
             $FilteredCount = (Get-Content "$OUTPUT_FOLDER\ClamAV\Infected\InfectedFiles-filtered.txt" | Measure-Object).Count
             Write-Host "[Alert] $FilteredCount infected file(s) found ($InfectedFilesCount)" -ForegroundColor Red
         }
@@ -8069,7 +8985,7 @@ Function Documents {
 # RecentDocs
 if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive") 
 {
-    if (Test-Path "$RECmd")
+    if (Test-Path "$($RECmd)")
     {
         # Check if batch processing file exists
         if (Test-Path "$SCRIPT_DIR\Tools\RECmd_BatchFiles\RecentDocs.reb")
@@ -8182,7 +9098,7 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
 # Office Trusted Documents
 if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive") 
 {
-    if (Test-Path "$RECmd")
+    if (Test-Path "$($RECmd)")
     {
         # Check if batch processing file exists
         if (Test-Path "$SCRIPT_DIR\Tools\RECmd_BatchFiles\TrustedDocuments.reb")
@@ -8296,12 +9212,12 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
 
 Function KrollBatch {
 
-# Kroll RECmd Batch File v1.20 (2022-06-01)
+# Kroll RECmd Batch File v1.21 (2023-03-04)
 # https://github.com/EricZimmerman/RECmd/blob/master/BatchExamples/Kroll_Batch.md
 # https://github.com/EricZimmerman/RECmd/blob/master/BatchExamples/Kroll_Batch.reb
 if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive") 
 {
-    if (Test-Path "$RECmd")
+    if (Test-Path "$($RECmd)")
     {
         # Check if batch processing file exists
         if (Test-Path "$SCRIPT_DIR\Tools\RECmd_BatchFiles\Kroll_Batch.reb")
@@ -8323,7 +9239,7 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
             $Directory = (Get-ChildItem "$OUTPUT_FOLDER\Registry\Kroll\CSV" -Directory | Select-Object FullName).FullName
             if ($Directory)
             {
-                if (Test-Path "$Directory")
+                if (Test-Path "$($Directory)")
                 {
                     Rename-Item -Path "$Directory" -NewName "PluginDetailFiles" -Force
                 }
@@ -8332,7 +9248,7 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
             # Stats
             if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\Kroll_Batch.log")
             {
-                $Total = Get-Content "$OUTPUT_FOLDER\Registry\Kroll\Kroll_Batch.log" | Select-String -Pattern "key/value pairs"
+                $Total = Get-Content "$OUTPUT_FOLDER\Registry\Kroll\Kroll_Batch.log" | Select-String -Pattern "key/value pair"
                 Write-Host "[Info]  $Total"
             }
 
@@ -8383,6 +9299,24 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
                     $WorkSheet.Cells["H:H"].Style.HorizontalAlignment="Right"
                     # HorizontalAlignment "Center" of header of column H
                     $WorkSheet.Cells["H1:H1"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
+            # Kroll_AppCompat.csv
+            if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_AppCompat.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_AppCompat.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_AppCompat.csv" -Delimiter "," | Sort-Object { $_.LastOpened -as [datetime] } -Descending
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\Kroll\XLSX\PluginDetailFiles\Kroll_AppCompat.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Kroll_AppCompat" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:E1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A and D-E
+                    $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
                     }
                 }
             }
@@ -8474,6 +9408,25 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
                 }
             }
 
+            # Kroll_ETW.csv
+            if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_ETW.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_ETW.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_ETW.csv" -Delimiter ","
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\Kroll\XLSX\PluginDetailFiles\Kroll_ETW.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Kroll_ETW" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:G1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A, C-D and F-G
+                    $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["C:D"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["F:G"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }            
+
             # Kroll_FileExts.csv
             if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_FileExts.csv")
             {
@@ -8485,8 +9438,27 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
                     # BackgroundColor and FontColor for specific cells of TopRow
                     $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
                     Set-Format -Address $WorkSheet.Cells["A1:F1"] -BackgroundColor $BackgroundColor -FontColor White
-                    # HorizontalAlignment "Center" of columns D-F
+                    # HorizontalAlignment "Center" of columns A and D-F
+                    $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
                     $WorkSheet.Cells["D:F"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
+            # Kroll_FirewallRules.csv
+            if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_FirewallRules.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_FirewallRules.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_FirewallRules.csv" -Delimiter "," | Sort-Object { $_.OpenedOn -as [datetime] } -Descending
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\Kroll\XLSX\PluginDetailFiles\Kroll_FirewallRules.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Kroll_FirewallRules" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A and C-H
+                    $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["C:H"].Style.HorizontalAlignment="Center"
                     }
                 }
             }
@@ -8543,7 +9515,24 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
                 }
             }
 
-            # Kroll_LastVisitedPidlMRU.csv --> No Excel Support
+            # Kroll_LastVisitedPidlMRU.csv
+            if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_LastVisitedPidlMRU.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_LastVisitedPidlMRU.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_LastVisitedPidlMRU.csv" -Delimiter "," | Sort-Object { $_.OpenedOn -as [datetime] } -Descending
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\Kroll\XLSX\PluginDetailFiles\Kroll_LastVisitedPidlMRU.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Kroll_LastVisitedPidlMRU" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:H1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A, C-E and G
+                    $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["C:E"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["G:G"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
 
             # Kroll_MountedDevices.csv
             if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_MountedDevices.csv")
@@ -8578,7 +9567,41 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
                 }
             }
 
-            # Kroll_OpenSavePidlMRU.csv --> No Excel Support
+            # Kroll_NetworkSetup2.csv
+            if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_NetworkSetup2.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_NetworkSetup2.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_NetworkSetup2.csv" -Delimiter "," | Sort-Object { $_.Timestamp -as [datetime] } -Descending
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\Kroll\XLSX\PluginDetailFiles\Kroll_NetworkSetup2.xlsx" -NoNumberConversion * -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Kroll_NetworkSetup2" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:H1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns C-H
+                    $WorkSheet.Cells["C:H"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
+            # Kroll_OpenSavePidlMRU.csv
+            if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_OpenSavePidlMRU.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_OpenSavePidlMRU.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_OpenSavePidlMRU.csv" -Delimiter "," | Sort-Object { $_.Timestamp -as [datetime] } -Descending
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\Kroll\XLSX\PluginDetailFiles\Kroll_OpenSavePidlMRU.xlsx" -NoNumberConversion * -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Kroll_OpenSavePidlMRU" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:H1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A, C-E and G
+                    $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["C:E"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["G:G"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
 
             # Kroll_Products.csv
             if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_Products.csv")
@@ -8617,6 +9640,24 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
                 }
             }
 
+            # Kroll_RADAR.csv
+                   if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_RADAR.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_RADAR.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_RADAR.csv" -Delimiter ","
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\Kroll\XLSX\PluginDetailFiles\Kroll_RADAR.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Kroll_RADAR" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:E1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A and C-E
+                    $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["C:E"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }     
+
             # Kroll_RecentDocs.csv
             if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_RecentDocs.csv")
             {
@@ -8632,6 +9673,60 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
                     $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
                     $WorkSheet.Cells["C:D"].Style.HorizontalAlignment="Center"
                     $WorkSheet.Cells["F:I"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
+            # Kroll_RunMRU.csv
+            if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_RunMRU.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_RunMRU.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_RunMRU.csv" -Delimiter "," | Sort-Object { $_.OpenedOn -as [datetime] } -Descending
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\Kroll\XLSX\PluginDetailFiles\Kroll_RunMRU.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Kroll_RunMRU" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:f1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A and C-F
+                    $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["C:F"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
+            # Kroll_SAMBuiltin.csv
+            if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_SAMBuiltin.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_SAMBuiltin.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_SAMBuiltin.csv" -Delimiter "," | Sort-Object { $_.OpenedOn -as [datetime] } -Descending
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\Kroll\XLSX\PluginDetailFiles\Kroll_SAMBuiltin.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Kroll_SAMBuiltin" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:E1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A and D-E
+                    $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
+            # Kroll_SCSI.csv
+            if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_SCSI.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_SCSI.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_SCSI.csv" -Delimiter "," | Sort-Object { $_.OpenedOn -as [datetime] } -Descending
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\Kroll\XLSX\PluginDetailFiles\Kroll_SCSI.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Kroll_SCSI" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:M1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A and C-M
+                    $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["C:M"].Style.HorizontalAlignment="Center"
                     }
                 }
             }
@@ -8776,10 +9871,10 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
                     param($WorkSheet)
                     # BackgroundColor and FontColor for specific cells of TopRow
                     $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
-                    Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
-                    # HorizontalAlignment "Center" of columns A and D-H
+                    Set-Format -Address $WorkSheet.Cells["A1:J1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A and C-J
                     $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
-                    $WorkSheet.Cells["D:H"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["C:J"].Style.HorizontalAlignment="Center"
                     }
                 }
             }
@@ -8856,6 +9951,23 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
                 }
             }
 
+            # Kroll_WindowsApp.csv
+            if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_WindowsApp.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_WindowsApp.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_WindowsApp.csv" -Delimiter "," | Sort-Object { $_.Timestamp -as [datetime] } -Descending
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\Registry\Kroll\XLSX\PluginDetailFiles\Kroll_WindowsApp.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Kroll_WindowsApp" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:F1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns D-E
+                    $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
             # Kroll_WindowsPortableDevices.csv
             if (Test-Path "$OUTPUT_FOLDER\Registry\Kroll\CSV\PluginDetailFiles\Kroll_WindowsPortableDevices.csv")
             {
@@ -8911,7 +10023,7 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
 Function LNK {
 
 # Check if YARA exists
-if (Test-Path "$yara64")
+if (Test-Path "$($yara64)")
 {
     # Get Start Time
     $StartTime_YARA = (Get-Date)
@@ -8919,7 +10031,7 @@ if (Test-Path "$yara64")
     # Simple YARA Scanner
     Write-Output "[Info]  Scanning for Windows Shortcut Files (LNK) w/ YARA [time-consuming task] ... "
     New-Item "$OUTPUT_FOLDER\LNK" -ItemType Directory -Force | Out-Null
-    $LNKRule = "$SCRIPT_DIR\Rules\LNK.yar"
+    $LNKRule = "$SCRIPT_DIR\yara\evild3ad\LNK.yar"
     & $yara64 -p 4 -r -f -w -N "$LNKRule" "$DriveLetter\forensic\ntfs" > "$OUTPUT_FOLDER\LNK\stdout.txt" 2> $null
 
     # -N   do not follow symlinks when scanning
@@ -8947,9 +10059,9 @@ if (Test-Path "$yara64")
     }
 
     # lnk_parser
-    if (Test-Path "$lnk_parser")
+    if (Test-Path "$($lnk_parser)")
     {
-        if (Test-Path "$entropy")
+        if (Test-Path "$($entropy)")
         {
             Write-Output "[Info]  Parsing SHLLINK artifacts (LNK) w/ lnk_parser ... "
             New-Item "$OUTPUT_FOLDER\LNK\lnk_parser\CSV" -ItemType Directory -Force | Out-Null
@@ -9574,6 +10686,244 @@ if (Test-Path "$OUTPUT_FOLDER\LNK\lnk_parser\CSV\lnk_parser-hunt.csv")
 #############################################################################################################################################################################################
 #############################################################################################################################################################################################
 
+#region ImageMount
+
+# VHDMP (VHD Miniport Driver by Microsoft Corporation)
+
+# VHD and VHDX Files
+# Windows 7 and newer systems include the ability to manually mount VHD files. Starting with Windows 8, a user can mount a VHD by simply double-clicking on the file. 
+# Once mounted, a VHD disk image appears to Windows as a normal hard disk that's physically connected to the system. 
+# VHDX (Virtual Hard Disk v2) images are functionally equivalent to VHD images, but they include more modern features, such as support for larger sizes and disk resizing.
+
+# Mark of the Web (MOTW)
+# MOTW was introduced in Windows XP SP2 and allowed Windows to tag files on the local file system with information about the Internet Explorer security zone from which the files originated. 
+# This MOTW feature has evolved to handle more and more file types and scenarios. 
+# The recurring theme is that files that came from the Internet (e.g., a web page or an email) may be dangerous, and therefore should be treated with more caution.
+# For example, starting with Microsoft Office 2010, documents tagged with an MOTW that indicated that they came from the Internet are opened in Microsoft Office Protected View. 
+# Documents in Protected View are restricted in what they can do, thus reducing the attack surface of potentially dangerous documents. 
+
+# Starting with Windows 10, Windows Defender SmartScreen restricts the execution of certain file types if they originated from the Internet.
+
+# Files contained within a VHD or VHDX container do not retain the MOTW of the container file!!!
+
+# ISO and IMG Files
+# Just like VHD and VHDX files, the contents of ISO or IMG files do not carry the MOTW of the containing file. 
+# And just like VHD and VHDX files, starting with Windows 8, ISO and IMG files can be opened with a double click.
+
+# Following Microsoft's decision to block macros by default on MS Office applications, threat actors are increasingly using container files such as ISO files to distribute malware.
+
+Function ImageMount {
+
+# VHDMP (Event Logs for VHD's)
+if (Test-Path "$OUTPUT_FOLDER\EventLogs\EventLogs\Microsoft-Windows-VHDMP-Operational.evtx")
+{
+    Write-Output "[Info]  Analyzing Event Logs for Image Mount Indicators ... "
+    New-Item "$OUTPUT_FOLDER\EventLogs\VHDMP" -ItemType Directory -Force | Out-Null
+    Copy-Item "$OUTPUT_FOLDER\EventLogs\EventLogs\Microsoft-Windows-VHDMP-Operational.evtx" "$OUTPUT_FOLDER\EventLogs\VHDMP" 2>&1 | Out-Null
+
+    # EvtxECmd
+    if (Test-Path "$($EvtxECmd)")
+    {
+        if (Test-Path "$OUTPUT_FOLDER\EventLogs\VHDMP\Microsoft-Windows-VHDMP-Operational.evtx")
+        {
+            # EvtxECmd.csv
+            New-Item "$OUTPUT_FOLDER\EventLogs\VHDMP\CSV" -ItemType Directory -Force | Out-Null
+            & $EvtxECmd -f "$OUTPUT_FOLDER\EventLogs\VHDMP\Microsoft-Windows-VHDMP-Operational.evtx" --csv "$OUTPUT_FOLDER\EventLogs\VHDMP\CSV" --csvf "EvtxECmd.csv" > "$OUTPUT_FOLDER\EventLogs\VHDMP\EvtxECmd.log" 2> $null
+
+            # Windows Title (Default)
+            $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+
+            # Stats
+            if (Get-Content "$OUTPUT_FOLDER\EventLogs\VHDMP\EvtxECmd.log" | Select-String -Pattern "^Total event log records found:" -Quiet)
+            {
+                # Error
+                if (Get-Content "$OUTPUT_FOLDER\EventLogs\VHDMP\EvtxECmd.log" | Select-String -Pattern "Error processing record" -Quiet)
+                {
+                    Write-Output "[Info]  Microsoft-Windows-VHDMP-Operational.evtx seems to be partially corrupt."
+                }
+
+                # Total
+                $Total = (Get-Content "$OUTPUT_FOLDER\EventLogs\VHDMP\EvtxECmd.log" | Select-String -Pattern "Total event log records found:" | ForEach-Object{($_ -split "\s+")[-1]} | Out-String).Trim()
+                Write-Output "[Info]  Total Event Log Records found: $Total"
+            }
+
+            # ImageMount Hunt
+            if (Test-Path "$OUTPUT_FOLDER\EventLogs\VHDMP\CSV\EvtxECmd.csv")
+            {
+                if ([int](& $xsv count "$OUTPUT_FOLDER\EventLogs\VHDMP\CSV\EvtxECmd.csv") -gt 0)
+                {
+                    $Import = Import-Csv "$OUTPUT_FOLDER\EventLogs\VHDMP\CSV\EvtxECmd.csv" -Delimiter "," | Select-Object RecordNumber, @{Name='TimeCreated [UTC]';Expression={([datetime]$_.TimeCreated).ToString("yyyy-MM-dd HH:mm:ss")}}, EventId, Level, Channel, MapDescription, @{Name='EventData';Expression={$_.PayloadData1}},@{Name='Name';Expression={$_.PayloadData2 | ForEach-Object{($_ -split "\\")[-1]}}},@{Name='FilePath';Expression={$_.PayloadData2 | ForEach-Object{($_ -split ": ")[-1]}}}, Computer, UserId
+
+                    # Event ID 1 - Contains entries of Image Files that has come online (surfaced)
+                    $Data = $Import | Where-Object { $_."EventId" -eq "1" }
+                    $EID1 = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+                    if ($EID1 -gt 0)
+                    {
+                        Write-Host "[Alert] Image Mount Entries found: Event ID 1 - Mount ($Count)" -ForegroundColor Red
+                    }
+
+                    # Event ID 2 - Contains entries of Image Files that has been removed (unsurfaced)
+                    $Data = $Import | Where-Object { $_."EventId" -eq "2" }
+                    $EID2 = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+                    if ($EID2 -gt 0)
+                    {
+                        Write-Host "[Alert] Image Mount Entries found: Event ID 2 - Unmount ($Count)" -ForegroundColor Red
+                    }
+
+                    # ImageMount Hunt Summary
+
+                    # CSV
+                    if (($EID1 -gt 0) -or ($EID2 -gt 0))
+                    { 
+                        $Import | Where-Object { $_."EventId" -eq "1" -or $_."EventId" -eq "2" } | Export-Csv "$OUTPUT_FOLDER\EventLogs\VHDMP\CSV\ImageMount.csv" -NoTypeInformation
+                    }
+
+                    # XLSX
+                    if (Test-Path "$OUTPUT_FOLDER\EventLogs\VHDMP\CSV\ImageMount.csv")
+                    {
+                        if([int](& $xsv count "$OUTPUT_FOLDER\EventLogs\VHDMP\CSV\ImageMount.csv") -gt 0)
+                        {
+                            $IMPORT = Import-Csv "$OUTPUT_FOLDER\EventLogs\VHDMP\CSV\ImageMount.csv" -Delimiter "," | Sort-Object { $_."TimeCreated [UTC]" -as [datetime] } -Descending
+                            New-Item "$OUTPUT_FOLDER\EventLogs\VHDMP\XLSX" -ItemType Directory -Force | Out-Null
+                            $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\EventLogs\VHDMP\XLSX\ImageMount.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "ImageMount" -CellStyleSB {
+                            param($WorkSheet)
+                            # BackgroundColor and FontColor for specific cells of TopRow
+                            $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                            Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                            # HorizontalAlignment "Center" of columns A-F and J-K
+                            $WorkSheet.Cells["A:F"].Style.HorizontalAlignment="Center"
+                            $WorkSheet.Cells["J:K"].Style.HorizontalAlignment="Center"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#############################################################################################################################################################################################
+
+# Recent Files
+if (Test-Path "$OUTPUT_FOLDER\RecentFiles\RecentFiles.csv")
+{
+    if ([int](& $xsv count -d "`t" "$OUTPUT_FOLDER\RecentFiles\RecentFiles.csv") -gt 0)
+    {
+        Write-Output "[Info]  Analyzing Recent Folder Artifacts for Image Mount Indicators ... "
+
+        $Import = Import-Csv "$OUTPUT_FOLDER\RecentFiles\RecentFiles.csv" -Delimiter "," | Select-Object @{Name='Timestamp [UTC]';Expression={([datetime]$_.date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}},@{Name='Name';Expression={$_.desc | ForEach-Object{($_ -split "\\")[-1]}}},@{Name='Type';Expression={$_.type}},@{Name='Action';Expression={$_.action}},@{Name='File Path';Expression={$_.desc}},@{Name='Bytes';Expression={$_.num}} | Sort-Object { $_."Timestamp [UTC]" -as [datetime] } -Descending
+
+        # IMG Files
+        $Data = $Import | Where-Object { $_."FilePath" -match "\\Users\\.*\.img\.lnk" }
+        $Count = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+        if ($Count -gt 0)
+        {
+            Write-Host "[Alert] Image Mount Indicator detected: .img.lnk ($Count)" -ForegroundColor Red
+            New-Item "$OUTPUT_FOLDER\RecentFiles\Image-Mount-Indicators" -ItemType Directory -Force | Out-Null
+            $Data | Export-Excel -Path "$OUTPUT_FOLDER\RecentFiles\Image-Mount-Indicators\IMG.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname ".img" -CellStyleSB {
+            param($WorkSheet)
+            # BackgroundColor and FontColor for specific cells of TopRow
+            $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+            Set-Format -Address $WorkSheet.Cells["A1:F1"] -BackgroundColor $BackgroundColor -FontColor White
+            # HorizontalAlignment "Center" of columns A, C-D and F
+            $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+            $WorkSheet.Cells["C:D"].Style.HorizontalAlignment="Center"
+            $WorkSheet.Cells["F:F"].Style.HorizontalAlignment="Center"
+            # BackgroundColor and FontColor for specific cells
+            $BackgroundColor = [System.Drawing.Color]::FromArgb(255,0,0)
+            $FontColor = [System.Drawing.Color]::FromArgb(255,255,255)
+            $LastRow = $WorkSheet.Dimension.End.Row
+            Set-Format -Address $WorkSheet.Cells["E2:E$LastRow"] -BackgroundColor $BackgroundColor -FontColor $FontColor -Bold
+            }
+        }
+
+        # ISO Files
+        $Data = $Import | Where-Object { $_."File Path" -match "\\Users\\.*\.iso\.lnk" }
+        $Count = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+        if ($Count -gt 0)
+        {
+            Write-Host "[Alert] Image Mount Indicator detected: .iso.lnk ($Count)" -ForegroundColor Red
+            New-Item "$OUTPUT_FOLDER\RecentFiles\Image-Mount-Indicators" -ItemType Directory -Force | Out-Null
+            $Data | Export-Excel -Path "$OUTPUT_FOLDER\RecentFiles\Image-Mount-Indicators\ISO.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname ".iso" -CellStyleSB {
+            param($WorkSheet)
+            # BackgroundColor and FontColor for specific cells of TopRow
+            $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+            Set-Format -Address $WorkSheet.Cells["A1:F1"] -BackgroundColor $BackgroundColor -FontColor White
+            # HorizontalAlignment "Center" of columns A, C-D and F
+            $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+            $WorkSheet.Cells["C:D"].Style.HorizontalAlignment="Center"
+            $WorkSheet.Cells["F:F"].Style.HorizontalAlignment="Center"
+            # BackgroundColor and FontColor for specific cells
+            $BackgroundColor = [System.Drawing.Color]::FromArgb(255,0,0)
+            $FontColor = [System.Drawing.Color]::FromArgb(255,255,255)
+            $LastRow = $WorkSheet.Dimension.End.Row
+            Set-Format -Address $WorkSheet.Cells["E2:E$LastRow"] -BackgroundColor $BackgroundColor -FontColor $FontColor -Bold
+            }
+        }
+
+        # VHD Files
+        $Data = $Import | Where-Object { $_."File Path" -match "\\Users\\.*\.vhd\.lnk" }
+        $Count = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+        if ($Count -gt 0)
+        {
+            Write-Host "[Alert] Image Mount Indicator detected: .vhd.lnk ($Count)" -ForegroundColor Red
+            New-Item "$OUTPUT_FOLDER\RecentFiles\Image-Mount-Indicators" -ItemType Directory -Force | Out-Null
+            $Data | Export-Excel -Path "$OUTPUT_FOLDER\RecentFiles\Image-Mount-Indicators\VHD.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname ".vhd" -CellStyleSB {
+            param($WorkSheet)
+            # BackgroundColor and FontColor for specific cells of TopRow
+            $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+            Set-Format -Address $WorkSheet.Cells["A1:F1"] -BackgroundColor $BackgroundColor -FontColor White
+            # HorizontalAlignment "Center" of columns A, C-D and F
+            $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+            $WorkSheet.Cells["C:D"].Style.HorizontalAlignment="Center"
+            $WorkSheet.Cells["F:F"].Style.HorizontalAlignment="Center"
+            # BackgroundColor and FontColor for specific cells
+            $BackgroundColor = [System.Drawing.Color]::FromArgb(255,0,0)
+            $FontColor = [System.Drawing.Color]::FromArgb(255,255,255)
+            $LastRow = $WorkSheet.Dimension.End.Row
+            Set-Format -Address $WorkSheet.Cells["E2:E$LastRow"] -BackgroundColor $BackgroundColor -FontColor $FontColor -Bold
+            }
+        }
+
+        # VHDX Files
+        $Data = $Import | Where-Object { $_."File Path" -match "\\Users\\.*\.vhdx\.lnk" }
+        $Count = [string]::Format('{0:N0}',($Data | Measure-Object).Count)
+
+        if ($Count -gt 0)
+        {
+            Write-Host "[Alert] Image Mount Indicator detected: .vhdx.lnk ($Count)" -ForegroundColor Yellow
+            New-Item "$OUTPUT_FOLDER\RecentFiles\Image-Mount-Indicators" -ItemType Directory -Force | Out-Null
+            $Data | Export-Excel -Path "$OUTPUT_FOLDER\RecentFiles\Image-Mount-Indicators\VHDX.xlsx" -FreezePane 2,6 -BoldTopRow -AutoSize -AutoFilter -WorkSheetname ".vhdx" -CellStyleSB {
+            param($WorkSheet)
+            # BackgroundColor and FontColor for specific cells of TopRow
+            $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+            Set-Format -Address $WorkSheet.Cells["A1:F1"] -BackgroundColor $BackgroundColor -FontColor White
+            # HorizontalAlignment "Center" of columns A, C-D and F
+            $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+            $WorkSheet.Cells["C:D"].Style.HorizontalAlignment="Center"
+            $WorkSheet.Cells["F:F"].Style.HorizontalAlignment="Center"
+            # BackgroundColor and FontColor for specific cells
+            $BackgroundColor = [System.Drawing.Color]::FromArgb(255,0,0)
+            $FontColor = [System.Drawing.Color]::FromArgb(255,255,255)
+            $LastRow = $WorkSheet.Dimension.End.Row
+            Set-Format -Address $WorkSheet.Cells["E2:E$LastRow"] -BackgroundColor $BackgroundColor -FontColor $FontColor -Bold
+            }
+        }
+    }
+}
+
+}
+
+#endregion ImageMount
+
+#############################################################################################################################################################################################
+#############################################################################################################################################################################################
+
 #region Modules
 
 # Status: Experimental
@@ -9591,7 +10941,7 @@ $StartTime_Modules = (Get-Date)
 Write-Host "[Info]  Analyzing Reconstructed Process Modules ... "
 New-Item "$OUTPUT_FOLDER\sys\modules\CSV" -ItemType Directory -Force | Out-Null
 
-if (!(Test-Path "$entropy"))
+if (!(Test-Path "$($entropy)"))
 {
     Write-Host "[Error] entropy.exe NOT found." -ForegroundColor Red
 }
@@ -9630,7 +10980,7 @@ $Modules | Foreach-Object {
     $Language = $FileInfo.VersionInfo.Language
     $ProductName = $FileInfo.VersionInfo.ProductName
 
-    if (Test-Path "$entropy")
+    if (Test-Path "$($entropy)")
     {
         $FileEntropy = & $entropy "$File" | ForEach-Object{($_ -split "\s+")[0]}
     }
@@ -9776,7 +11126,7 @@ $Time_Modules = ($EndTime_Modules-$StartTime_Modules)
 
 Function Invoke-1768 {
 
-# 1768.py v.0.0.16 (2022-08-27)
+# 1768.py v.0.0.18 (2022-04-03)
 # https://blog.didierstevens.com/?s=1768.py
 if ((Test-Path "$SCRIPT_DIR\Scripts\1768\1768.py") -and (Test-Path "$SCRIPT_DIR\Scripts\1768\1768.json"))
 {
@@ -9826,9 +11176,9 @@ $Time_Processing = ($EndTime_Processing-$StartTime_Processing)
 ('Total Processing duration:     {0} h {1} min {2} sec' -f $Time_Processing.Hours, $Time_Processing.Minutes, $Time_Processing.Seconds) >> "$OUTPUT_FOLDER\Stats.txt"
 
 # Creating Secure Archive
-if (Test-Path "$7za") 
+if (Test-Path "$($7za)") 
 {
-    if (Test-Path "$OUTPUT_FOLDER") 
+    if (Test-Path "$($OUTPUT_FOLDER)") 
     {
         Write-Output "[Info]  Preparing Secure Archive Container ... "
         & $7za a -mx5 -mhe "-p$PASSWORD" -t7z "$OUTPUT_FOLDER.7z" "$OUTPUT_FOLDER\*" > $null 2>&1
@@ -9840,7 +11190,7 @@ if (Test-Path "$7za")
     Write-Output "[Info]  Archive Size: $Size"
 
     # Cleaning up
-    if (Test-Path "$OUTPUT_FOLDER")
+    if (Test-Path "$($OUTPUT_FOLDER)")
     {
         Get-ChildItem -Path "$OUTPUT_FOLDER" -Recurse | Remove-Item -Force -Recurse
         Remove-Item "$OUTPUT_FOLDER" -Force
@@ -9921,6 +11271,20 @@ Write-Output "$ElapsedTime_Analysis"
 Write-Output ""
 Stop-Transcript
 
+# Remove Variables
+
+# YaraRules
+if (!($null -eq $YaraRules))
+{
+    Remove-Variable -Name "YaraRules" -Scope Script
+}
+
+# ClamAV
+if (!($null -eq $ClamAV))
+{
+    Remove-Variable -Name "ClamAV" -Scope Script
+}
+
 # Reset Progress Preference
 $Global:ProgressPreference = $OriginalProgressPreference
 
@@ -9943,12 +11307,18 @@ Updater
 MicrosoftDefender
 MemProcFS
 #ELKImport
-ClamAVUpdate
-ClamAV
+
+if ($ClamAV -eq "Enabled")
+{
+    ClamAVUpdate
+    ClamAV
+}
+
 Documents
 KrollBatch
 #LNK
 #LNK_Hunt
+ImageMount
 Modules
 #Invoke-1768
 SecureArchive

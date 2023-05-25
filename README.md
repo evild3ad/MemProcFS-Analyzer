@@ -6,12 +6,13 @@ https://github.com/ufrisk/MemProcFS
 
 Features:
 * Fast and easy memory analysis!
-* You can mount a Raw Physical Memory Dump like a disk image and handle the memory compression feature on Windows
+* You can mount a memory snapshot (Raw Physical Memory Dump or Microsoft Crash Dump) like a disk image and handle the memory compression feature on Windows
 * Auto-Install of MemProcFS, AmcacheParser, AppCompatCacheParser, Elasticsearch, entropy, EvtxECmd, ImportExcel, IPinfo CLI, jq, Kibana, lnk_parser, RECmd, SBECmd, xsv, YARA, and Zircolite  
 * Auto-Update of MemProcFS, AmcacheParser, AppCompatCacheParser, Elasticsearch, entropy, EvtxECmd (incl. Maps), ImportExcel, IPinfo CLI, jq, Kibana, lnk_parser, RECmd, SBECmd, xsv, YARA, and Zircolite   
 * Update-Info when there's a new version of ClamAV or a new Dokany File System Library Bundle available  
 * Pagefile Support
 * OS Fingerprinting  
+* Scan w/ Custom YARA rules (incl. 284 rules by e.g. [Chronicle](https://github.com/chronicle/GCTI/tree/main/YARA) and [Elastic Security](https://github.com/elastic/protections-artifacts))  
 * Multi-Threaded scan w/ ClamAV for Windows  
 * Collection of infected files detected by ClamAV for further analysis (PW: infected)
 * Collection of injected modules detected by MemProcFS PE_INJECT for further analysis (PW: infected)
@@ -50,7 +51,7 @@ Download the latest version of **MemProcFS-Analyzer** from the [Releases](https:
 Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PSVersion: 5.1) as Administrator and open/run MemProcFS-Analyzer.ps1. 
 
 ![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/8ff585672b7bbe689ad10080555f62dce2b0c06d/Screenshots/01.png)  
-**Fig 1:** Select your Raw Physical Memory Dump and select your pagefile.sys (Optional)
+**Fig 1:** Select your Memory Snapshot and select your pagefile.sys (Optional)
 
 ![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/8ff585672b7bbe689ad10080555f62dce2b0c06d/Screenshots/02.png)  
 **Fig 2:** MemProcFS-Analyzer auto-installs dependencies (First Run)
@@ -62,7 +63,7 @@ Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PS
 **Fig 4:** If you find MemProcFS useful, please become a sponsor at: https://github.com/sponsors/ufrisk  
 
 ![Mounted](https://github.com/evild3ad/MemProcFS-Analyzer/blob/8ff585672b7bbe689ad10080555f62dce2b0c06d/Screenshots/05.png)  
-**Fig 5:** You can investigate the mounted memory dump by exploring drive letter X:
+**Fig 5:** You can investigate the mounted memory dump by exploring drive letter
 
 ![Auto-Update](https://github.com/evild3ad/MemProcFS-Analyzer/blob/8ff585672b7bbe689ad10080555f62dce2b0c06d/Screenshots/06.png)  
 **Fig 6:** MemProcFS-Analyzer checks for updates (Second Run) 
@@ -181,19 +182,19 @@ https://ericzimmerman.github.io/
 AppCompatCacheParser v1.5.0.0 (.NET 6)  
 https://ericzimmerman.github.io/  
 
-ClamAV - Download &#8594; Windows &#8594; clamav-1.0.0.win.x64.msi (2022-11-23)  
+ClamAV - Download &#8594; Windows &#8594; clamav-1.0.1.win.x64.msi (2023-02-14)  
 https://www.clamav.net/downloads    
 
 Dokany Library Bundle v2.0.6.1000 (2022-10-02)  
 https://github.com/dokan-dev/dokany/releases/latest &#8594; DokanSetup.exe  
 
-Elasticsearch 8.6.0 (2023-01-10)  
+Elasticsearch 8.7.1 (2023-05-02)  
 https://www.elastic.co/downloads/elasticsearch  
 
 entropy v1.0 (2022-02-04)  
 https://github.com/merces/entropy  
 
-EvtxECmd v1.0.0.1 (.NET 6)  
+EvtxECmd v1.5.0.0 (.NET 6)  
 https://ericzimmerman.github.io/  
 
 ImportExcel v7.8.4 (2022-12-11)  
@@ -211,7 +212,7 @@ https://www.elastic.co/downloads/kibana
 lnk_parser v0.2.0 (2022-08-10)  
 https://github.com/AbdulRhmanAlfaifi/lnk_parser  
 
-MemProcFS v5.3.0 - The Memory Process File System (2023-01-19)  
+MemProcFS v5.6.4 - The Memory Process File System (2023-05-01)  
 https://github.com/ufrisk/MemProcFS  
 
 RECmd v2.0.0.0 (.NET 6)  
@@ -223,10 +224,10 @@ https://ericzimmerman.github.io/
 xsv v0.13.0 (2018-05-12)  
 https://github.com/BurntSushi/xsv  
 
-YARA v4.2.3 (2022-08-09)  
+YARA v4.3.1 (2023-04-21)  
 https://virustotal.github.io/yara/  
 
-Zircolite v2.9.7 (2022-10-08)  
+Zircolite v2.9.9 (2023-04-16)  
 https://github.com/wagga40/Zircolite  
 
 ## Links

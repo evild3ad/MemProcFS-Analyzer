@@ -1,6 +1,6 @@
 Description: Kroll RECmd Batch File
 Author: Andrew Rathbun
-Version: 1.20
+Version: 1.21
 Id: ecc582d5-a1b1-4256-ae64-ca2263b8f971
 Keys:
 #
@@ -312,7 +312,7 @@ Keys:
         Recursive: false
         Comment: "Displays the current Time Zone configuration for this system"
 
-# TimeZoneInfo plugin
+# TimeZoneInfo plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.TimeZoneInformation
 
 # https://kb.digital-detective.net/display/BF/Identification+of+Time+Zone+Settings+on+Suspect+Computer
 
@@ -324,7 +324,7 @@ Keys:
         Recursive: false
         Comment: "Displays list of network connections"
 
-# KnownNetworks plugin
+# KnownNetworks plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.KnownNetworks
 # https://www.forensafe.com/blogs/wirelessnetworks.html
 
     -
@@ -335,7 +335,7 @@ Keys:
         Recursive: false
         Comment: "Displays a list of PnP devices (Plug and Play) that were connected to this system"
 
-# DeviceClasses plugin
+# DeviceClasses plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.DeviceClasses
 # https://docs.microsoft.com/en-us/windows-hardware/drivers/usbcon/usb-device-specific-registry-settings
 # https://www.hecfblog.com/2013/08/daily-blog-67-understanding-artifacts.html
 
@@ -598,7 +598,8 @@ Keys:
 
 # System Info -> Network Configuration (IPv4)
 
-# DHCPNetworkHints plugin not used
+# DHCPNetworkHints plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.DHCPNetworkHint
+# Plugin not used currently
 
     -
         Description: Network Adapters
@@ -608,7 +609,7 @@ Keys:
         Recursive: false
         Comment: "Displays list of network adapters connected to this system"
 
-# NetworkAdapters plugin
+# NetworkAdapters plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.NetworkAdapters
 
     -
         Description: Network Configuration (IPv4)
@@ -1221,10 +1222,32 @@ Keys:
         KeyPath: ControlSet*\Control\WMI\Autologger\SUM
         ValueName: PollingInterval
         Recursive: False
-        Comment: "Displays the updating interval for the SUM DB. Default is 24 hours. 60000 = 60 seconds, for example."
+        Comment: "Displays the updating interval for the SUM DB. Default is 24 hours. 60000 = 60 seconds, for example"
 
 # https://youtu.be/p4XI8-ldE5o?t=627
 
+# System Info - Firewall Rules
+
+    -
+        Description: Firewall Rules
+        HiveType: SYSTEM
+        Category: System Info
+        KeyPath: ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\FirewallRules
+        Recursive: False
+        Comment: "Displays firewall rules on this system"
+
+# FirewallRules plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.FirewallRules
+
+    -
+        Description: MAC Addresses
+        HiveType: SYSTEM
+        Category: System Info
+        KeyPath: ControlSet00*\Control\NetworkSetup2
+        Recursive: False
+        Comment: "Displays MAC Addresses related to this system"
+
+# NetworkSetup2 plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.NetworkSetup2
+# https://thinkdfir.com/2019/10/05/hunting-for-mac-addresses
 
 # --------------------
 # DEVICES
@@ -1278,7 +1301,7 @@ Keys:
         Recursive: false
         Comment: "Displays the Bluetooth devices that have been connected to this computer"
 
-# BTHPORT plugin
+# BTHPORT plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.BluetoothServicesBthPort
 
     -
         Description: Volume Info Cache
@@ -1288,7 +1311,7 @@ Keys:
         Recursive: false
         Comment: "2 = Removable, 3 = Fixed, 4 = Network, 5 = Optical, 6 = RAM disk, 0 = Unknown"
 
-# VolumeInfoCache plugin
+# VolumeInfoCache plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.VolumeInfoCache
 # https://docs.microsoft.com/en-us/dotnet/api/system.io.drivetype?view=net-5.0
 
 # Devices -> USBSTOR
@@ -1301,7 +1324,7 @@ Keys:
         Recursive: false
         Comment: "Displays list of USB devices that have been plugged into this system. If & is second character within serial number, serial number is only unique on the system"
 
-# USBSTOR plugin
+# USBSTOR plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.USBSTOR
 # https://www.jaiminton.com/cheatsheet/DFIR/#usb-information-1
 # https://www.13cubed.com/downloads/dfir_cheat_sheet.pdf
 # https://www.swiftforensics.com/2013/11/windows-8-new-registry-artifacts-part-1.html
@@ -1315,7 +1338,7 @@ Keys:
         Recursive: false
         Comment: "Provides VID and PID numbers of USB devices. Match serial number from USBSTOR and search for VID and PID across the system"
 
-# USB plugin
+# USB plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.USB
 # https://www.tristiansforensicsecurity.com/2018/11/28/basic-usb-forensics-in-windows/
 
     -
@@ -1339,7 +1362,7 @@ Keys:
         Recursive: false
         Comment: "Last Write Timestamp is for entire key, not each individual value"
 
-# MountedDevices plugin
+# MountedDevices plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryExplorer.MountedDevices
 # https://what-when-how.com/windows-forensic-analysis/registry-analysis-windows-forensic-analysis-part-6/
 # https://hatsoffsecurity.com/2014/12/04/mounted-devices-key/
 # https://www.forensicfocus.com/articles/forensic-analysis-of-the-windows-registry/
@@ -1355,8 +1378,18 @@ Keys:
         Recursive: false
         Comment: "Displays list of USB devices previously connected to this system"
 
-# WindowsPortableDevices plugin
+# WindowsPortableDevices plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.WindowsPortableDevices
 # https://df-stream.com/2017/10/amcache-and-usb-device-tracking/
+
+    -
+        Description: SCSI
+        HiveType: SYSTEM
+        Category: Devices
+        KeyPath: ControlSet*\Enum\SCSI
+        Recursive: false
+        Comment: "Displays a list of SCSI devices connected to this system"
+
+# SCSI plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.SCSI
 
 # --------------------
 # NETWORK SHARES
@@ -1424,7 +1457,7 @@ Keys:
         Recursive: false
         Comment: "User accounts in SAM hive"
 
-# UserAccounts plugin
+# SAM plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.SAM
 # https://www.forensafe.com/blogs/useraccounts.html
 
     -
@@ -1435,7 +1468,7 @@ Keys:
         Recursive: false
         Comment: "User accounts in SOFTWARE hive"
 
-# ProfileList plugin
+# ProfileList plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.ProfileList
 # https://content-calpoly-edu.s3.amazonaws.com/cci/1/documents/ccic_forensics_manual/CCIC%20Chapter%204%20-%20Understanding%20the%20Registry.pdf
 
     -
@@ -1448,6 +1481,17 @@ Keys:
         Comment: "Built-in accounts in SECURITY hive"
 
 # https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/security-identifiers-in-windows
+
+    -
+        Description: Built-in User Accounts (SAM)
+        HiveType: SAM
+        Category: User Accounts
+        KeyPath: SAM\Domains\Builtin\Aliases
+        Recursive: false
+        Comment: "Built-in accounts in SAM hive"
+
+# SAMBuiltIn plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.SAMBuiltin
+# https://learn.microsoft.com/en-us/windows/security/identity-protection/access-control/local-accounts
 
 # --------------------
 # PROGRAM EXECUTION
@@ -1476,7 +1520,7 @@ Keys:
         Recursive: false
         Comment: "Displays last execution time of a program"
 
-# JumplistData plugin
+# JumplistData plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.JumplistData
 # https://twitter.com/sv2hui/status/1005763370186891269?lang=en
 
     -
@@ -1487,7 +1531,7 @@ Keys:
         Recursive: true
         Comment: "RecentApps"
 
-# RecentApps plugin
+# RecentApps plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.RecentApps
 
     -
         Description: RunMRU
@@ -1497,7 +1541,7 @@ Keys:
         Recursive: false
         Comment: "Tracks commands from the Run box in the Start menu, lower MRU # (Value Data3) = more recent"
 
-# RunMRU plugin
+# RunMRU plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.RunMRU
 # https://digitalf0rensics.wordpress.com/2014/01/17/windows-registry-and-forensics-part2/
 # https://www.andreafortuna.org/2017/10/18/windows-registry-in-forensic-analysis/
 # https://silo.tips/download/a-forensic-analysis-of-the-windows-registry
@@ -1512,7 +1556,7 @@ Keys:
         Recursive: false
         Comment: "AKA ShimCache, data is only written to this value at reboot by winlogon.exe"
 
-# AppCompat plugin
+# AppCompatCache plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.AppCompatCache
 # https://medium.com/@bromiley/windows-wednesday-shim-cache-1997ba8b13e7
 # https://www.youtube.com/watch?v=ZKlyu-HOvxY
 # https://www.fireeye.com/blog/threat-research/2015/06/caching_out_the_val.html
@@ -1529,7 +1573,7 @@ Keys:
         Recursive: false
         Comment: "Displays programs that are configured to run in Compatibility Mode in Windows"
 
-# AppCompatFlags2 plugin
+# AppCompatFlags2 plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.AppCompatFlags2
 # https://journeyintoir.blogspot.com/2013/12/revealing-program-compatibility.html
 
     -
@@ -1540,7 +1584,7 @@ Keys:
         Recursive: false
         Comment: "Recently ran applications, lower MRU # (Value Data3) = more recent"
 
-# CIDSizeMRU plugin
+# CIDSizeMRU plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.CIDSizeMRU
 # https://windowsir.blogspot.com/2013/07/howto-determine-user-access-to-files.html
 # https://windowsir.blogspot.com/2013/07/howto-determine-program-execution.html
 
@@ -1554,20 +1598,7 @@ Keys:
         Recursive: false
         Comment: "Displays the last execution time of a program"
 
-# BamDam plugin
-# https://www.andreafortuna.org/2018/05/23/forensic-artifacts-evidences-of-program-execution-on-windows-systems/
-# https://www.cellebrite.com/en/analyzing-program-execution-windows-artifacts/
-# https://www.linkedin.com/pulse/alternative-prefetch-bam-costas-katsavounidis/
-
-    -
-        Description: Background Activity Moderator (BAM)
-        HiveType: SYSTEM
-        Category: Program Execution
-        KeyPath: ControlSet*\Services\BAM\UserSettings\*
-        Recursive: false
-        Comment: "Displays the last execution time of a program"
-
-# BamDam plugin
+# Bam plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.Bam
 # https://www.andreafortuna.org/2018/05/23/forensic-artifacts-evidences-of-program-execution-on-windows-systems/
 # https://www.cellebrite.com/en/analyzing-program-execution-windows-artifacts/
 # https://www.linkedin.com/pulse/alternative-prefetch-bam-costas-katsavounidis/
@@ -1580,18 +1611,7 @@ Keys:
         Recursive: false
         Comment: "DAM"
 
-# BamDam plugin
-# https://www.cellebrite.com/en/analyzing-program-execution-windows-artifacts/
-
-    -
-        Description: Desktop Activity Moderator (DAM)
-        HiveType: SYSTEM
-        Category: Program Execution
-        KeyPath: ControlSet*\Services\DAM\UserSettings\*
-        Recursive: false
-        Comment: "DAM"
-
-# BamDam plugin
+# Bam plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.Bam
 # https://www.cellebrite.com/en/analyzing-program-execution-windows-artifacts/
 
     -
@@ -1613,7 +1633,7 @@ Keys:
         Recursive: false
         Comment: "GUI-based programs launched from the desktop"
 
-# UserAssist plugin
+# UserAssist plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.UserAssist
 # https://www.sans.org/security-resources/posters/windows-forensic-analysis/170/download
 # https://blog.didierstevens.com/programs/userassist/
 # https://www.andreafortuna.org/2018/05/23/forensic-artifacts-evidences-of-program-execution-on-windows-systems/
@@ -1644,6 +1664,18 @@ Keys:
 # https://windowsir.blogspot.com/2005/12/mystery-of-muicachesolved.html
 # https://www.fireeye.com/blog/threat-research/2013/08/execute.html
 
+    -
+        Description: RADAR
+        HiveType: SOFTWARE
+        Category: Program Execution
+        KeyPath: Microsoft\RADAR\HeapLeakDetection
+        Recursive: false
+        Comment: "Displays applications that were running at one point in time on this system"
+
+# RADAR plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.RADAR
+# http://windowsir.blogspot.com/2011/09/registry-stuff.html
+# https://harelsegev.github.io/posts/the-mystery-of-the-heapleakdetection-registry-key/
+
 # --------------------
 # USER ACTIVITY
 # --------------------
@@ -1657,7 +1689,7 @@ Keys:
         Recursive: false
         Comment: "Displays pinned Taskbar items"
 
-# TaskBand plugin
+# TaskBand plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.Taskband
 # https://tzworks.net/prototype_page.php?proto_id=19
 
     -
@@ -1680,7 +1712,7 @@ Keys:
         Recursive: false
         Comment: "Internet Explorer/Edge Typed URLs"
 
-# TypedURLs plugin
+# TypedURLs plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.TypedURLs
 # https://crucialsecurity.wordpress.com/2011/03/14/typedurls-part-1/
 # https://www.andreafortuna.org/2017/10/18/windows-registry-in-forensic-analysis/
 # https://tzworks.net/prototype_page.php?proto_id=19
@@ -1694,7 +1726,7 @@ Keys:
         Recursive: false
         Comment: "Microsoft Office Recent Files, lower Item value (Value Name) = more recent"
 
-# OfficeMRU plugin
+# OfficeMRU plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.OfficeMRU
 # https://www.eshlomo.us/windows-forensics-analysis-evidence/
 # https://www.sans.org/security-resources/posters/windows-forensic-analysis/170/download
 # https://www.andreafortuna.org/2017/10/18/windows-registry-in-forensic-analysis/
@@ -1720,7 +1752,7 @@ Keys:
         Recursive: true
         Comment: "FirstFolder, tracks the application's first folder that is presented to the user during an Open or Save As operation"
 
-# FirstFolder plugin
+# FirstFolder plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.FirstFolder
 # https://research.ijcaonline.org/cognition2015/number4/cog2174.pdf
 # https://www.sans.org/blog/opensavemru-and-lastvisitedmru/
 
@@ -1732,8 +1764,18 @@ Keys:
         Recursive: false
         Comment: "Tracks files that have been opened or saved within a Windows shell dialog box"
 
-# OpenSavePidlMRU plugin
+# OpenSavePidlMRU plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.OpenSavePidlMRU
 # https://www.sans.org/blog/opensavemru-and-lastvisitedmru/
+
+    -
+        Description: OpenSaveMRU
+        HiveType: NTUSER
+        Category: User Activity
+        KeyPath: Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSaveMRU
+        Recursive: false
+        Comment: "Tracks files that have been opened or saved within a Windows shell dialog box"
+
+# OpenSaveMRU plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.OpenSaveMRU
 
     -
         Description: LastVisitedPidlMRU
@@ -1743,7 +1785,7 @@ Keys:
         Recursive: false
         Comment: "Tracks the specific executable used by an application to open the files documented in OpenSavePidlMRU"
 
-# LastVisitedPidlMRU plugin
+# LastVisitedPidlMRU plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.LastVisitedPidlMRU
 # https://www.sans.org/blog/opensavemru-and-lastvisitedmru
 # https://digitalf0rensics.wordpress.com/2014/01/17/windows-registry-and-forensics-part2/
 # https://www.eshlomo.us/windows-forensics-analysis-evidence/
@@ -1758,7 +1800,7 @@ Keys:
         Recursive: false
         Comment: "Tracks the specific executable used by an application to open the files documented in OpenSavePidlMRU"
 
-# LastVisitedPidlMRU plugin
+# LastVisitedPidlMRU plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.LastVisitedPidlMRU
 # https://www.sans.org/blog/opensavemru-and-lastvisitedmru
 # https://digitalf0rensics.wordpress.com/2014/01/17/windows-registry-and-forensics-part2/
 # https://www.eshlomo.us/windows-forensics-analysis-evidence/
@@ -1773,7 +1815,7 @@ Keys:
         Recursive: true
         Comment: "Files recently opened from Windows Explorer"
 
-# RecentDocs plugin
+# RecentDocs plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.RecentDocs
 # https://forensic4cast.com/2019/03/the-recentdocs-key-in-windows-10/
 # https://www.andreafortuna.org/2017/10/18/windows-registry-in-forensic-analysis/
 # https://digitalf0rensics.wordpress.com/2014/01/17/windows-registry-and-forensics-part2/
@@ -1834,6 +1876,9 @@ Keys:
         Comment: "Displays where a user's Shell folders are mapped to"
 
 # User Activity -> FeatureUsage
+
+# FeatureUsage plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.FeatureUsage
+# Plugin not used simply because by parsing each value individually, helpful comments can be added. Using the plugin and not using the plugin still produces an identical number of rows for the CSV, in testing
 
     -
         Description: FeatureUsage
@@ -1973,7 +2018,7 @@ Keys:
         Recursive: false
         Comment: "Displays the IP addresses/hostnames of devices this system has connected to (Outbound RDP)"
 
-# TerminalServerClient plugin
+# TerminalServerClient plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.TerminalServerClient
 # Default subkey stores previous RDP connection entries the user has connected to
 # UsernameHint value stores the username used on remote machine during RDP session
 # https://jpcertcc.github.io/ToolAnalysisResultSheet/details/mstsc.htm
@@ -2096,7 +2141,7 @@ Keys:
         Recursive: false
         Comment: "Displays Scheduled Tasks and their last start/stop time"
 
-# TaskCache plugin
+# TaskCache plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.TaskCache
 # https://digital-forensics.sans.org/media/DFPS_FOR508_v4.4_1-19.pdf
 # https://www.jaiminton.com/cheatsheet/DFIR/#t1060-registry-run-keys--startup-folder
 # https://jpcertcc.github.io/ToolAnalysisResultSheet/details/schtasks.htm
@@ -2242,7 +2287,7 @@ Keys:
         Recursive: false
         Comment: "Displays files which were opened Adobe Reader by the user"
 
-# Adobe plugin
+# Adobe plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.Adobe
 # https://www.forensafe.com/blogs/adobeacrobatreader.html
 
     -
@@ -2289,7 +2334,7 @@ Keys:
         Recursive: false
         Comment: "Displays list of files and folders that were used with 7-Zip"
 
-# SevenZip plugin
+# 7-ZipHistory plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.7-ZipHistory
 
 # Third Party Applications -> WinRAR - https://www.rarlab.com/
 
@@ -2301,7 +2346,7 @@ Keys:
         Recursive: false
         Comment: "Displays history of archives that were used with WinRAR"
 
-# WinRAR plugin
+# WinRAR plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.WinRAR
 
 # Third Party Applications -> Eraser - https://eraser.heidi.ie/
 
@@ -2440,7 +2485,7 @@ Keys:
         Recursive: true
         Comment: "Displays information relating to Ares"
 
-# Ares plugin
+# Ares plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.Ares
 
 # Third Party Applications -> Soulseek - https://www.slsknet.org/news/
 
@@ -2659,7 +2704,7 @@ Keys:
         Recursive: false
         Comment: "Displays list of services running on this computer"
 
-# Services plugin
+# Services plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.Services
 # https://www.forensafe.com/blogs/windowsservices.html
 
 # --------------------
@@ -2677,6 +2722,26 @@ Keys:
 
 # https://www.ibm.com/mysupport/s/question/0D50z000062kolQ/how-to-monitor-custom-event-log?language=en_US
 # SYSTEM\\ControlSet00*\Services\EventLog\* will display the Provider GUID for each Event Log channel listed here. This recursive key is not enabled here
+
+    -
+        Description: Application Event Log Providers
+        HiveType: SYSTEM
+        Category: Event Logs
+        KeyPath: ControlSet001\Control\WMI\Autologger\EventLog-Application
+        Recursive: true
+        Comment: "Displays the status of Providers within the Application Event Log on this system, 0 = Disabled, 1 - Enabled"
+
+# ETW plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.ETW
+
+    -
+        Description: System Event Log Providers
+        HiveType: SYSTEM
+        Category: Event Logs
+        KeyPath: ControlSet001\Control\WMI\Autologger\EventLog-System
+        Recursive: true
+        Comment: "Displays the status of Providers within the Application Event Log on this system, 0 = Disabled, 1 - Enabled"
+
+# ETW plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.ETW
 
 # --------------------
 # MICROSOFT OFFICE/OFFICE 365
@@ -2764,7 +2829,7 @@ Keys:
         Recursive: true
         Comment: "Displays list of Office documents where the user may have clicked Enable Editing, Enable Macro, or Enable Content"
 
-# TrustedDocuments plugin
+# TrustedDocuments plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.TrustedDocuments
 
 # --------------------
 # MICROSOFT EXCHANGE
@@ -2906,7 +2971,7 @@ Keys:
         Recursive: false
         Comment: "Displays list of installed software and the associated application paths"
 
-# AppPaths plugin
+# AppPaths plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.AppPaths
 
     -
         Description: File Extensions
@@ -2916,7 +2981,7 @@ Keys:
         Recursive: false
         Comment: "Tracks programs associated with file extensions"
 
-# FileExts plugin
+# FileExts plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.FileExts
 # https://www.marshall.edu/forensics/files/Brewer-PosterFinal.pdf
 # https://digital-forensics.sans.org/summit-archives/2012/taking-registry-analysis-to-the-next-level.pdf
 
@@ -2929,7 +2994,7 @@ Keys:
         Recursive: false
         Comment: "Displays installed software"
 
-# Uninstall plugin
+# Uninstall plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.Uninstall
 # https://community.idera.com/database-tools/powershell/powertips/b/tips/posts/find-installed-software
 
     -
@@ -2940,7 +3005,7 @@ Keys:
         Recursive: false
         Comment: "Displays installed software"
 
-# Uninstall plugin
+# Uninstall plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.Uninstall
 # https://community.idera.com/database-tools/powershell/powertips/b/tips/posts/find-installed-software
 
     -
@@ -2951,7 +3016,7 @@ Keys:
         Recursive: false
         Comment: "Displays installed software"
 
-# Uninstall plugin
+# Uninstall plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.Uninstall
 # https://community.idera.com/database-tools/powershell/powertips/b/tips/posts/find-installed-software
 # https://www.advancedinstaller.com/user-guide/registry-wow6432-node.html
 # https://docs.microsoft.com/en-us/windows/win32/sysinfo/32-bit-and-64-bit-application-data-in-the-registry
@@ -2964,8 +3029,20 @@ Keys:
         Recursive: false
         Comment: "Displays all installed software packages"
 
-# Products plugin
+# Products plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.Uninstall
 # https://www.nirsoft.net/utils/installed_packages_view.html
+
+    -
+        Description: Windows App List
+        HiveType: UsrClass
+        Category: Installed Software
+        KeyPath: Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository
+        Recursive: false
+        Comment: "Displays all Windows applications installed on this system"
+
+# WindowsApp plugin - https://github.com/EricZimmerman/RegistryPlugins/tree/master/RegistryPlugin.WindowsApp
+# https://www.datadigitally.com/2019/05/windows-10-specific-registry-keys.html
+# This batch file currently only supports UsrClass parsing. Other hive didn't appear to be working when testing in Registry Explorer
 
 # --------------------
 # VOLUME SHADOW COPIES
@@ -3331,7 +3408,7 @@ Keys:
         Description: Connections Made By MS Office
         HiveType: NTUSER
         Category: Threat Hunting
-        KeyPath: Software\Microsoft\Office\16.0\Common\Internet\Server Cache
+        KeyPath: Software\Microsoft\Office\*\Common\Internet\Server Cache
         Recursive: true
         Comment: "Displays the connections made by MS Office - IOCs found here for CVE-2022-30190"
 

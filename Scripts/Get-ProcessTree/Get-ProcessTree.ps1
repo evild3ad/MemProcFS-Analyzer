@@ -145,11 +145,12 @@ Param (
     [switch] $NoSuspiciousChecks
 )
 
-Add-Type -AssemblyName "System.Windows"
-Add-Type -AssemblyName "System.Windows.Forms"
-Add-Type -AssemblyName "System.Drawing"
-Add-Type -AssemblyName "PresentationFramework"
-Add-Type -AssemblyName "PresentationCore"
+[void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows")
+[void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
+[void][System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+[void][System.Reflection.Assembly]::LoadWithPartialName("PresentationFramework")
+[void][System.Reflection.Assembly]::LoadWithPartialName("PresentationCore")
+
 
 # querying the entries of the csv file
 $csvEntries = @(Import-CSV -Path $CSVPath -Delimiter "`t")
