@@ -50,27 +50,27 @@ Download the latest version of **MemProcFS-Analyzer** from the [Releases](https:
 ## Usage  
 Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PSVersion: 5.1) as Administrator and open/run MemProcFS-Analyzer.ps1. 
 
-![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/01.png)  
+![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/01.png)  
 **Fig 1:** Select your Memory Snapshot and select your pagefile.sys (Optional)
 
-![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/02.png)  
+![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/02.png)  
 **Fig 2:** MemProcFS-Analyzer auto-installs dependencies (First Run)
 
-![Microsoft-Internet-Symbol-Store](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/03.png)  
+![Microsoft-Internet-Symbol-Store](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/03.png)  
 **Fig 3:** Accept Terms of Use (First Run)  
 
-![MemProcFS](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/04.png)  
+![MemProcFS](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/04.png)  
 **Fig 4:** If you find MemProcFS useful, please become a sponsor at: https://github.com/sponsors/ufrisk  
 
 ![Mounted](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/05.png)  
 **Fig 5:** You can investigate the mounted memory dump by exploring drive letter
 
-![Auto-Update](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/06.png)  
+![Auto-Update](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/06.png)  
 **Fig 6:** MemProcFS-Analyzer checks for updates (Second Run) 
 
 Note: It's recommended to uncomment/disable the "Updater" function after installation. Check out the "Main" in the bottom of the script.
 
-![FindEvil](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/07.png)  
+![FindEvil](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/07.png)  
 **Fig 7:** FindEvil feature and additional analytics
 
 ![Processes](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/08.png)  
@@ -118,7 +118,7 @@ Note: It's recommended to uncomment/disable the "Updater" function after install
 ![ELK-Timeline](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/22.png)  
 **Fig 22:** Happy ELK Hunting!
 
-![Secure-Archive-Container](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/23.png)  
+![Secure-Archive-Container](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/23.png)  
 **Fig 23:** Multi-Threaded ClamAV Scan to help you finding evil! ;-)
 
 ![Message-Box](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/24.png)  
