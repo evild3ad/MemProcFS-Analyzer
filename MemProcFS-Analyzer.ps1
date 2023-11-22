@@ -1,10 +1,10 @@
-﻿# MemProcFS-Analyzer v0.9
+﻿# MemProcFS-Analyzer v1.0
 #
 # @author:    Martin Willing
 # @copyright: Copyright (c) 2021-2023 Martin Willing. All rights reserved.
 # @contact:   Any feedback or suggestions are always welcome and much appreciated - mwilling@lethal-forensics.com
 # @url:       https://lethal-forensics.com/
-# @date:      2023-05-25
+# @date:      2023-11-22
 #
 #
 # ██╗     ███████╗████████╗██╗  ██╗ █████╗ ██╗      ███████╗ ██████╗ ██████╗ ███████╗███╗   ██╗███████╗██╗ ██████╗███████╗
@@ -16,7 +16,7 @@
 #
 #
 # Dependencies:
-# 7-Zip 22.01 Standalone Console (2022-07-15)
+# 7-Zip 23.01 Standalone Console (2023-06-20)
 # https://www.7-zip.org/download.html
 #
 # AmcacheParser v1.5.1.0 (.NET 6)
@@ -25,7 +25,7 @@
 # AppCompatCacheParser v1.5.0.0 (.NET 6)
 # https://ericzimmerman.github.io/
 #
-# ClamAV - Download --> Windows --> clamav-1.0.1.win.x64.msi (2023-02-14)
+# ClamAV - Download --> Windows --> clamav-1.2.0.win.x64.msi (2023-08-28)
 # https://www.clamav.net/downloads
 # https://docs.clamav.net/manual/Usage/Configuration.html#windows --> First Time Set-Up
 # https://blog.clamav.net/
@@ -33,31 +33,31 @@
 # Dokany Library Bundle v2.0.6.1000 (2022-10-02)
 # https://github.com/dokan-dev/dokany/releases/latest --> DokanSetup.exe
 #
-# Elasticsearch 8.7.1 (2023-05-02)
+# Elasticsearch 8.9.2 (2023-09-06)
 # https://www.elastic.co/downloads/elasticsearch
 #
-# entropy v1.0 (2022-02-04)
+# entropy v1.1 (2023-07-28)
 # https://github.com/merces/entropy
 #
 # EvtxECmd v1.5.0.0 (.NET 6)
 # https://ericzimmerman.github.io/
 #
-# ImportExcel v7.8.4 (2022-12-11)
+# ImportExcel v7.8.6 (2023-10-12)
 # https://github.com/dfinke/ImportExcel
 #
-# IPinfo CLI 2.10.0 (2022-09-28)
+# IPinfo CLI 3.1.1 (2023-10-02)
 # https://github.com/ipinfo/cli
 #
-# jq v1.6 (2019-11-02)
+# jq v1.7 (2023-09-06)
 # https://github.com/stedolan/jq
 #
-# Kibana 8.7.1 (2023-05-02)
+# Kibana 8.9.2 (2023-09-06)
 # https://www.elastic.co/downloads/kibana
 #
 # lnk_parser v0.2.0 (2022-08-10)
 # https://github.com/AbdulRhmanAlfaifi/lnk_parser
 #
-# MemProcFS v5.6.4 - The Memory Process File System (2023-05-01)
+# MemProcFS v5.8.17 - The Memory Process File System (2023-08-20)
 # https://github.com/ufrisk/MemProcFS
 #
 # RECmd v2.0.0.0 (.NET 6)
@@ -69,10 +69,10 @@
 # xsv v0.13.0 (2018-05-12)
 # https://github.com/BurntSushi/xsv
 #
-# YARA v4.3.1 (2023-04-21)
+# YARA v4.3.2 (2023-06-12)
 # https://virustotal.github.io/yara/
 #
-# Zircolite v2.9.9 (2023-04-16)
+# Zircolite v2.9.10 (2023-07-15)
 # https://github.com/wagga40/Zircolite
 #
 #
@@ -180,8 +180,19 @@
 # Added: Improved Drive Letter (Mount Point) Handling
 # Fixed: Other minor fixes and improvements
 #
+# Version 1.0
+# Release Date: 2023-11-22
+# Added: Improved Hunting for Suspicious Scheduled Tasks
+# Added: 318 YARA Custom Rules
+# Added: Get-YaraCustomRules
+# Added: Kroll RECmd Batch File v1.22 (2023-06-20)
+# Added: Checkbox Forensic Timeline (CSV)
+# Added: Checkbox Forensic Timeline (XLSX)
+# Added: FindEvil: AV_DETECT
+# Fixed: Other minor fixes and improvements
 #
-# Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.2965) and PowerShell 5.1 (5.1.19041.2673)
+#
+# Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.3693) and PowerShell 5.1 (5.1.19041.3693)
 #
 #
 #############################################################################################################################################################################################
@@ -189,7 +200,7 @@
 
 <#
 .SYNOPSIS
-  MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR
+  MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR
 
 .DESCRIPTION
   MemProcFS-Analyzer.ps1 is a PowerShell script utilized to simplify the usage of MemProcFS and to assist with the memory analysis workflow.
@@ -316,7 +327,7 @@ Function Header {
 
 # Windows Title
 $script:DefaultWindowsTitle = $Host.UI.RawUI.WindowTitle
-$Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+$Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
 
 # Check if the PowerShell script is being run with admin rights
 if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
@@ -389,6 +400,8 @@ Function Show-UserInterface
     $FormMemProcFSAnalyzer = New-Object 'System.Windows.Forms.Form'
     $Checkbox1 = New-Object 'System.Windows.Forms.CheckBox'
     $Checkbox2 = New-Object 'System.Windows.Forms.CheckBox'
+    $Checkbox3 = New-Object 'System.Windows.Forms.CheckBox'
+    $Checkbox4 = New-Object 'System.Windows.Forms.CheckBox'
     $StatusBar = New-Object 'System.Windows.Forms.StatusBar'
     $StatusBarPanel1 = New-Object 'System.Windows.Forms.StatusBarPanel'
     $LabelMemoryDump = New-Object 'System.Windows.Forms.Label'
@@ -410,7 +423,7 @@ Function Show-UserInterface
     $HelpToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
     $WikiToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
     $MemProcFSToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
-    $SANSFOR532ToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
+    $MemProcFSWikiToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
     $AboutToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
     $GitHubToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
     $InitialFormWindowState = New-Object 'System.Windows.Forms.FormWindowState'
@@ -448,7 +461,7 @@ Function Show-UserInterface
 
     $CheckForUpdatesToolStripMenuItem_Click={
 
-        $CurrentVersion = "0.9"
+        $CurrentVersion = "1.0"
 
         $StatusBar.Text = "Checking latest release on GitHub ..."
 
@@ -526,13 +539,13 @@ Function Show-UserInterface
     $MemProcFSToolStripMenuItem_Click = {
 		Start-Process "https://github.com/ufrisk/MemProcFS"
 	}
-	
-	$SANSFOR532ToolStripMenuItem_Click = {
-		Start-Process "https://www.sans.org/cyber-security-courses/enterprise-memory-forensics-in-depth/"
+
+    $MemProcFSWikiToolStripMenuItem_Click = {
+		Start-Process "https://github.com/ufrisk/MemProcFS/wiki"
 	}
 
     $AboutToolStripMenuItem_Click = {
-        $MessageBody = "MemProcFS-Analyzer v0.9`nCopyright (c) 2021-2023 Martin Willing"
+        $MessageBody = "MemProcFS-Analyzer v1.0`nCopyright (c) 2021-2023 Martin Willing"
         $MessageTitle = "MemProcFS-Analyzer"
         $ButtonType = "OK"
         $MessageIcon = "Info"
@@ -569,6 +582,36 @@ Function Show-UserInterface
         }
     }
 
+    $Checkbox3_CheckedChanged =
+    {
+        if($Checkbox3.Checked -eq $true)
+	    {
+            # Forensic Timeline (CSV) - Enabled
+            $script:ForensicTimelineCSV = "Enabled"
+        }
+        
+        if($Checkbox3.Checked -eq $false)
+        {
+            # Forensic Timeline (CSV) - Disabled
+            $script:ForensicTimelineCSV = $null
+        }
+    }
+
+    $Checkbox4_CheckedChanged =
+    {
+        if($Checkbox4.Checked -eq $true)
+	    {
+            # Forensic Timeline (XLSX) - Enabled
+            $script:ForensicTimelineXLSX = "Enabled"
+        }
+        
+        if($Checkbox4.Checked -eq $false)
+        {
+            # Forensic Timeline (XLSX) - Disabled
+            $script:ForensicTimelineXLSX = $null
+        }
+    }
+
     $Form_StateCorrection_Load =
     {
         $FormMemProcFSAnalyzer.WindowState = $InitialFormWindowState
@@ -586,6 +629,8 @@ Function Show-UserInterface
         {
             $Checkbox1.remove_CheckedChanged($Checkbox1_CheckedChanged)
             $Checkbox2.remove_CheckedChanged($Checkbox2_CheckedChanged)
+            $Checkbox3.remove_CheckedChanged($Checkbox3_CheckedChanged)
+            $Checkbox4.remove_CheckedChanged($Checkbox4_CheckedChanged)
             $ButtonBrowse1.remove_Click($ButtonBrowseMemory_Click)
             $ButtonBrowse2.remove_Click($ButtonBrowsePagefile_Click)
             $ButtonStart.remove_MouseClick($ButtonStart_Click)
@@ -596,7 +641,7 @@ Function Show-UserInterface
             $ExitToolStripMenuItem.remove_Click($exitToolStripMenuItem_Click)
             $WikiToolStripMenuItem.remove_Click($wikiToolStripMenuItem_Click)
             $MemProcFSToolStripMenuItem.remove_Click($MemProcFSToolStripMenuItem_Click)
-            $SANSFOR532ToolStripMenuItem.remove_Click($SANSFOR532ToolStripMenuItem_Click)
+            $MemProcFSWikiToolStripMenuItem.remove_Click($MemProcFSWikiToolStripMenuItem_Click)
             $AboutToolStripMenuItem.remove_Click($AboutToolStripMenuItem_Click)
             $GitHubToolStripMenuItem.remove_Click($GitHubToolStripMenuItem_Click)
             $FormMemProcFSAnalyzer.remove_Load($Form_StateCorrection_Load)
@@ -613,6 +658,8 @@ Function Show-UserInterface
     # FormMemProcFSAnalyzer
     $FormMemProcFSAnalyzer.Controls.Add($Checkbox1)
     $FormMemProcFSAnalyzer.Controls.Add($Checkbox2)
+    $FormMemProcFSAnalyzer.Controls.Add($Checkbox3)
+    $FormMemProcFSAnalyzer.Controls.Add($Checkbox4)
     $FormMemProcFSAnalyzer.Controls.Add($StatusBar)
     $FormMemProcFSAnalyzer.Controls.Add($LabelMemoryDump)
     $FormMemProcFSAnalyzer.Controls.Add($LabelPageFile)
@@ -633,7 +680,7 @@ Function Show-UserInterface
     $FormMemProcFSAnalyzer.MinimizeBox = $False
     $FormMemProcFSAnalyzer.Name = 'FormMemProcFSAnalyzer'
     $FormMemProcFSAnalyzer.StartPosition = 'CenterScreen'
-    $FormMemProcFSAnalyzer.Text = 'MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR'
+    $FormMemProcFSAnalyzer.Text = 'MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR'
     $FormMemProcFSAnalyzer.TopLevel = $True
     $FormMemProcFSAnalyzer.TopMost = $True
     $FormMemProcFSAnalyzer.Add_Shown({$FormMemProcFSAnalyzer.Activate()})
@@ -655,6 +702,24 @@ Function Show-UserInterface
 	$Checkbox2.Text = 'Enable ClamAV Scan'
 	$Checkbox2.UseVisualStyleBackColor = $True
 	$Checkbox2.add_CheckedChanged($Checkbox2_CheckedChanged)
+
+    # Checkbox3
+    $Checkbox3.Location = New-Object System.Drawing.Point(270, 131)
+	$Checkbox3.Name = 'Checkbox3'
+	$Checkbox3.Size = New-Object System.Drawing.Size(200, 24)
+    $Checkbox3.TabIndex = 11
+    $Checkbox3.Text = 'Enable Forensic Timeline (CSV)'
+    $Checkbox3.UseVisualStyleBackColor = $True
+    $Checkbox3.add_CheckedChanged($Checkbox3_CheckedChanged)
+
+    # Checkbox4
+    $Checkbox4.Location = New-Object System.Drawing.Point(270, 151)
+	$Checkbox4.Name = 'Checkbox4'
+    $Checkbox4.Size = New-Object System.Drawing.Size(200, 24)
+	$Checkbox4.TabIndex = 12
+    $Checkbox4.Text = 'Enable Forensic Timeline (XLSX)'
+	$Checkbox4.UseVisualStyleBackColor = $True
+    $Checkbox4.add_CheckedChanged($Checkbox4_CheckedChanged)
 
     # Status Bar
     $StatusBar.Location = New-Object System.Drawing.Point(0, 240)
@@ -737,12 +802,12 @@ Function Show-UserInterface
     $OpenFileDialog1.Filter = 'Memory Dump Files (*.001;*.bin;*.dmp;*.img;*.mem;*.raw;*.vmem)|*.001;*.bin;*.dmp;*.img;*.mem;*.raw;*.vmem|All Files (*.*)|*.*'
     $OpenFileDialog1.InitialDirectory = "::{20D04FE0-3AEA-1069-A2D8-08002B30309D}" # MyComputer
     $OpenFileDialog1.ReadOnlyChecked = $True
-    $OpenFileDialog1.Title = 'MemProcFS-Analyzer v0.9 - Select your Raw Physical Memory Dump'
+    $OpenFileDialog1.Title = 'MemProcFS-Analyzer v1.0 - Select your Raw Physical Memory Dump'
 
     # OpenFileDialog2
     $OpenFileDialog2.Filter = 'Page Files (*.sys)|*.sys|All Files (*.*)|*.*'
     $OpenFileDialog2.ReadOnlyChecked = $True
-    $OpenFileDialog2.Title = 'MemProcFS-Analyzer v0.9 - Select your pagefile.sys (Optional)'
+    $OpenFileDialog2.Title = 'MemProcFS-Analyzer v1.0 - Select your pagefile.sys (Optional)'
 
     # ButtonStart
     $ButtonStart.DialogResult = 'OK'
@@ -798,7 +863,7 @@ Function Show-UserInterface
     [void]$HelpToolStripMenuItem.DropDownItems.Add($GitHubToolStripMenuItem)
     [void]$HelpToolStripMenuItem.DropDownItems.Add($WikiToolStripMenuItem)
     [void]$HelpToolStripMenuItem.DropDownItems.Add($MemProcFSToolStripMenuItem)
-    [void]$HelpToolStripMenuItem.DropDownItems.Add($SANSFOR532ToolStripMenuItem)
+    [void]$HelpToolStripMenuItem.DropDownItems.Add($MemProcFSWikiToolStripMenuItem)
     [void]$HelpToolStripMenuItem.DropDownItems.Add($AboutToolStripMenuItem)
     $HelpToolStripMenuItem.Name = 'HelpToolStripMenuItem'
     $HelpToolStripMenuItem.Size = New-Object System.Drawing.Size(44, 20)
@@ -839,12 +904,12 @@ Function Show-UserInterface
     $MemProcFSToolStripMenuItem.ToolTipText = 'MemProcFS - The Memory Process File System'
     $MemProcFSToolStripMenuItem.Add_Click($MemProcFSToolStripMenuItem_Click)
 
-    # SANSFOR532ToolStripMenuItem
-    $SANSFOR532ToolStripMenuItem.Name = 'SANSFOR532ToolStripMenuItem'
-    $SANSFOR532ToolStripMenuItem.Size = New-Object System.Drawing.Size(152, 22)
-    $SANSFOR532ToolStripMenuItem.Text = 'SANS FOR532'
-    $SANSFOR532ToolStripMenuItem.ToolTipText = 'FOR532: Enterprise Memory Forensics In-Depth'
-    $SANSFOR532ToolStripMenuItem.Add_Click($SANSFOR532ToolStripMenuItem_Click)
+    # MemProcFSWikiToolStripMenuItem
+    $MemProcFSWikiToolStripMenuItem.Name = 'MemProcFSWikiToolStripMenuItem'
+    $MemProcFSWikiToolStripMenuItem.Size = New-Object System.Drawing.Size(152, 22)
+    $MemProcFSWikiToolStripMenuItem.Text = 'MemProcFS Wiki'
+    $MemProcFSWikiToolStripMenuItem.ToolTipText = 'MemProcFS Wiki'
+    $MemProcFSWikiToolStripMenuItem.Add_Click($MemProcFSWikiToolStripMenuItem_Click)
 
     # AboutToolStripMenuItem
     $AboutToolStripMenuItem.Name = 'AboutToolStripMenuItem'
@@ -919,7 +984,7 @@ Write-Host "$Logo"
 
 # Header
 Write-Output ""
-Write-Output "MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+Write-Output "MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
 Write-Output "(c) 2021-2023 Martin Willing at Lethal-Forensics (https://lethal-forensics.com/)"
 Write-Output ""
 
@@ -964,7 +1029,9 @@ if ($NetworkListManager -eq "True")
     }
 
     # Check if Backblaze B2 Platform is reachable
-    if (!(Test-Connection -ComputerName f001.backblazeb2.com -Count 1 -Quiet))
+    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/AmcacheParser.zip"
+    $StatusCode = (Invoke-WebRequest -Uri $URL -UseBasicParsing -DisableKeepAlive | Select-Object StatusCode).StatusCode
+    if ($StatusCode -ne "200") 
     {
         Write-Host "[Error] f001.backblazeb2.com is NOT reachable. Please check your network connection and try again." -ForegroundColor Red
         $Host.UI.RawUI.WindowTitle = "$DefaultWindowsTitle"
@@ -983,7 +1050,7 @@ if (Test-Path "$($MemProcFS)")
 {
     if (Test-Path "$SCRIPT_DIR\Tools\MemProcFS\Version.txt")
     {
-        $CurrentVersion = Get-Content "$SCRIPT_DIR\Tools\MemProcFS\Version.txt"
+        [version]$CurrentVersion = Get-Content "$SCRIPT_DIR\Tools\MemProcFS\Version.txt"
         Write-Output "[Info]  Current Version: MemProcFS v$CurrentVersion"
     }
 }
@@ -1001,20 +1068,19 @@ $Response = (Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Jso
 $Published = $Response.published_at
 $Download = ($Response.assets | Select-Object -ExpandProperty browser_download_url | Select-String -Pattern "win_x64" | Out-String).Trim()
 $ReleaseDate = $Published.split('T')[0]
-$Version = $Download | ForEach-Object{($_ -split "_")[4]} | ForEach-Object{($_ -split "-")[0]}
+$Version = $Download | ForEach-Object{($_ -split "_")[4]} | ForEach-Object{($_ -split "-")[0]} | ForEach-Object{($_ -replace "v","")}
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  MemProcFS $Version ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release:  MemProcFS v$Version ($ReleaseDate)"
 }
 else
 {
-    Write-Output "[Info]  Latest Release: MemProcFS $Version ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release: MemProcFS v$Version ($ReleaseDate)"
 }
 
 # Check if MemProcFS needs to be downloaded/updated
-$LatestRelease = $Version.Substring(1)
-if ($CurrentVersion -ne $LatestRelease -Or $null -eq $CurrentVersion)
+if ($CurrentVersion -ne $Version -Or $null -eq $CurrentVersion)
 {
     # Download latest release from GitHub
     Write-Output "[Info]  Dowloading Latest Release ..."
@@ -1041,6 +1107,74 @@ if ($CurrentVersion -ne $LatestRelease -Or $null -eq $CurrentVersion)
 else
 {
     Write-Host "[Info]  You are running the most recent version of MemProcFS." -ForegroundColor Green
+}
+
+}
+
+#############################################################################################################################################################################################
+
+Function Get-YaraCustomRules {
+
+# Check Current Version of YARA Custom Rules
+if (Test-Path "$SCRIPT_DIR\yara\*")
+{
+    if (Test-Path "$SCRIPT_DIR\yara\README.md")
+    {
+        $Content = Get-Content "$SCRIPT_DIR\yara\README.md" | Select-String -Pattern "Last updated:"
+        $Pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}"
+        $CurrentVersion = [regex]::Matches($Content, $Pattern).Value
+        Write-Output "[Info]  Current Version of YARA Custom Rules: $CurrentVersion"
+    }
+    else
+    {
+        Write-Output "[Info]  README.md NOT found."
+    }
+}
+else
+{
+    Write-Output "[Info]  YARA Custom Rules NOT found."
+    $CurrentVersion = ""
+}
+
+# Determining latest update on GitHub
+$WebRequest = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/evild3ad/yara/main/README.md"
+$Content = $WebRequest.Content.Split([Environment]::NewLine) | Select-String -Pattern "Last updated:"
+$Pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}"
+$LatestUpdate = [regex]::Matches($Content, $Pattern).Value
+Write-Output "[Info]  Latest Update: $LatestUpdate"
+
+# Check if YARA Custom Rules need to be downloaded/updated
+if ($CurrentVersion -lt $LatestUpdate -Or $null -eq $CurrentVersion)
+{
+    # Download latest YARA Custom Rules from GitHub
+    Write-Output "[Info]  Downloading YARA Custom Rules ..."
+    Invoke-WebRequest "https://github.com/evild3ad/yara/archive/refs/heads/main.zip" -OutFile "$SCRIPT_DIR\yara.zip"
+
+    if (Test-Path "$SCRIPT_DIR\yara.zip")
+    {
+        # Delete Directory Content and Remove Directory
+        if (Test-Path "$SCRIPT_DIR\yara")
+        {
+            Get-ChildItem -Path "$SCRIPT_DIR\yara" -Recurse | Remove-Item -Force -Recurse
+            Remove-Item "$SCRIPT_DIR\yara" -Force
+        }
+
+        # Unpacking Archive File
+        Write-Output "[Info]  Extracting Files ..."
+        Expand-Archive -Path "$SCRIPT_DIR\yara.zip" -DestinationPath "$SCRIPT_DIR" -Force
+
+        # Rename Unpacked Directory
+        Start-Sleep 10
+        Rename-Item "$SCRIPT_DIR\yara-main" "$SCRIPT_DIR\yara" -Force
+
+        # Remove Downloaded Archive
+        Start-Sleep 5
+        Remove-Item "$SCRIPT_DIR\yara.zip" -Force
+    }
+}
+else
+{
+    Write-Host "[Info]  You are running the most recent YARA Custom Rules." -ForegroundColor Green
 }
 
 }
@@ -1186,7 +1320,7 @@ Function Get-Kibana {
 # Check Current Version of Kibana
 if (Test-Path "$($Kibana)")
 {
-    $CurrentVersion = & $Kibana --version
+    $CurrentVersion = & $Kibana --version | Select-Object -Last 1
     Write-Output "[Info]  Current Version: Kibana v$CurrentVersion"
     Start-Sleep 1
 }
@@ -1484,10 +1618,6 @@ if ($CurrentVersion -ne $LatestRelease -Or $null -eq $CurrentVersion)
         Write-Output "[Info]  Extracting Files ..."
         Expand-Archive -Path "$SCRIPT_DIR\$Zip" -DestinationPath "$SCRIPT_DIR\Tools" -Force
 
-        # Rename Unpacked Directory
-        Start-Sleep 5
-        Rename-Item "$SCRIPT_DIR\Tools\entropy-$LatestRelease-win64" "$SCRIPT_DIR\Tools\entropy" -Force
-
         # Version
         Write-Output "$LatestRelease" | Out-File "$SCRIPT_DIR\Tools\entropy\Version.txt"
 
@@ -1643,7 +1773,8 @@ if ($CurrentVersion -ne $LatestRelease)
     try
     {
         Write-Output "[Info]  Updating PowerShell module 'ImportExcel' ..."
-        Update-Module -Name ImportExcel -Force -ErrorAction SilentlyContinue
+        Uninstall-Module -Name ImportExcel -AllVersions -ErrorAction SilentlyContinue
+        Install-Module -Name ImportExcel -Scope CurrentUser -Repository PSGallery -Force
     }
     catch
     {
@@ -2279,6 +2410,7 @@ else
 # Installer/Updater
 InternetConnectivityCheck
 Get-MemProcFS
+Get-YaraCustomRules
 Get-Dokany
 Get-Elasticsearch
 Get-Kibana
@@ -2767,6 +2899,7 @@ if (Test-Path "$($MemProcFS)")
         # https://github.com/ufrisk/MemProcFS/wiki/FS_FindEvil
         #
         # Indicators of Evil
+        # AV_DETECT      AV_DETECT reports malware detected by the anti-virus residing on the analyzed system.
         # PE_INJECT      PE_INJECT locates malware by scanning for valid .DLLs and .EXEs with executable pages in their page tables located in a private (non-image) virtual address descriptor.
         # PEB_MASQ       PEB_MASQ will flag PEB Masquerading attempts. If PEB_MASQ is detected please investigate further in /sys/proc/proc-v.txt
         # PEB_BAD_LDR    BAD_PEB_LDR will flag if no in-process modules are enumerated from the PEB/LDR_DATA structures.
@@ -2797,8 +2930,10 @@ if (Test-Path "$($MemProcFS)")
 
                 $Data | Foreach-Object {
 
-                $proc = $_ | Select-Object -ExpandProperty proc
-                $procid = $_ | Select-Object -ExpandProperty pid
+                $proc = $_ | Select-Object -ExpandProperty proc -ErrorAction SilentlyContinue
+                $procid = $_ | Select-Object -ExpandProperty pid -ErrorAction SilentlyContinue
+
+                # Microsoft Defender AntiVirus Alerts
 
                 $addr = $_ | Select-Object -ExpandProperty addr -ErrorAction SilentlyContinue
                 if ($addr)
@@ -2847,6 +2982,14 @@ if (Test-Path "$($MemProcFS)")
         # Find Evil
         if (Test-Path "$OUTPUT_FOLDER\forensic\findevil\findevil.csv")
         {
+            # AV_DETECT (Microsoft Defender AntiVirus)
+            $Data = Import-Csv "$OUTPUT_FOLDER\forensic\findevil\findevil.csv" -Delimiter "`t" | Where-Object { $_.Type -like "*AV_DETECT*" }
+            $Count = ($Data | Measure-Object).Count
+            if ($Count -gt 0)
+            {
+                Write-Host "[Alert] AV_DETECT found ($Count)" -ForegroundColor Red
+            }
+            
             # PE_INJECT (Injected Modules)
             $Data = Import-Csv "$OUTPUT_FOLDER\forensic\findevil\findevil.csv" -Delimiter "`t" | Where-Object { $_.Type -like "*PE_INJECT*" }
             $Count = ($Data | Measure-Object).Count
@@ -3637,7 +3780,7 @@ if (Test-Path "$($MemProcFS)")
 
                                     # Map IPs
                                     # https://ipinfo.io/map
-                                    Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo map | Out-Null
+                                    Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo map | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\Map.txt"
 
                                     # Access Token
                                     # https://ipinfo.io/signup?ref=cli
@@ -3648,9 +3791,6 @@ if (Test-Path "$($MemProcFS)")
                                         # Summarize IPs
                                         # https://ipinfo.io/summarize-ips
                                         Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo summarize -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\Summary.txt"
-
-                                        # JSON
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo --json -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\IPinfo.json"
 
                                         # CSV
                                         Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo --csv -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\IPinfo.csv"
@@ -3742,16 +3882,13 @@ if (Test-Path "$($MemProcFS)")
 
                                     # Map IPs
                                     # https://ipinfo.io/map
-                                    Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo map | Out-Null
+                                    Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo map | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\Map.txt"
 
                                     if (!("$Token" -eq "access_token"))
                                     {
                                         # Summarize IPs
                                         # https://ipinfo.io/summarize-ips
                                         Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo summarize -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\Summary.txt"
-
-                                        # JSON
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo --json -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\IPinfo.json"
 
                                         # CSV
                                         Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo --csv -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\IPinfo.csv"
@@ -3785,6 +3922,58 @@ if (Test-Path "$($MemProcFS)")
                 else
                 {
                     Write-Output "[Info]  ipinfo.exe NOT found."
+                }
+            }
+
+            # IP.txt
+
+            # IPv4
+            if (Test-Path "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt")
+            {
+                if ((Get-Item "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt").Length -gt 0kb)
+                {
+                    Get-Content -Path "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | Out-File "$OUTPUT_FOLDER\sys\net\IP.txt"
+                }
+            }
+
+            # IPv6
+            if (Test-Path "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt")
+            {
+                if ((Get-Item "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt").Length -gt 0kb)
+                {
+                    Get-Content -Path "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | Out-File "$OUTPUT_FOLDER\sys\net\IP.txt" -Append
+                }
+            }
+
+            # IPinfo CLI (50000 requests per month)
+            if (Test-Path "$($IPinfo)")
+            {
+                if (Test-Path "$OUTPUT_FOLDER\sys\net\IP.txt")
+                {
+                    if ((Get-Item "$OUTPUT_FOLDER\sys\net\IP.txt").Length -gt 0kb)
+                    {
+                        # Internet Connectivity Check (Vista+)
+                        $NetworkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]‘{DCB00C01-570F-4A9B-8D69-199FDBA5723B}’)).IsConnectedToInternet
+
+                        if (!($NetworkListManager -eq "True"))
+                        {
+                            Write-Host "[Error] Your computer is NOT connected to the Internet. IP addresses cannot be checked via IPinfo API." -ForegroundColor Red
+                        }
+                        else
+                        {
+                            # Check if IPinfo.io is reachable
+                            if (!(Test-Connection -ComputerName ipinfo.io -Count 1 -Quiet))
+                            {
+                                Write-Host "[Error] ipinfo.io is NOT reachable. IP addresses cannot be checked via IPinfo API." -ForegroundColor Red
+                            }
+                            else
+                            {
+                                # Map IPs
+                                New-Item "$OUTPUT_FOLDER\sys\net\IPinfo" -ItemType Directory -Force | Out-Null
+                                Get-Content "$OUTPUT_FOLDER\sys\net\IP.txt" | & $IPinfo map | Out-File "$OUTPUT_FOLDER\sys\net\IPinfo\Map.txt"
+                            }
+                        }
+                    }
                 }
             }
 
@@ -4104,7 +4293,7 @@ if (Test-Path "$($MemProcFS)")
                         Write-Output "[Info]  Launching Process Tree (TreeView) ... "
                         Start-Process -FilePath "powershell" -NoNewWindow -ArgumentList "-NoProfile", "-File", "$SCRIPT_DIR\Scripts\Get-ProcessTree\Get-ProcessTree.ps1", "-CSVPath", "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv"
                         Start-Sleep -Seconds 3
-                        $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+                        $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
                     }
                 }
             }
@@ -5906,211 +6095,848 @@ if (Test-Path "$($MemProcFS)")
         # Note: A scheduled task can be used by an adversary to establish persistence, move laterally, and/or escalate privileges.
         if (Test-Path "$DriveLetter\sys\tasks\tasks.txt")
         {
+            # tasks.txt
             New-Item "$OUTPUT_FOLDER\sys\tasks" -ItemType Directory -Force | Out-Null
-            Add-Content -Path "$OUTPUT_FOLDER\sys\tasks\tasks.txt" -Encoding utf8 -Value (Get-Content -Path "$DriveLetter\sys\tasks\tasks.txt")
+            Add-Content -Path "$OUTPUT_FOLDER\sys\tasks\tasks.txt" -Encoding UTF8 -Value (Get-Content -Path "$DriveLetter\sys\tasks\tasks.txt")
+            
+            # by-guid
+            Copy-Item -Path "$DriveLetter\sys\tasks\by-guid" -Destination "$OUTPUT_FOLDER\sys\tasks" -Recurse
+
+            # by-name
+            Copy-Item -Path "$DriveLetter\sys\tasks\by-name" -Destination "$OUTPUT_FOLDER\sys\tasks" -Recurse
 
             # Count Scheduled Tasks
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Measure-Object).Count -2
-            Write-Output "[Info]  Processing $Count ScheduledTasks ..."
-
-            # CSV
-            if (Test-Path "$DriveLetter\forensic\json\general.json")
+            if (Test-Path "$DriveLetter\forensic\csv\tasks.csv")
             {
-                $Data = Get-Content "$DriveLetter\forensic\json\general.json" | ConvertFrom-Json | Where-Object { $_.type -eq "shtask" }
-
-                $Data | Foreach-Object {
-
-                $desc = $_ | Select-Object -ExpandProperty desc
-                $user = $_ | Select-Object -ExpandProperty desc2 | Select-Object @{Name="user"; Expression={ForEach-Object{($_ -split "user:")[1]} | ForEach-Object{($_ -split "cmd:")[0]} | ForEach-Object{($_ -replace "[\[\]]","")}}}
-                $cmd = $_ | Select-Object -ExpandProperty desc2 | Select-Object @{Name="cmd"; Expression={ForEach-Object{($_ -split "cmd:")[1]} | ForEach-Object{($_ -split "param:")[0]} | ForEach-Object{($_ -replace "[\[\]]","")}}}
-                $param = $_ | Select-Object -ExpandProperty desc2 | Select-Object @{Name="param"; Expression={ForEach-Object{($_ -split "param:")[1]} | ForEach-Object{($_ -replace "[\[\]]","")}}}
-
-                New-Object -TypeName PSObject -Property @{
-	                "Task Name" = $desc
-	                "User" = $user.user
-	                "Command Line" = $cmd.cmd
-	                "Parameters" = $param.param
-                    }
-                } | Select-Object "Task Name","User","Command Line","Parameters" | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\tasks.csv" -Delimiter "`t" -NoTypeInformation
-            }
-
-            # XLSX
-            if (Get-Module -ListAvailable -Name ImportExcel)
-            {
-                if (Test-Path "$OUTPUT_FOLDER\sys\tasks\tasks.csv")
-                {
-                    if([int](& $xsv count -d "`t" "$OUTPUT_FOLDER\sys\tasks\tasks.csv") -gt 0)
-                    {
-                        $IMPORT = Import-Csv "$OUTPUT_FOLDER\sys\tasks\tasks.csv" -Delimiter "`t"
-                        $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\tasks.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Tasks" -CellStyleSB {
-                        param($WorkSheet)
-                        # BackgroundColor and FontColor for specific cells of TopRow
-                        $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
-                        Set-Format -Address $WorkSheet.Cells["A1:D1"] -BackgroundColor $BackgroundColor -FontColor White
-                        # HorizontalAlignment "Center" of column B
-                        $WorkSheet.Cells["B:B"].Style.HorizontalAlignment="Center"
-                        }
-                    }
-                }
+                [int]$Count = & $xsv count "$DriveLetter\forensic\csv\tasks.csv"
+                Write-Output "[Info]  Processing $Count ScheduledTasks ..."
             }
 
             # Threat Hunting: Scheduled Tasks
             # https://attack.mitre.org/techniques/T1053/
 
-            # a) Task Scheduler running from a suspicious folder location (False Positives: MEDIUM)
-
-            # Task Scheduler running from a suspicious folder location: C:\Users\*
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "[A-Z]{1}:\\Users\\" | Measure-Object).Count
-            if ($Count -gt 0)
+            if (Test-Path "$DriveLetter\forensic\csv\tasks.csv")
             {
-                Write-Host "[Alert] Task Scheduler running from a suspicious folder location: C:\Users\* ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location" -ItemType Directory -Force | Out-Null
-                (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "[A-Z]{1}:\\Users\\" | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\Users.txt"
-            }
+                $Tasks = Import-Csv -Path "$DriveLetter\forensic\csv\tasks.csv" -Delimiter "," -Encoding UTF8
 
-            # Task Scheduler running from a suspicious folder location: C:\ProgramData\*
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "[A-Z]{1}:\\ProgramData\\" | Measure-Object).Count
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running from a suspicious folder location: C:\ProgramData\* ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location" -ItemType Directory -Force | Out-Null
-                (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "[A-Z]{1}:\\ProgramData\\" | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\ProgramData.txt"
-            }
+                # a) Task Scheduler running from a suspicious folder location (False Positives: MEDIUM)
 
-            # Task Scheduler running from a suspicious folder location: C:\Windows\Temp\*
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "[A-Z]{1}:\\Windows\\Temp\\" | Measure-Object).Count
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running from a suspicious folder location: C:\Windows\Temp\* ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location" -ItemType Directory -Force | Out-Null
-                (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "[A-Z]{1}:\\Windows\\Temp\\" | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\Temp.txt"
-            }
+                # Task Scheduler running from a suspicious folder location: C:\Users\*
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "[A-Z]{1}:\\Users\\*" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running from a suspicious folder location: C:\Users\* ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\Users.csv" -NoTypeInformation -Encoding UTF8
 
-            # Task Scheduler running from a suspicious folder location: C:\TMP\*
-            $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\tasks.csv" -Delimiter "`t" | Where-Object {($_."Command Line" -match "[A-Z]{1}:\\TMP\\")}
-            $Count = [string]::Format('{0:N0}',($Import | Measure-Object).Count)
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running from a suspicious folder location: C:\TMP\* ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location" -ItemType Directory -Force | Out-Null
-                $Import | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\TMP.txt"
-            }
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\Users.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\Users.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\Users.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\XLSX\Users.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Users" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("\Users\",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
 
-            # b) Task Scheduler running using suspicious Scripting Utilities (False Positives: MEDIUM)
+                # Task Scheduler running from a suspicious folder location: C:\ProgramData\*
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "[A-Z]{1}:\\ProgramData\\*" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running from a suspicious folder location: C:\ProgramData\* ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\ProgramData.csv" -NoTypeInformation -Encoding UTF8
 
-            # Task Scheduler running using suspicious Scripting Utility: cmd.exe
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "cmd" | Measure-Object).Count
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: cmd.exe ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities" -ItemType Directory -Force | Out-Null
-                (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "cmd" | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\cmd.txt"
-            }
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\ProgramData.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\ProgramData.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\ProgramData.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\XLSX\ProgramData.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "ProgramData" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("\ProgramData\",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
 
-            # Task Scheduler running using suspicious Scripting Utility: csript.exe
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "csript" | Measure-Object).Count
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: csript.exe ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities" -ItemType Directory -Force | Out-Null
-                (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "csript" | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\csript.txt"
-            }
+                # Task Scheduler running from a suspicious folder location: C:\Windows\Temp\*
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "[A-Z]{1}:\\Windows\\Temp\\" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running from a suspicious folder location: C:\Windows\Temp\* ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\Temp.csv" -NoTypeInformation -Encoding UTF8
 
-            # Task Scheduler running using suspicious Scripting Utility: mshta.exe
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "mshta" | Measure-Object).Count
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: mshta.exe ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities" -ItemType Directory -Force | Out-Null
-                (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "mshta" | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\mshta.txt"
-            }
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\Temp.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\Temp.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\Temp.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\XLSX\Temp.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Temp" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("\Windows\Temp\",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
 
-            # Task Scheduler running using suspicious Scripting Utility: powershell.exe
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "powershell" | Measure-Object).Count
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: powershell.exe ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities" -ItemType Directory -Force | Out-Null
-                (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "powershell" | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\powershell.txt"
-            }
+                # Task Scheduler running from a suspicious folder location: C:\TMP\*
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "[A-Z]{1}:\\TMP\\" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running from a suspicious folder location: C:\TMP\* ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\TMP.csv" -NoTypeInformation -Encoding UTF8
 
-            # Task Scheduler running using suspicious Scripting Utility: regsvr32.exe
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "regsvr32" | Measure-Object).Count
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: regsvr32.exe ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities" -ItemType Directory -Force | Out-Null
-                (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "regsvr32" | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\regsvr32.txt"
-            }
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\TMP.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\TMP.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\TMP.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\XLSX\TMP.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "TMP" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("\TMP\",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
 
-            # Task Scheduler running using suspicious Scripting Utility: rundll32.exe
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "rundll32" | Measure-Object).Count
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: rundll32.exe ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities" -ItemType Directory -Force | Out-Null
-                (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "rundll32" | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\rundll32.txt"
-            }
+                # b) Task Scheduler running using suspicious Scripting Utilities (False Positives: MEDIUM)
 
-            # Task Scheduler running using suspicious Scripting Utility: wmic.exe
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "wmic" | Measure-Object).Count
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: wmic.exe ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities" -ItemType Directory -Force | Out-Null
-                (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "wmic" | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\wmic.txt"
-            }
+                # CommandLine
 
-            # Task Scheduler running using suspicious Scripting Utility: wscript.exe
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "wscript" | Measure-Object).Count
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: wscript.exe ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities" -ItemType Directory -Force | Out-Null
-                (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "wscript" | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\wscript.txt"
-            }
+                # Task Scheduler running using suspicious Scripting Utility: certutil.exe
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "certutil.exe" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: certutil.exe ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\certutil.csv" -NoTypeInformation -Encoding UTF8
 
-            # Parameters
-            
-            # Task Scheduler running malicious command line argument: sekurlsa::LogonPasswords --> OS Credential Dumping: LSASS Memory [T1003.001] --> mimikatz
-            $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\tasks.csv" -Delimiter "`t" | Where-Object {($_.Parameters -match "sekurlsa::LogonPasswords")}
-            $Count = [string]::Format('{0:N0}',($Import | Measure-Object).Count)
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running malicious command line argument: sekurlsa::LogonPasswords ($Count)" -ForegroundColor Red
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters" -ItemType Directory -Force | Out-Null
-                $Import | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\sekurlsa_LogonPasswords.txt"
-            }
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\certutil.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\certutil.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\certutil.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX\certutil.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "certutil.exe" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("certutil",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
 
-            # Task Scheduler running suspicious command line argument: -WindowStyle Hidden
-            $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\tasks.csv" -Delimiter "`t" | Where-Object {($_.Parameters -match "-WindowStyle Hidden")}
-            $Count = [string]::Format('{0:N0}',($Import | Measure-Object).Count)
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running malicious command line argument: -WindowStyle Hidden ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters" -ItemType Directory -Force | Out-Null
-                $Import | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\WindowStyle_Hidden.txt"
-            }
+                # Task Scheduler running using suspicious Scripting Utility: cmd.exe
+                $Import = $Tasks | Where-Object { $_.CommandLine -notmatch "dsregcmd.exe" } | Where-Object { $_.CommandLine -match "cmd.exe" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: cmd.exe ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\cmd.csv" -NoTypeInformation -Encoding UTF8
 
-            # Task Scheduler running suspicious command line argument: -nop
-            $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\tasks.csv" -Delimiter "`t" | Where-Object {($_.Parameters -match "-nop")}
-            $Count = [string]::Format('{0:N0}',($Import | Measure-Object).Count)
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running malicious command line argument: -nop ($Count)" -ForegroundColor Yellow
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters" -ItemType Directory -Force | Out-Null
-                $Import | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\nop.txt"
-            }
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\cmd.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\cmd.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\cmd.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX\cmd.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "cmd.exe" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("cmd.exe",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
 
-            # Custom
+                # Task Scheduler running using suspicious Scripting Utility: csript.exe
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "csript.exe" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: csript.exe ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\csript.csv" -NoTypeInformation -Encoding UTF8
 
-            # Task Scheduler running from a suspicious folder location executes an EXE: 'C:\Users\*\AppData\Roaming\*' + EXE
-            $Count = (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "AppData\\Roaming" | Select-String -Pattern "\.exe" | Measure-Object).Count
-            if ($Count -gt 0)
-            {
-                Write-Host "[Alert] Task Scheduler running from a suspicious folder location executes an EXE: 'C:\Users\*\AppData\Roaming\*' + EXE ($Count)" -ForegroundColor Red
-                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities" -ItemType Directory -Force | Out-Null
-                (Get-Content "$OUTPUT_FOLDER\sys\tasks\tasks.txt" | Select-String -Pattern "AppData\\Roaming" | Select-String -Pattern "\.exe" | Out-String).Trim() | Out-File "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\APPDATA-EXE.txt"
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\csript.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\csript.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\csript.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX\csript.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "csript.exe" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("csript.exe",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running using suspicious Scripting Utility: mshta.exe
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "mshta.exe" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: mshta.exe ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\mshta.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\mshta.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\mshta.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\mshta.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX\mshta.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "mshta.exe" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("mshta.exe",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running using suspicious Scripting Utility: msiexec.exe
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "msiexec.exe" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: msiexec.exe ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\msiexec.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\msiexec.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\msiexec.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\msiexec.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX\msiexec.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "msiexec.exe" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("msiexec",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running using suspicious Scripting Utility: powershell.exe
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "powershell.exe" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: powershell.exe ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\powershell.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\powershell.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\powershell.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\powershell.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX\powershell.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "powershell.exe" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("powershell.exe",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running using suspicious Scripting Utility: regsvr32.exe
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "regsvr32.exe" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: regsvr32.exe ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\regsvr32.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\regsvr32.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\regsvr32.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\regsvr32.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX\regsvr32.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "regsvr32.exe" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("regsvr32.exe",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running using suspicious Scripting Utility: rundll32.exe
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "rundll32.exe" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: rundll32.exe ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\rundll32.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\rundll32.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\rundll32.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\rundll32.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX\rundll32.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "rundll32.exe" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("rundll32.exe",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running using suspicious Scripting Utility: wmic.exe
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "wmic.exe" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: wmic.exe ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\wmic.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\wmic.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\wmic.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\wmic.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX\wmic.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "wmic.exe" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("wmic.exe",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running using suspicious Scripting Utility: wscript.exe
+                $Import = $Tasks | Where-Object { $_.CommandLine -match "wscript.exe" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running using suspicious Scripting Utility: wscript.exe ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\wscript.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\wscript.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\wscript.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\CSV\wscript.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Scripting-Utilities\XLSX\wscript.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "wscript.exe" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["F:F"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("wscript.exe",$F1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Parameters
+
+                # Task Scheduler running malicious command line argument: bitsadmin
+                $Import = $Tasks | Where-Object { $_.Parameters -match "bitsadmin" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running malicious command line argument: bitsadmin ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\bitsadmin.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\bitsadmin.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\bitsadmin.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\bitsadmin.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX\bitsadmin.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "bitsadmin" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["G:G"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("bitsadmin",$G1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running malicious command line argument: sekurlsa::LogonPasswords --> OS Credential Dumping: LSASS Memory [T1003.001] --> Mimikatz
+                $Import = $Tasks | Where-Object { $_.Parameters -match "sekurlsa::LogonPasswords" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running malicious command line argument: sekurlsa::LogonPasswords ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\sekurlsa_LogonPasswords.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\sekurlsa_LogonPasswords.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\sekurlsa_LogonPasswords.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\sekurlsa_LogonPasswords.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX\sekurlsa_LogonPasswords.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Mimikatz" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["G:G"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("sekurlsa::LogonPasswords",$G1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running suspicious command line argument: -WindowStyle Hidden
+                $Import = $Tasks | Where-Object { $_.Parameters -match "-WindowStyle Hidden" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running suspicious command line argument: -WindowStyle Hidden ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\WindowStyle_Hidden.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\WindowStyle_Hidden.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\WindowStyle_Hidden.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\WindowStyle_Hidden.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX\WindowStyle_Hidden.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "-WindowStyle Hidden" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["G:G"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("-WindowStyle Hidden",$G1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running suspicious command line argument: -nop
+                $Import = $Tasks | Where-Object { $_.Parameters -match "-nop" }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running suspicious command line argument: -nop ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\nop.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\nop.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\nop.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\nop.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX\nop.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "-nop" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["G:G"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("-nop",$G1)))' -BackgroundColor Red
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # c) Scheduled tasks with suspicious network connections (False Positives: MEDIUM)
+
+                # Task Scheduler running suspicious command line argument: IPv4 address
+                $IPv4_Pattern = ".*((?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).*"
+                $Import = $Tasks | Where-Object {($_.Parameters -match "$IPv4_Pattern")}
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running suspicious command line argument: IPv4 address ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\IPv4.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\IPv4.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\IPv4.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\IPv4.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX\IPv4.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "IPv4" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["G:G"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND(".",$G1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running suspicious command line argument: IPv6 address
+                $IPv6_Pattern = ".*:(?::[a-f\d]{1,4}){0,5}(?:(?::[a-f\d]{1,4}){1,2}|:(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})))|[a-f\d]{1,4}:(?:[a-f\d]{1,4}:(?:[a-f\d]{1,4}:(?:[a-f\d]{1,4}:(?:[a-f\d]{1,4}:(?:[a-f\d]{1,4}:(?:[a-f\d]{1,4}:(?:[a-f\d]{1,4}|:)|(?::(?:[a-f\d]{1,4})?|(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))))|:(?:(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))|[a-f\d]{1,4}(?::[a-f\d]{1,4})?|))|(?::(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))|:[a-f\d]{1,4}(?::(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))|(?::[a-f\d]{1,4}){0,2})|:))|(?:(?::[a-f\d]{1,4}){0,2}(?::(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))|(?::[a-f\d]{1,4}){1,2})|:))|(?:(?::[a-f\d]{1,4}){0,3}(?::(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))|(?::[a-f\d]{1,4}){1,2})|:))|(?:(?::[a-f\d]{1,4}){0,4}(?::(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))|(?::[a-f\d]{1,4}){1,2})|:)).*"
+                $Import = $Tasks | Where-Object { $_.Parameters -notmatch "sekurlsa::LogonPasswords" } | Where-Object {($_.Parameters -match "$IPv6_Pattern")}
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running suspicious command line argument: IPv6 address ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\IPv6.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\IPv6.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\IPv6.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\IPv6.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX\IPv6.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "IPv6" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["G:G"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND(".",$G1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running suspicious command line argument: http://
+                $Import = $Tasks | Where-Object {($_.Parameters -match "http://")}
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running suspicious command line argument: http:// ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\http.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\http.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\http.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\http.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX\http.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "http" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["G:G"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("http://",$G1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running suspicious command line argument: https://
+                $Import = $Tasks | Where-Object {($_.Parameters -match "https://")}
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running suspicious command line argument: https:// ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\https.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\https.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\https.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\https.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX\https.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "https" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["G:G"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("https://",$G1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # d) Custom (False Positives: LOW)
+
+                # Task Scheduler running from a suspicious folder location and executes an EXE: 'C:\Users\*\AppData\Roaming\*' + EXE
+                $Import = $Tasks | Where-Object {($_.CommandLine -match "[A-Z]{1}:\\Users\\.*\\AppData\\Roaming\\")} | Where-Object {($_.CommandLine -match "\.exe")}
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running from a suspicious folder location and executes an EXE: 'C:\Users\*\AppData\Roaming\*' + EXE ($Count)" -ForegroundColor Red
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Location\CSV\APPDATA-EXE.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\APPDATA-EXE.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\APPDATA-EXE.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\APPDATA-EXE.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX\APPDATA-EXE.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "APPDATA-EXE" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["G:G"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND(".exe",$G1)))' -BackgroundColor Yellow
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -6252,12 +7078,18 @@ if (Test-Path "$($MemProcFS)")
         }
 
 #############################################################################################################################################################################################
-
+        
         # Forensic Timeline
         # https://github.com/ufrisk/MemProcFS/wiki/FS_Forensic_Timeline
+
+        Function Get-ForensicTimelineCSV {
+
         if (Test-Path "$OUTPUT_FOLDER\forensic\json\timeline.json")
         {
-            Write-Output "[Info]  Creating Forensic Timeline ... "
+            Write-Output "[Info]  Creating Forensic Timeline [time-consuming task] ... "
+
+            # Get Start Time
+            $script:StartTime_CSVCreation = (Get-Date)
 
             # CSV --> Timeline Explorer (TLE)
             New-Item "$OUTPUT_FOLDER\forensic\timeline\CSV" -ItemType Directory -Force | Out-Null
@@ -6270,46 +7102,91 @@ if (Test-Path "$($MemProcFS)")
                 Write-Output "[Info]  File Size (CSV): $Size"
             }
 
-            # XLSX
-            if (Get-Module -ListAvailable -Name ImportExcel) 
+            # Count rows of CSV (w/ thousands separators)
+            [int]$Count = & $xsv count "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv"
+            $Rows = '{0:N0}' -f $Count
+            Write-Output "[Info]  Total Lines (CSV): $Rows"
+
+            # Get End Time
+            $EndTime_CSVCreation = (Get-Date)
+
+            # Duration CSV Creation
+            $Time_CSVCreation = ($EndTime_CSVCreation-$StartTime_CSVCreation)
+            ('Duration CSV Creation:         {0} h {1} min {2} sec' -f $Time_CSVCreation.Hours, $Time_CSVCreation.Minutes, $Time_CSVCreation.Seconds) >> "$OUTPUT_FOLDER\Stats.txt"
+        }
+
+        }
+
+        # Checkbox
+        if ($ForensicTimelineCSV -eq "Enabled")
+        {
+            Get-ForensicTimelineCSV
+        }
+
+        Function Get-ForensicTimelineXLSX {
+
+        # CSV
+        if (!(Test-Path "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv"))
+        {
+            if (Test-Path "$OUTPUT_FOLDER\forensic\json\timeline.json")
             {
+                Write-Output "[Info]  Creating Forensic Timeline [time-consuming task] ... "
+
+                # Get Start Time
+                $script:StartTime_CSVCreation = (Get-Date)
+
+                # CSV --> Timeline Explorer (TLE)
+                New-Item "$OUTPUT_FOLDER\forensic\timeline\CSV" -ItemType Directory -Force | Out-Null
+                Get-Content "$DriveLetter\forensic\json\timeline.json" | ConvertFrom-Json | Export-Csv -Path "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv" -Delimiter "," -NoTypeInformation -Encoding UTF8
+
+                # File Size (CSV)
                 if (Test-Path "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv")
                 {
-                    if([int](& $xsv count "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv") -gt 0)
+                    $Size = Get-FileSize((Get-Item "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv").Length)
+                    Write-Output "[Info]  File Size (CSV): $Size"
+                }
+
+                # Count rows of CSV (w/ thousands separators)
+                [int]$Count = & $xsv count "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv"
+                $Rows = '{0:N0}' -f $Count
+                Write-Output "[Info]  Total Lines (CSV): $Rows"
+
+                # Get End Time
+                $EndTime_CSVCreation = (Get-Date)
+
+                # Duration CSV Creation
+                $Time_CSVCreation = ($EndTime_CSVCreation-$StartTime_CSVCreation)
+                ('Duration CSV Creation:         {0} h {1} min {2} sec' -f $Time_CSVCreation.Hours, $Time_CSVCreation.Minutes, $Time_CSVCreation.Seconds) >> "$OUTPUT_FOLDER\Stats.txt"
+            }
+        }
+
+        # XLSX
+        if (Get-Module -ListAvailable -Name ImportExcel) 
+        {
+            if (Test-Path "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv") -gt 0)
+                {
+                    New-Item "$OUTPUT_FOLDER\forensic\timeline\XLSX" -ItemType Directory -Force | Out-Null
+
+                    [int]$Count = & $xsv count "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv"
+
+                    # Get Start Time
+                    $script:StartTime_XLSXCreation = (Get-Date)
+
+                    if ($Count -gt "1048576")
                     {
-                        New-Item "$OUTPUT_FOLDER\forensic\timeline\XLSX" -ItemType Directory -Force | Out-Null
+                        Write-Output "[Info]  ImportExcel: timeline.csv will be splitted [time-consuming task] ..."
+                        & $xsv sort -R -s "date" "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv" --delimiter "," -o "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline-reverse.csv"
+                        & $xsv split -s 1000000 "$OUTPUT_FOLDER\forensic\timeline\CSV" --filename "timeline-{}.csv" --delimiter "," "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline-reverse.csv"
 
-                        # Count rows of CSV (w/ thousands separators)
-                        [int]$Count = & $xsv count "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv"
-                        $Rows = '{0:N0}' -f $Count
-                        Write-Output "[Info]  Total Lines (CSV): $Rows"
+                        [array]$Files = (Get-ChildItem -Path "$OUTPUT_FOLDER\forensic\timeline\CSV" | Where-Object {$_.Name -match "timeline-[0-9].*\.csv"}).FullName
 
-                        if ($Count -gt "1048576")
+                        ForEach( $File in $Files )
                         {
-                            Write-Output "[Info]  ImportExcel: timeline.csv will be splitted [time-consuming task] ..."
-                            & $xsv sort -R -s "date" "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv" --delimiter "," -o "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline-reverse.csv"
-                            & $xsv split -s 1000000 "$OUTPUT_FOLDER\forensic\timeline\CSV" --filename "timeline-{}.csv" --delimiter "," "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline-reverse.csv"
-
-                            [array]$Files = (Get-ChildItem -Path "$OUTPUT_FOLDER\forensic\timeline\CSV" | Where-Object {$_.Name -match "timeline-[0-9].*\.csv"}).FullName
-
-                            ForEach( $File in $Files )
-                            {
-                                $FileName = $File | ForEach-Object{($_ -split "\\")[-1]} | ForEach-Object{($_ -split "\.")[0]}
-                                $IMPORT = Import-Csv "$File" -Delimiter "," | Select-Object @{Name='Timestamp [UTC]';Expression={([datetime]$_.date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}},@{Name='Type';Expression={$_.type}},@{Name='Action';Expression={$_.action}},@{Name='PID';Expression={$_.pid}},@{Name='Number';Expression={$_.num}},@{Name='Description';Expression={$_.desc}} | Sort-Object { $_."Timestamp [UTC]" -as [datetime] } -Descending
-                                $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\timeline\XLSX\$FileName.xlsx" -NoNumberConversion * -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Timeline" -CellStyleSB {
-                                param($WorkSheet)
-                                # BackgroundColor and FontColor for specific cells of TopRow
-                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
-                                Set-Format -Address $WorkSheet.Cells["A1:F1"] -BackgroundColor $BackgroundColor -FontColor White
-                                # HorizontalAlignment "Center" of columns A-E
-                                $WorkSheet.Cells["A:E"].Style.HorizontalAlignment="Center"
-                                }
-                            }
-                        }
-                        else
-                        {
-                            $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv" -Delimiter "," | Select-Object @{Name='Timestamp [UTC]';Expression={([datetime]$_.date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}},@{Name='Type';Expression={$_.type}},@{Name='Action';Expression={$_.action}},@{Name='PID';Expression={$_.pid}},@{Name='Number';Expression={$_.num}},@{Name='Description';Expression={$_.desc}} | Sort-Object { $_."Timestamp [UTC]" -as [datetime] } -Descending
-                            $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\timeline\XLSX\timeline.xlsx" -NoNumberConversion * -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Timeline" -CellStyleSB {
+                            $FileName = $File | ForEach-Object{($_ -split "\\")[-1]} | ForEach-Object{($_ -split "\.")[0]}
+                            $IMPORT = Import-Csv "$File" -Delimiter "," | Select-Object @{Name='Timestamp [UTC]';Expression={([datetime]$_.date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}},@{Name='Type';Expression={$_.type}},@{Name='Action';Expression={$_.action}},@{Name='PID';Expression={$_.pid}},@{Name='Number';Expression={$_.num}},@{Name='Description';Expression={$_.desc}} | Sort-Object { $_."Timestamp [UTC]" -as [datetime] } -Descending
+                            $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\timeline\XLSX\$FileName.xlsx" -NoNumberConversion * -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Timeline" -CellStyleSB {
                             param($WorkSheet)
                             # BackgroundColor and FontColor for specific cells of TopRow
                             $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
@@ -6319,8 +7196,35 @@ if (Test-Path "$($MemProcFS)")
                             }
                         }
                     }
+                    else
+                    {
+                        $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv" -Delimiter "," | Select-Object @{Name='Timestamp [UTC]';Expression={([datetime]$_.date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}},@{Name='Type';Expression={$_.type}},@{Name='Action';Expression={$_.action}},@{Name='PID';Expression={$_.pid}},@{Name='Number';Expression={$_.num}},@{Name='Description';Expression={$_.desc}} | Sort-Object { $_."Timestamp [UTC]" -as [datetime] } -Descending
+                        $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\timeline\XLSX\timeline.xlsx" -NoNumberConversion * -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Timeline" -CellStyleSB {
+                        param($WorkSheet)
+                        # BackgroundColor and FontColor for specific cells of TopRow
+                        $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                        Set-Format -Address $WorkSheet.Cells["A1:F1"] -BackgroundColor $BackgroundColor -FontColor White
+                        # HorizontalAlignment "Center" of columns A-E
+                        $WorkSheet.Cells["A:E"].Style.HorizontalAlignment="Center"
+                        }
+                    }
+
+                    # Get End Time
+                    $EndTime_XLSXCreation = (Get-Date)
+
+                    # Duration XLSX Creation
+                    $Time_XLSXCreation = ($EndTime_XLSXCreation-$StartTime_XLSXCreation)
+                    ('Duration XLSX Creation:        {0} h {1} min {2} sec' -f $Time_XLSXCreation.Hours, $Time_XLSXCreation.Minutes, $Time_XLSXCreation.Seconds) >> "$OUTPUT_FOLDER\Stats.txt"
                 }
             }
+        }
+
+        }
+
+        # Checkbox
+        if ($ForensicTimelineXLSX -eq "Enabled")
+        {
+            Get-ForensicTimelineXLSX
         }
 
 #############################################################################################################################################################################################
@@ -6566,7 +7470,7 @@ if (Test-Path "$($MemProcFS)")
                 }
 
                 # Windows Title (Default)
-                $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+                $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
             }
         }
         else
@@ -9212,7 +10116,7 @@ if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive")
 
 Function KrollBatch {
 
-# Kroll RECmd Batch File v1.21 (2023-03-04)
+# Kroll RECmd Batch File v1.22 (2023-06-20)
 # https://github.com/EricZimmerman/RECmd/blob/master/BatchExamples/Kroll_Batch.md
 # https://github.com/EricZimmerman/RECmd/blob/master/BatchExamples/Kroll_Batch.reb
 if (Test-Path "$OUTPUT_FOLDER\Registry\Registry\*.reghive") 
@@ -10731,7 +11635,7 @@ if (Test-Path "$OUTPUT_FOLDER\EventLogs\EventLogs\Microsoft-Windows-VHDMP-Operat
             & $EvtxECmd -f "$OUTPUT_FOLDER\EventLogs\VHDMP\Microsoft-Windows-VHDMP-Operational.evtx" --csv "$OUTPUT_FOLDER\EventLogs\VHDMP\CSV" --csvf "EvtxECmd.csv" > "$OUTPUT_FOLDER\EventLogs\VHDMP\EvtxECmd.log" 2> $null
 
             # Windows Title (Default)
-            $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v0.9 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+            $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
 
             # Stats
             if (Get-Content "$OUTPUT_FOLDER\EventLogs\VHDMP\EvtxECmd.log" | Select-String -Pattern "^Total event log records found:" -Quiet)
@@ -11126,8 +12030,9 @@ $Time_Modules = ($EndTime_Modules-$StartTime_Modules)
 
 Function Invoke-1768 {
 
-# 1768.py v.0.0.18 (2022-04-03)
+# 1768.py v.0.0.20 (2023-10-15)
 # https://blog.didierstevens.com/?s=1768.py
+# https://github.com/DidierStevens/DidierStevensSuite/blob/master/1768.py
 if ((Test-Path "$SCRIPT_DIR\Scripts\1768\1768.py") -and (Test-Path "$SCRIPT_DIR\Scripts\1768\1768.json"))
 {
     # Current version
@@ -11273,16 +12178,28 @@ Stop-Transcript
 
 # Remove Variables
 
-# YaraRules
-if (!($null -eq $YaraRules))
-{
-    Remove-Variable -Name "YaraRules" -Scope Script
-}
-
 # ClamAV
 if (!($null -eq $ClamAV))
 {
     Remove-Variable -Name "ClamAV" -Scope Script
+}
+
+# ForensicTimelineCSV
+if (!($null -eq $ForensicTimelineCSV))
+{
+    Remove-Variable -Name "ForensicTimelineCSV" -Scope Script
+}
+
+# ForensicTimelineXLSX
+if (!($null -eq $ForensicTimelineXLSX))
+{
+    Remove-Variable -Name "ForensicTimelineXLSX" -Scope Script
+}
+
+# YaraRules
+if (!($null -eq $YaraRules))
+{
+    Remove-Variable -Name "YaraRules" -Scope Script
 }
 
 # Reset Progress Preference

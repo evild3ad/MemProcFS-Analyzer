@@ -12,7 +12,7 @@ Features:
 * Update-Info when there's a new version of ClamAV or a new Dokany File System Library Bundle available  
 * Pagefile Support
 * OS Fingerprinting  
-* Scan w/ Custom YARA rules (incl. 284 rules by e.g. [Chronicle](https://github.com/chronicle/GCTI/tree/main/YARA) and [Elastic Security](https://github.com/elastic/protections-artifacts))  
+* Scan w/ Custom YARA rules (incl. 318 rules by e.g. [Chronicle](https://github.com/chronicle/GCTI/tree/main/YARA) and [Elastic Security](https://github.com/elastic/protections-artifacts))  
 * Multi-Threaded scan w/ ClamAV for Windows  
 * Collection of infected files detected by ClamAV for further analysis (PW: infected)
 * Collection of injected modules detected by MemProcFS PE_INJECT for further analysis (PW: infected)
@@ -173,7 +173,7 @@ Notes:
 - [Elasticsearch Tips](https://github.com/evild3ad/MemProcFS-Analyzer/wiki/Elasticsearch)
 
 ## Dependencies
-7-Zip 22.01 Standalone Console (2022-07-15)  
+7-Zip 23.01 Standalone Console (2023-06-20)  
 https://www.7-zip.org/download.html  
 
 AmcacheParser v1.5.1.0 (.NET 6)  
@@ -182,37 +182,37 @@ https://ericzimmerman.github.io/
 AppCompatCacheParser v1.5.0.0 (.NET 6)  
 https://ericzimmerman.github.io/  
 
-ClamAV - Download &#8594; Windows &#8594; clamav-1.0.1.win.x64.msi (2023-02-14)  
+ClamAV - Download &#8594; Windows &#8594; clamav-1.2.0.win.x64.msi (2023-08-28)  
 https://www.clamav.net/downloads    
 
 Dokany Library Bundle v2.0.6.1000 (2022-10-02)  
 https://github.com/dokan-dev/dokany/releases/latest &#8594; DokanSetup.exe  
 
-Elasticsearch 8.7.1 (2023-05-02)  
+Elasticsearch 8.9.2 (2023-09-06)  
 https://www.elastic.co/downloads/elasticsearch  
 
-entropy v1.0 (2022-02-04)  
+entropy v1.1 (2023-07-28)  
 https://github.com/merces/entropy  
 
 EvtxECmd v1.5.0.0 (.NET 6)  
 https://ericzimmerman.github.io/  
 
-ImportExcel v7.8.4 (2022-12-11)  
+ImportExcel v7.8.6 (2023-10-12)   
 https://github.com/dfinke/ImportExcel  
 
-IPinfo CLI 2.10.0 (2022-09-28)  
+IPinfo CLI 3.1.1 (2023-10-02)    
 https://github.com/ipinfo/cli  
 
-jq v1.6 (2019-11-02)  
+jq v1.7 (2023-09-06)   
 https://github.com/stedolan/jq  
 
-Kibana 8.6.0 (2023-01-10)  
+Kibana 8.9.2 (2023-09-06)    
 https://www.elastic.co/downloads/kibana  
 
 lnk_parser v0.2.0 (2022-08-10)  
 https://github.com/AbdulRhmanAlfaifi/lnk_parser  
 
-MemProcFS v5.6.4 - The Memory Process File System (2023-05-01)  
+MemProcFS v5.8.17 - The Memory Process File System (2023-08-20)    
 https://github.com/ufrisk/MemProcFS  
 
 RECmd v2.0.0.0 (.NET 6)  
@@ -227,7 +227,7 @@ https://github.com/BurntSushi/xsv
 YARA v4.3.1 (2023-04-21)  
 https://virustotal.github.io/yara/  
 
-Zircolite v2.9.9 (2023-04-16)  
+Zircolite v2.9.10 (2023-07-15)  
 https://github.com/wagga40/Zircolite  
 
 ## Links
