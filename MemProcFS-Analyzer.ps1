@@ -1072,7 +1072,7 @@ $Version = $Download | ForEach-Object{($_ -split "_")[4]} | ForEach-Object{($_ -
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  MemProcFS v$Version ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release: MemProcFS v$Version ($ReleaseDate)"
 }
 else
 {
@@ -1209,7 +1209,7 @@ $ReleaseDate = $Published.split('T')[0]
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  Dokany File System Library $Tag ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release: Dokany File System Library $Tag ($ReleaseDate)"
 }
 else
 {
@@ -1255,7 +1255,8 @@ $Repository = "elastic/elasticsearch"
 $Releases = "https://api.github.com/repos/$Repository/releases"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $Response = (Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json)
-$Latest = $Response.tag_name | Where-Object{($_ -notmatch "-rc")} | ForEach-Object{($_ -replace "v","")} | Sort-Object -Descending | Select-Object -First 1
+$Versions = $Response.tag_name | Where-Object{($_ -notmatch "-rc")} | ForEach-Object{($_ -replace "v","")}
+$Latest = ($Versions | ForEach-Object{[System.Version]$_ } | Sort-Object -Descending | Select-Object -First 1).ToString()
 $Item = $Response | Where-Object{($_.tag_name -eq "v$Latest")}
 $Tag = $Item.tag_name
 $Published = $Item.published_at
@@ -1263,7 +1264,7 @@ $ReleaseDate = $Published.split('T')[0]
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  Elasticsearch $Tag ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release: Elasticsearch $Tag ($ReleaseDate)"
 }
 else
 {
@@ -1335,7 +1336,8 @@ $Repository = "elastic/kibana"
 $Releases = "https://api.github.com/repos/$Repository/releases"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $Response = (Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json)
-$Latest = $Response.tag_name | Where-Object{($_ -notmatch "-rc")} | ForEach-Object{($_ -replace "v","")} | Sort-Object -Descending | Select-Object -First 1
+$Versions = $Response.tag_name | Where-Object{($_ -notmatch "-rc")} | ForEach-Object{($_ -replace "v","")}
+$Latest = ($Versions | ForEach-Object{[System.Version]$_ } | Sort-Object -Descending | Select-Object -First 1).ToString()
 $Item = $Response | Where-Object{($_.tag_name -eq "v$Latest")}
 $Tag = $Item.tag_name
 $Published = $Item.published_at
@@ -1343,7 +1345,7 @@ $ReleaseDate = $Published.split('T')[0]
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  Kibana $Tag ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release: Kibana $Tag ($ReleaseDate)"
 }
 else
 {
@@ -1590,7 +1592,7 @@ $LatestRelease = $Tag.Substring(1)
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  entropy $Tag ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release: entropy $Tag ($ReleaseDate)"
 }
 else
 {
@@ -1751,7 +1753,7 @@ $LatestRelease = $Tag.Substring(1)
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  ImportExcel $Tag ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release: ImportExcel $Tag ($ReleaseDate)"
 }
 else
 {
@@ -1832,7 +1834,7 @@ $ReleaseDate = $Published.split('T')[0]
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  IPinfo CLI v$Tag ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release: IPinfo CLI v$Tag ($ReleaseDate)"
 }
 else
 {
@@ -1910,7 +1912,7 @@ $ReleaseDate = $Published.split('T')[0]
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  jq v$Tag ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release: jq v$Tag ($ReleaseDate)"
 }
 else
 {
@@ -1974,7 +1976,7 @@ $ReleaseDate = $Published.split('T')[0]
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  lnk_parser $Tag ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release: lnk_parser $Tag ($ReleaseDate)"
 }
 else
 {
@@ -2187,7 +2189,7 @@ $ReleaseDate = $Published.split('T')[0]
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  xsv v$Tag ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release: xsv v$Tag ($ReleaseDate)"
 }
 else
 {
@@ -2260,7 +2262,7 @@ $ReleaseDate = $Published.split('T')[0]
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  YARA $Tag ($ReleaseDate)"
+    Write-Output "[Info]  Latest Release: YARA $Tag ($ReleaseDate)"
 }
 else
 {
@@ -2350,7 +2352,7 @@ $LatestRelease = $Published.split('T')[0]
 
 if ($CurrentVersion)
 {
-    Write-Output "[Info]  Latest Release:  Zircolite v$Tag ($LatestRelease)"
+    Write-Output "[Info]  Latest Release: Zircolite v$Tag ($LatestRelease)"
 }
 else
 {
