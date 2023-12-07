@@ -1,4 +1,4 @@
-﻿# MemProcFS-Analyzer v1.0
+# MemProcFS-Analyzer v1.0
 #
 # @author:    Martin Willing
 # @copyright: Copyright (c) 2021-2023 Martin Willing. All rights reserved.
@@ -2686,7 +2686,7 @@ if (Test-Path "$($MemProcFS)")
             {
                 $CurrentVersion = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentVersion.txt" | Select-Object -Skip 2
 		
-  		# Major
+  		        # Major
             	$Major = $CurrentVersion.split('.')[0]
 		
             	# Minor
@@ -2711,7 +2711,14 @@ if (Test-Path "$($MemProcFS)")
             $ReleaseID = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ReleaseId.txt" | Select-Object -Skip 2
     
             # CurrentBuildNumber
-            [int]$CurrentBuildNumber = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentBuildNumber.txt" | Select-Object -Skip 2
+            if (Test-Path "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentBuildNumber.txt")
+            {
+                [int]$CurrentBuildNumber = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentBuildNumber.txt" | Select-Object -Skip 2
+            }
+            else
+            {
+                Write-Host "[Error] CurrentBuildNumber.txt into $DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ does NOT exist." -ForegroundColor Red
+            }
 
             # UBR
             if (Test-Path "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\UBR.txt")
@@ -2797,36 +2804,46 @@ if (Test-Path "$($MemProcFS)")
         }
 
         # RegisteredOwner
-        $RegisteredOwner = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\RegisteredOwner.txt" | Select-Object -Skip 2
-        if ($null -ne $RegisteredOwner)
+        if (Test-Path "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\RegisteredOwner.txt")
         {
-            Write-Output "[Info]  RegisteredOwner: $RegisteredOwner"
-        }
-        else
-        {
-            Write-Output "[Info]  RegisteredOwner: --"
-        }
+            $RegisteredOwner = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\RegisteredOwner.txt" | Select-Object -Skip 2
+		        if ($null -ne $RegisteredOwner)
+				{
+					Write-Output "[Info]  RegisteredOwner: $RegisteredOwner"
+				}
+				else
+				{
+				    Write-Output "[Info]  RegisteredOwner: --"
+				}
+            }
+            else
+            {
+                Write-Host "[Error] RegisteredOwner.txt into $DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ does NOT exist." -ForegroundColor Red
+            }
 
         # Check if it's a Domain Controller (Active Directory)
         # HKLM\System\ControlSet00$CurrentControlSet\Services\ADWS (Active Directory Domain Services)
         # HKLM\System\ControlSet00$CurrentControlSet\Services\NTDS (Windows NT Directory Services)
-        if ((Get-ChildItem -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\services" | Select-Object -ExpandProperty FullName | Select-String -Pattern "\\ADWS" -Quiet) -And (Get-ChildItem -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\services" | Select-Object -ExpandProperty FullName | Select-String -Pattern "\\NTDS" -Quiet))
+        if  (Test-Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\services")
         {
-            # ProductType
-            # WinNT - Windows Client / Windows NT Workstation
-            # LanmanNT – Domain Controller
-            # ServerNT – Member Server / ServerNT - Windows NT Server Standalone
-            if (Get-Content -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ProductOptions\ProductType.txt" | Select-Object -Skip 2 | Select-String -Pattern "LanmanNT" -Quiet)
+            if ((Get-ChildItem -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\services" | Select-Object -ExpandProperty FullName | Select-String -Pattern "\\ADWS" -Quiet) -And (Get-ChildItem -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\services" | Select-Object -ExpandProperty FullName | Select-String -Pattern "\\NTDS" -Quiet))
             {
-                $ProductType = Get-Content -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ProductOptions\ProductType.txt" | Select-Object -Skip 2
-                Write-Output "[Info]  Product Type: Domain Controller ($ProductType)"
-            }
+                # ProductType
+                # WinNT - Windows Client / Windows NT Workstation
+                # LanmanNT – Domain Controller
+                # ServerNT – Member Server / ServerNT - Windows NT Server Standalone
+                if (Get-Content -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ProductOptions\ProductType.txt" | Select-Object -Skip 2 | Select-String -Pattern "LanmanNT" -Quiet)
+                {
+                    $ProductType = Get-Content -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ProductOptions\ProductType.txt" | Select-Object -Skip 2
+                    Write-Output "[Info]  Product Type: Domain Controller ($ProductType)"
+                }
 
-            # ProductSuite
-            $ProductSuite = Get-Content -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ProductOptions\ProductSuite.txt" | Select-Object -Skip 2
-            if ($ProductSuite)
-            {
-                Write-Output "[Info]  Product Suite: $ProductSuite"
+                # ProductSuite
+                $ProductSuite = Get-Content -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ProductOptions\ProductSuite.txt" | Select-Object -Skip 2
+                if ($ProductSuite)
+                {
+                    Write-Output "[Info]  Product Suite: $ProductSuite"
+                }
             }
         }
 
@@ -12240,8 +12257,8 @@ if ($ClamAV -eq "Enabled")
 
 Documents
 KrollBatch
-#LNK
-#LNK_Hunt
+LNK
+LNK_Hunt
 ImageMount
 Modules
 #Invoke-1768
