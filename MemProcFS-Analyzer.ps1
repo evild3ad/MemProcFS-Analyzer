@@ -2682,13 +2682,20 @@ if (Test-Path "$($MemProcFS)")
         else 
         {
             # CurrentVersion
-            $CurrentVersion = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentVersion.txt" | Select-Object -Skip 2
-
-            # Major
-            $Major = $CurrentVersion.split('.')[0]
-
-            # Minor
-            $Minor = $CurrentVersion.split('.')[1]
+            if (Test-Path "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentVersion.txt")
+            {
+                $CurrentVersion = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentVersion.txt" | Select-Object -Skip 2
+		
+  		# Major
+            	$Major = $CurrentVersion.split('.')[0]
+		
+            	# Minor
+            	$Minor = $CurrentVersion.split('.')[1]
+            }
+            else
+            {
+                Write-Host "[Error] CurrentVersion.txt into $DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ does NOT exist." -ForegroundColor Red
+            }
         }
 
         # Windows 10, Windows 11, Windows Server 2016, Windows Server 2019, and Windows Server 2022
