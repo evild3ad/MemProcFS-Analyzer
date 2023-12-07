@@ -3784,7 +3784,7 @@ if (Test-Path "$($MemProcFS)")
 
                                     # Access Token
                                     # https://ipinfo.io/signup?ref=cli
-                                    $Token = "b6f095752b5cf9" # Please insert your Access Token here
+                                    $Token = "access_token" # Please insert your Access Token here
 
                                     if (!("$Token" -eq "access_token"))
                                     {
