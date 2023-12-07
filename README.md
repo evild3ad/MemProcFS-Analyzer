@@ -164,9 +164,11 @@ Open "MemProcFS-Analyzer.ps1" with your text editor, search for "Please insert y
 Check if NuGet is available in the package providers by running the following command:  
 `Get-PackageProvider -ListAvailable`  
 If NuGet is not installed on your system yet, you have to install it.  
-`Install-PackageProvider -Name NuGet -Force`  
+`Install-PackageProvider -Name NuGet -Force`
 
-8. Done! :smiley:   
+8. Make sure touncomment/disable the functions you want to play with (by default, Elasticsearch and ELKImport are disabled). Check out the "Main" in the bottom of the script.
+
+9. Done! :smiley:   
 
 Notes: 
 - Turn off your antivirus protection temporarily or better exclude your MemProcFS-Analyzer directory from scanning.  
