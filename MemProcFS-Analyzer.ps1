@@ -264,8 +264,10 @@ $script:entropy = "$SCRIPT_DIR\Tools\entropy\entropy.exe"
 # EvtxECmd
 $script:EvtxECmd = "$SCRIPT_DIR\Tools\EvtxECmd\EvtxECmd.exe"
 
-# IPinfo CLI
+# IPinfo CLI & Access Token
+# https://ipinfo.io/signup?ref=cli
 $script:IPinfo = "$SCRIPT_DIR\Tools\IPinfo\ipinfo.exe"
+$IPInfoToken = "f62a65aed34710" # Please insert your Access Token here
 
 # jq
 $script:jq = "$SCRIPT_DIR\Tools\jq\jq-win64.exe"
@@ -3806,18 +3808,14 @@ if (Test-Path "$($MemProcFS)")
                                     # https://ipinfo.io/map
                                     Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo map | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\Map.txt"
 
-                                    # Access Token
-                                    # https://ipinfo.io/signup?ref=cli
-                                    $Token = "b6f095752b5cf9" # Please insert your Access Token here
-
-                                    if (!("$Token" -eq "access_token"))
+                                    if (!("$IPInfoToken" -eq "access_token"))
                                     {
                                         # Summarize IPs
                                         # https://ipinfo.io/summarize-ips
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo summarize -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\Summary.txt"
+                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo summarize -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\Summary.txt"
 
                                         # CSV
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo --csv -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\IPinfo.csv"
+                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo --csv -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\IPinfo.csv"
 
                                         # XLSX
                                         if (Get-Module -ListAvailable -Name ImportExcel)
@@ -3908,14 +3906,14 @@ if (Test-Path "$($MemProcFS)")
                                     # https://ipinfo.io/map
                                     Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo map | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\Map.txt"
 
-                                    if (!("$Token" -eq "access_token"))
+                                    if (!("$IPInfoToken" -eq "access_token"))
                                     {
                                         # Summarize IPs
                                         # https://ipinfo.io/summarize-ips
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo summarize -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\Summary.txt"
+                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo summarize -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\Summary.txt"
 
                                         # CSV
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo --csv -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\IPinfo.csv"
+                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo --csv -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\IPinfo.csv"
 
                                         # XLSX
                                         if (Get-Module -ListAvailable -Name ImportExcel)
