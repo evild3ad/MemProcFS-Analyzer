@@ -12257,8 +12257,8 @@ if ($ClamAV -eq "Enabled")
 
 Documents
 KrollBatch
-LNK
-LNK_Hunt
+#LNK
+#LNK_Hunt
 ImageMount
 Modules
 #Invoke-1768
