@@ -4313,7 +4313,8 @@ if (Test-Path "$($MemProcFS)")
                     if([int](& $xsv count -d "`t" "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv") -gt 0)
                     {
                         Write-Output "[Info]  Launching Process Tree (TreeView) ... "
-                        Start-Process -FilePath "powershell" -NoNewWindow -ArgumentList "-NoProfile", "-File", "$SCRIPT_DIR\Scripts\Get-ProcessTree\Get-ProcessTree.ps1", "-CSVPath", "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv"
+                        Unblock-File -Path "$SCRIPT_DIR\Scripts\Get-ProcessTree\Get-ProcessTree.ps1"
+			Start-Process -FilePath "powershell" -NoNewWindow -ArgumentList "-NoProfile", "-File", "$SCRIPT_DIR\Scripts\Get-ProcessTree\Get-ProcessTree.ps1", "-CSVPath", "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv"
                         Start-Sleep -Seconds 3
                         $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
                     }
