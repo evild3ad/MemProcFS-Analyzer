@@ -166,7 +166,10 @@ Check if NuGet is available in the package providers by running the following co
 If NuGet is not installed on your system yet, you have to install it.  
 `Install-PackageProvider -Name NuGet -Force`  
 
-8. Done! :smiley:   
+8. Make sure to comment/uncomment (selectively enable or disable) the functions you want to play with (Elasticsearch and ELKImport are disabled by default).  
+   Check out the "Main" in the bottom of the script.
+
+9.  Done! :smiley:   
 
 Notes: 
 - Turn off your antivirus protection temporarily or better exclude your MemProcFS-Analyzer directory from scanning.  
