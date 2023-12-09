@@ -4,7 +4,7 @@
 # @copyright: Copyright (c) 2021-2023 Martin Willing. All rights reserved.
 # @contact:   Any feedback or suggestions are always welcome and much appreciated - mwilling@lethal-forensics.com
 # @url:       https://lethal-forensics.com/
-# @date:      2023-11-22
+# @date:      2023-12-09
 #
 #
 # ██╗     ███████╗████████╗██╗  ██╗ █████╗ ██╗      ███████╗ ██████╗ ██████╗ ███████╗███╗   ██╗███████╗██╗ ██████╗███████╗
@@ -33,7 +33,7 @@
 # Dokany Library Bundle v2.0.6.1000 (2022-10-02)
 # https://github.com/dokan-dev/dokany/releases/latest --> DokanSetup.exe
 #
-# Elasticsearch 8.9.2 (2023-09-06)
+# Elasticsearch 8.11.2 (2023-12-07)
 # https://www.elastic.co/downloads/elasticsearch
 #
 # entropy v1.1 (2023-07-28)
@@ -51,13 +51,13 @@
 # jq v1.7 (2023-09-06)
 # https://github.com/stedolan/jq
 #
-# Kibana 8.9.2 (2023-09-06)
+# Kibana 8.11.2 (2023-12-07)
 # https://www.elastic.co/downloads/kibana
 #
 # lnk_parser v0.2.0 (2022-08-10)
 # https://github.com/AbdulRhmanAlfaifi/lnk_parser
 #
-# MemProcFS v5.8.17 - The Memory Process File System (2023-08-20)
+# MemProcFS v5.8.18 - The Memory Process File System (2023-08-20)
 # https://github.com/ufrisk/MemProcFS
 #
 # RECmd v2.0.0.0 (.NET 6)
@@ -72,7 +72,7 @@
 # YARA v4.3.2 (2023-06-12)
 # https://virustotal.github.io/yara/
 #
-# Zircolite v2.9.10 (2023-07-15)
+# Zircolite v2.10.0 (2023-12-02)
 # https://github.com/wagga40/Zircolite
 #
 #
@@ -1255,7 +1255,8 @@ $Repository = "elastic/elasticsearch"
 $Releases = "https://api.github.com/repos/$Repository/releases"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $Response = (Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json)
-$Latest = $Response.tag_name | Where-Object{($_ -notmatch "-rc")} | ForEach-Object{($_ -replace "v","")} | Sort-Object -Descending | Select-Object -First 1
+$Versions = $Response.tag_name | Where-Object{($_ -notmatch "-rc")} | ForEach-Object{($_ -replace "v","")}
+$Latest = ($Versions | ForEach-Object{[System.Version]$_ } | Sort-Object -Descending | Select-Object -First 1).ToString()
 $Item = $Response | Where-Object{($_.tag_name -eq "v$Latest")}
 $Tag = $Item.tag_name
 $Published = $Item.published_at
@@ -1335,7 +1336,8 @@ $Repository = "elastic/kibana"
 $Releases = "https://api.github.com/repos/$Repository/releases"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $Response = (Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json)
-$Latest = $Response.tag_name | Where-Object{($_ -notmatch "-rc")} | ForEach-Object{($_ -replace "v","")} | Sort-Object -Descending | Select-Object -First 1
+$Versions = $Response.tag_name | Where-Object{($_ -notmatch "-rc")} | ForEach-Object{($_ -replace "v","")}
+$Latest = ($Versions | ForEach-Object{[System.Version]$_ } | Sort-Object -Descending | Select-Object -First 1).ToString()
 $Item = $Response | Where-Object{($_.tag_name -eq "v$Latest")}
 $Tag = $Item.tag_name
 $Published = $Item.published_at
@@ -6751,6 +6753,41 @@ if (Test-Path "$($MemProcFS)")
                                 $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
                                 # ConditionalFormatting
                                 Add-ConditionalFormatting -Address $WorkSheet.Cells["G:G"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("-nop",$G1)))' -BackgroundColor Red
+                                }
+                            }
+                        }
+                    }
+                }
+
+                # Task Scheduler running suspicious command line argument: /s --> Remote Scheduled Task
+                $Import = $Tasks | Where-Object { $_.Parameters -match " /s " }
+                $Count = ($Import | Measure-Object).Count
+                if ($Count -gt 0)
+                {
+                    Write-Host "[Alert] Task Scheduler running suspicious command line argument which indicates a Remote Scheduled Task: /s ($Count)" -ForegroundColor Yellow
+                    New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV" -ItemType Directory -Force | Out-Null
+                    $Import | Export-Csv -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\Remote-Scheduled-Task.csv" -NoTypeInformation -Encoding UTF8
+
+                    # XLSX
+                    if (Get-Module -ListAvailable -Name ImportExcel)
+                    {
+                        if (Test-Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\Remote-Scheduled-Task.csv")
+                        {
+                            if([int](& $xsv count -d "," "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\Remote-Scheduled-Task.csv") -gt 0)
+                            {
+                                New-Item "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX" -ItemType Directory -Force | Out-Null
+                                $Import = Import-Csv "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\CSV\Remote-Scheduled-Task.csv" -Delimiter ","
+                                $Import | Export-Excel -Path "$OUTPUT_FOLDER\sys\tasks\Suspicious-Tasks\Parameters\XLSX\Remote-Scheduled-Task.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Remote Scheduled Task" -CellStyleSB {
+                                param($WorkSheet)
+                                # BackgroundColor and FontColor for specific cells of TopRow
+                                $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                # HorizontalAlignment "Center" of columns A, D-E and H-K
+                                $WorkSheet.Cells["A:A"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["D:E"].Style.HorizontalAlignment="Center"
+                                $WorkSheet.Cells["H:K"].Style.HorizontalAlignment="Center"
+                                # ConditionalFormatting
+                                Add-ConditionalFormatting -Address $WorkSheet.Cells["G:G"] -WorkSheet $WorkSheet -RuleType 'Expression' 'NOT(ISERROR(FIND("/s",$G1)))' -BackgroundColor Red
                                 }
                             }
                         }
