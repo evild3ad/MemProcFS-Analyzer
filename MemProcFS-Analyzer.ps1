@@ -4,7 +4,7 @@
 # @copyright: Copyright (c) 2021-2023 Martin Willing. All rights reserved.
 # @contact:   Any feedback or suggestions are always welcome and much appreciated - mwilling@lethal-forensics.com
 # @url:       https://lethal-forensics.com/
-# @date:      2023-12-09
+# @date:      2023-12-10
 #
 #
 # ██╗     ███████╗████████╗██╗  ██╗ █████╗ ██╗      ███████╗ ██████╗ ██████╗ ███████╗███╗   ██╗███████╗██╗ ██████╗███████╗
@@ -266,6 +266,7 @@ $script:EvtxECmd = "$SCRIPT_DIR\Tools\EvtxECmd\EvtxECmd.exe"
 
 # IPinfo CLI
 $script:IPinfo = "$SCRIPT_DIR\Tools\IPinfo\ipinfo.exe"
+$IPInfoToken = "access_token" # Please insert your Access Token here (Default: access_token)
 
 # jq
 $script:jq = "$SCRIPT_DIR\Tools\jq\jq-win64.exe"
@@ -2684,13 +2685,20 @@ if (Test-Path "$($MemProcFS)")
         else 
         {
             # CurrentVersion
-            $CurrentVersion = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentVersion.txt" | Select-Object -Skip 2
+            if (Test-Path "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentVersion.txt")
+            {
+                $CurrentVersion = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentVersion.txt" | Select-Object -Skip 2
 
-            # Major
-            $Major = $CurrentVersion.split('.')[0]
+                # Major
+                $Major = $CurrentVersion.split('.')[0]
 
-            # Minor
-            $Minor = $CurrentVersion.split('.')[1]
+                # Minor
+                $Minor = $CurrentVersion.split('.')[1]
+            }
+            else
+            {
+                Write-Host "[Error] $DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentVersion.txt does NOT exist." -ForegroundColor Red
+            }
         }
 
         # Windows 10, Windows 11, Windows Server 2016, Windows Server 2019, and Windows Server 2022
@@ -2706,7 +2714,14 @@ if (Test-Path "$($MemProcFS)")
             $ReleaseID = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ReleaseId.txt" | Select-Object -Skip 2
     
             # CurrentBuildNumber
-            [int]$CurrentBuildNumber = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentBuildNumber.txt" | Select-Object -Skip 2
+            if (Test-Path "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentBuildNumber.txt")
+            {
+                [int]$CurrentBuildNumber = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentBuildNumber.txt" | Select-Object -Skip 2
+            }
+            else
+            {
+                Write-Host "[Error] $DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentBuildNumber.txt does NOT exist." -ForegroundColor Red
+            }
 
             # UBR
             if (Test-Path "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\UBR.txt")
@@ -2792,36 +2807,46 @@ if (Test-Path "$($MemProcFS)")
         }
 
         # RegisteredOwner
-        $RegisteredOwner = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\RegisteredOwner.txt" | Select-Object -Skip 2
-        if ($null -ne $RegisteredOwner)
+        if (Test-Path "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\RegisteredOwner.txt")
         {
-            Write-Output "[Info]  RegisteredOwner: $RegisteredOwner"
+            $RegisteredOwner = Get-Content "$DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\RegisteredOwner.txt" | Select-Object -Skip 2
+            if ($null -ne $RegisteredOwner)
+            {
+                Write-Output "[Info]  RegisteredOwner: $RegisteredOwner"
+            }
+            else
+            {
+                Write-Output "[Info]  RegisteredOwner: --"
+            }
         }
         else
         {
-            Write-Output "[Info]  RegisteredOwner: --"
+            Write-Host "[Error] $DriveLetter\registry\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\RegisteredOwner.txt does NOT exist." -ForegroundColor Red
         }
 
         # Check if it's a Domain Controller (Active Directory)
         # HKLM\System\ControlSet00$CurrentControlSet\Services\ADWS (Active Directory Domain Services)
         # HKLM\System\ControlSet00$CurrentControlSet\Services\NTDS (Windows NT Directory Services)
-        if ((Get-ChildItem -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\services" | Select-Object -ExpandProperty FullName | Select-String -Pattern "\\ADWS" -Quiet) -And (Get-ChildItem -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\services" | Select-Object -ExpandProperty FullName | Select-String -Pattern "\\NTDS" -Quiet))
+        if  (Test-Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\services")
         {
-            # ProductType
-            # WinNT - Windows Client / Windows NT Workstation
-            # LanmanNT – Domain Controller
-            # ServerNT – Member Server / ServerNT - Windows NT Server Standalone
-            if (Get-Content -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ProductOptions\ProductType.txt" | Select-Object -Skip 2 | Select-String -Pattern "LanmanNT" -Quiet)
+            if ((Get-ChildItem -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\services" | Select-Object -ExpandProperty FullName | Select-String -Pattern "\\ADWS" -Quiet) -And (Get-ChildItem -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\services" | Select-Object -ExpandProperty FullName | Select-String -Pattern "\\NTDS" -Quiet))
             {
-                $ProductType = Get-Content -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ProductOptions\ProductType.txt" | Select-Object -Skip 2
-                Write-Output "[Info]  Product Type: Domain Controller ($ProductType)"
-            }
+                # ProductType
+                # WinNT - Windows Client / Windows NT Workstation
+                # LanmanNT – Domain Controller
+                # ServerNT – Member Server / ServerNT - Windows NT Server Standalone
+                if (Get-Content -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ProductOptions\ProductType.txt" | Select-Object -Skip 2 | Select-String -Pattern "LanmanNT" -Quiet)
+                {
+                    $ProductType = Get-Content -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ProductOptions\ProductType.txt" | Select-Object -Skip 2
+                    Write-Output "[Info]  Product Type: Domain Controller ($ProductType)"
+                }
 
-            # ProductSuite
-            $ProductSuite = Get-Content -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ProductOptions\ProductSuite.txt" | Select-Object -Skip 2
-            if ($ProductSuite)
-            {
-                Write-Output "[Info]  Product Suite: $ProductSuite"
+                # ProductSuite
+                $ProductSuite = Get-Content -Path "$DriveLetter\registry\HKLM\SYSTEM\ControlSet00$CurrentControlSet\Control\ProductOptions\ProductSuite.txt" | Select-Object -Skip 2
+                if ($ProductSuite)
+                {
+                    Write-Output "[Info]  Product Suite: $ProductSuite"
+                }
             }
         }
 
@@ -3786,16 +3811,14 @@ if (Test-Path "$($MemProcFS)")
 
                                     # Access Token
                                     # https://ipinfo.io/signup?ref=cli
-                                    $Token = "access_token" # Please insert your Access Token here
-
-                                    if (!("$Token" -eq "access_token"))
+                                    if (!("$IPInfoToken" -eq "access_token"))
                                     {
                                         # Summarize IPs
                                         # https://ipinfo.io/summarize-ips
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo summarize -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\Summary.txt"
+                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo summarize -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\Summary.txt"
 
                                         # CSV
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo --csv -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\IPinfo.csv"
+                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo --csv -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\IPinfo.csv"
 
                                         # XLSX
                                         if (Get-Module -ListAvailable -Name ImportExcel)
@@ -3886,14 +3909,14 @@ if (Test-Path "$($MemProcFS)")
                                     # https://ipinfo.io/map
                                     Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo map | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\Map.txt"
 
-                                    if (!("$Token" -eq "access_token"))
+                                    if (!("$IPInfoToken" -eq "access_token"))
                                     {
                                         # Summarize IPs
                                         # https://ipinfo.io/summarize-ips
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo summarize -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\Summary.txt"
+                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo summarize -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\Summary.txt"
 
                                         # CSV
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo --csv -t $Token | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\IPinfo.csv"
+                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo --csv -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\IPinfo.csv"
 
                                         # XLSX
                                         if (Get-Module -ListAvailable -Name ImportExcel)
@@ -4086,7 +4109,7 @@ if (Test-Path "$($MemProcFS)")
             $Count = [string]::Format('{0:N0}',($Import | Measure-Object).Count)
             if ($Count -gt 0)
             {
-                Write-Host "[Alert] TCP on Destination Port 20 detected - May indicates  File Transfer Protocol (FTP) activity ($Count)" -ForegroundColor Red
+                Write-Host "[Alert] TCP on Destination Port 20 detected - May indicates outgoing File Transfer Protocol (FTP) activity ($Count)" -ForegroundColor Red
                 New-Item "$OUTPUT_FOLDER\sys\net\Detections" -ItemType Directory -Force | Out-Null
                 $Import | Out-File "$OUTPUT_FOLDER\sys\net\Detections\TCP-on-Destination-Port-20.txt"
             }
@@ -4293,6 +4316,7 @@ if (Test-Path "$($MemProcFS)")
                     if([int](& $xsv count -d "`t" "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv") -gt 0)
                     {
                         Write-Output "[Info]  Launching Process Tree (TreeView) ... "
+                        Unblock-File -Path "$SCRIPT_DIR\Scripts\Get-ProcessTree\Get-ProcessTree.ps1"
                         Start-Process -FilePath "powershell" -NoNewWindow -ArgumentList "-NoProfile", "-File", "$SCRIPT_DIR\Scripts\Get-ProcessTree\Get-ProcessTree.ps1", "-CSVPath", "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv"
                         Start-Sleep -Seconds 3
                         $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
