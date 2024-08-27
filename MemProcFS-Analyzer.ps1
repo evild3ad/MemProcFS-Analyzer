@@ -1030,7 +1030,7 @@ if ($NetworkListManager -eq "True")
     }
 
     # Check if Backblaze B2 Platform is reachable
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/AmcacheParser.zip"
+    $URL = "https://download.mikestammer.com/net6/AmcacheParser.zip"
     $StatusCode = (Invoke-WebRequest -Uri $URL -UseBasicParsing -DisableKeepAlive | Select-Object StatusCode).StatusCode
     if ($StatusCode -ne "200") 
     {
@@ -1430,7 +1430,7 @@ if (Test-Path "$($AmcacheParser)")
 
     # Determining latest release of AmcacheParser
     $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/AmcacheParser.zip"
+    $URL = "https://download.mikestammer.com/net6/AmcacheParser.zip"
     $Headers = (Invoke-WebRequest -Uri $URL -UseBasicParsing -Method Head).Headers
     $LatestSHA1 = $Headers["x-bz-content-sha1"]
 }
@@ -1445,7 +1445,7 @@ if ($null -eq $CurrentSHA1 -or $CurrentSHA1 -ne $LatestSHA1)
     # Download latest release from Backblaze
     Write-Output "[Info]  Dowloading Latest Release ..."
     $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/AmcacheParser.zip"
+    $URL = "https://download.mikestammer.com/net6/AmcacheParser.zip"
     $Zip = "AmcacheParser.zip"
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest -Uri $URL -OutFile "$SCRIPT_DIR\Tools\$Zip"
@@ -1504,7 +1504,7 @@ if (Test-Path "$($AppCompatCacheParser)")
 
     # Determining latest release of AppCompatCacheParser
     $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/AppCompatCacheParser.zip"
+    $URL = "https://download.mikestammer.com/net6/AppCompatCacheParser.zip"
     $Headers = (Invoke-WebRequest -Uri $URL -UseBasicParsing -Method Head).Headers
     $LatestSHA1 = $Headers["x-bz-content-sha1"]
 }
@@ -1519,7 +1519,7 @@ if ($null -eq $CurrentSHA1 -or $CurrentSHA1 -ne $LatestSHA1)
     # Download latest release from Backblaze
     Write-Output "[Info]  Dowloading Latest Release ..."
     $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/AppCompatCacheParser.zip"
+    $URL = "https://download.mikestammer.com/net6/AppCompatCacheParser.zip"
     $Zip = "AppCompatCacheParser.zip"
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest -Uri $URL -OutFile "$SCRIPT_DIR\Tools\$Zip"
@@ -1662,7 +1662,7 @@ if (Test-Path "$($EvtxECmd)")
 
     # Determining latest release of EvtxECmd
     $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/EvtxECmd.zip"
+    $URL = "https://download.mikestammer.com/net6/EvtxECmd.zip"
     $Headers = (Invoke-WebRequest -Uri $URL -UseBasicParsing -Method Head).Headers
     $LatestSHA1 = $Headers["x-bz-content-sha1"]
 }
@@ -1677,7 +1677,7 @@ if ($null -eq $CurrentSHA1 -or $CurrentSHA1 -ne $LatestSHA1)
     # Download latest release from Backblaze
     Write-Output "[Info]  Dowloading Latest Release ..."
     $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/EvtxECmd.zip"
+    $URL = "https://download.mikestammer.com/net6/EvtxECmd.zip"
     $Zip = "EvtxECmd.zip"
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest -Uri $URL -OutFile "$SCRIPT_DIR\Tools\$Zip"
@@ -2036,7 +2036,7 @@ if (Test-Path "$($RECmd)")
 
     # Determining latest release of RECmd
     $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/RECmd.zip"
+    $URL = "https://download.mikestammer.com/net6/RECmd.zip"
     $Headers = (Invoke-WebRequest -Uri $URL -UseBasicParsing -Method Head).Headers
     $LatestSHA1 = $Headers["x-bz-content-sha1"]
 }
@@ -2051,7 +2051,7 @@ if ($null -eq $CurrentSHA1 -or $CurrentSHA1 -ne $LatestSHA1)
     # Download latest release from Backblaze
     Write-Output "[Info]  Dowloading Latest Release ..."
     $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/RECmd.zip"
+    $URL = "https://download.mikestammer.com/net6/RECmd.zip"
     $Zip = "RECmd.zip"
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest -Uri $URL -OutFile "$SCRIPT_DIR\Tools\$Zip"
@@ -2110,7 +2110,7 @@ if (Test-Path "$($SBECmd)")
 
     # Determining latest release of SBECmd
     $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/SBECmd.zip"
+    $URL = "https://download.mikestammer.com/net6/SBECmd.zip"
     $Headers = (Invoke-WebRequest -Uri $URL -UseBasicParsing -Method Head).Headers
     $LatestSHA1 = $Headers["x-bz-content-sha1"]
 }
@@ -2125,7 +2125,7 @@ if ($null -eq $CurrentSHA1 -or $CurrentSHA1 -ne $LatestSHA1)
     # Download latest release from Backblaze
     Write-Output "[Info]  Dowloading Latest Release ..."
     $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/SBECmd.zip"
+    $URL = "https://download.mikestammer.com/net6/SBECmd.zip"
     $Zip = "SBECmd.zip"
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest -Uri $URL -OutFile "$SCRIPT_DIR\Tools\$Zip"
