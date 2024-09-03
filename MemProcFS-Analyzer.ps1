@@ -1,10 +1,10 @@
-﻿# MemProcFS-Analyzer v1.0
+﻿# MemProcFS-Analyzer v1.1.0
 #
 # @author:    Martin Willing
-# @copyright: Copyright (c) 2021-2023 Martin Willing. All rights reserved.
+# @copyright: Copyright (c) 2021-2024 Martin Willing. All rights reserved.
 # @contact:   Any feedback or suggestions are always welcome and much appreciated - mwilling@lethal-forensics.com
 # @url:       https://lethal-forensics.com/
-# @date:      2023-12-10
+# @date:      2024-09-02
 #
 #
 # ██╗     ███████╗████████╗██╗  ██╗ █████╗ ██╗      ███████╗ ██████╗ ██████╗ ███████╗███╗   ██╗███████╗██╗ ██████╗███████╗
@@ -16,8 +16,8 @@
 #
 #
 # Dependencies:
-# 7-Zip 23.01 Standalone Console (2023-06-20)
-# https://www.7-zip.org/download.html
+# 7-Zip 24.08 Standalone Console (2024-08-11)
+# https://www.7-zip.org/download.html --> 7za.exe (x64)
 #
 # AmcacheParser v1.5.1.0 (.NET 6)
 # https://ericzimmerman.github.io/
@@ -25,15 +25,15 @@
 # AppCompatCacheParser v1.5.0.0 (.NET 6)
 # https://ericzimmerman.github.io/
 #
-# ClamAV - Download --> Windows --> clamav-1.2.0.win.x64.msi (2023-08-28)
+# ClamAV - Download --> Windows --> clamav-1.4.0.win.x64.msi (2024-08-15)
 # https://www.clamav.net/downloads
 # https://docs.clamav.net/manual/Usage/Configuration.html#windows --> First Time Set-Up
 # https://blog.clamav.net/
 #
-# Dokany Library Bundle v2.0.6.1000 (2022-10-02)
+# Dokany File System Library v2.2.0.1000 (2024-08-18)
 # https://github.com/dokan-dev/dokany/releases/latest --> DokanSetup.exe
 #
-# Elasticsearch 8.11.2 (2023-12-07)
+# Elasticsearch 8.15.0 (2024-08-08)
 # https://www.elastic.co/downloads/elasticsearch
 #
 # entropy v1.1 (2023-07-28)
@@ -42,22 +42,22 @@
 # EvtxECmd v1.5.0.0 (.NET 6)
 # https://ericzimmerman.github.io/
 #
-# ImportExcel v7.8.6 (2023-10-12)
+# ImportExcel v7.8.9 (2024-06-21)
 # https://github.com/dfinke/ImportExcel
 #
-# IPinfo CLI 3.1.1 (2023-10-02)
+# IPinfo CLI 3.3.1 (2024-03-01)
 # https://github.com/ipinfo/cli
 #
-# jq v1.7 (2023-09-06)
+# jq v1.7.1 (2023-12-13)
 # https://github.com/stedolan/jq
 #
-# Kibana 8.11.2 (2023-12-07)
+# Kibana 8.15.0 (2024-08-08)
 # https://www.elastic.co/downloads/kibana
 #
 # lnk_parser v0.2.0 (2022-08-10)
 # https://github.com/AbdulRhmanAlfaifi/lnk_parser
 #
-# MemProcFS v5.8.18 - The Memory Process File System (2023-08-20)
+# MemProcFS v5.11.4 - The Memory Process File System (2024-07-29)
 # https://github.com/ufrisk/MemProcFS
 #
 # RECmd v2.0.0.0 (.NET 6)
@@ -69,10 +69,10 @@
 # xsv v0.13.0 (2018-05-12)
 # https://github.com/BurntSushi/xsv
 #
-# YARA v4.3.2 (2023-06-12)
+# YARA v4.5.1 (2024-05-25)
 # https://virustotal.github.io/yara/
 #
-# Zircolite v2.10.0 (2023-12-02)
+# Zircolite v2.20.0 (2024-03-29)
 # https://github.com/wagga40/Zircolite
 #
 #
@@ -180,7 +180,7 @@
 # Added: Improved Drive Letter (Mount Point) Handling
 # Fixed: Other minor fixes and improvements
 #
-# Version 1.0
+# Version 1.0.0
 # Release Date: 2023-11-22
 # Added: Improved Hunting for Suspicious Scheduled Tasks
 # Added: 318 YARA Custom Rules
@@ -191,8 +191,20 @@
 # Added: FindEvil: AV_DETECT
 # Fixed: Other minor fixes and improvements
 #
+# Version 1.1.0
+# Release Date: 2024-09-02
+# Added: Updater.ps1
+# Added: FS_Sys_Sysinfo
+# Added: FS_Forensic_Prefetch
+# Added: 376 YARA Custom Rules
+# Added: Offline Mode
+# Added: MemProcFS.log
+# Added: Microsoft Protection Logs (MPLogs)
+# Added: ProcessesAndModules-Extended_Info.ps1 (Collect-MemoryDump)
+# Fixed: Other minor fixes and improvements
 #
-# Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.3693) and PowerShell 5.1 (5.1.19041.3693)
+#
+# Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.4780) and PowerShell 5.1 (5.1.19041.4780)
 #
 #
 #############################################################################################################################################################################################
@@ -200,7 +212,7 @@
 
 <#
 .SYNOPSIS
-  MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR
+  MemProcFS-Analyzer v1.1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR
 
 .DESCRIPTION
   MemProcFS-Analyzer.ps1 is a PowerShell script utilized to simplify the usage of MemProcFS and to assist with the memory analysis workflow.
@@ -266,6 +278,8 @@ $script:EvtxECmd = "$SCRIPT_DIR\Tools\EvtxECmd\EvtxECmd.exe"
 
 # IPinfo CLI
 $script:IPinfo = "$SCRIPT_DIR\Tools\IPinfo\ipinfo.exe"
+
+# IPinfo CLI - Access Token
 $IPInfoToken = "access_token" # Please insert your Access Token here (Default: access_token)
 
 # jq
@@ -293,10 +307,14 @@ $script:xsv = "$SCRIPT_DIR\Tools\xsv\xsv.exe"
 $script:yara64 = "$SCRIPT_DIR\Tools\YARA\yara64.exe"
 
 # Zircolite
-$script:zircolite = "$SCRIPT_DIR\Tools\Zircolite\zircolite_win10.exe"
+$script:zircolite = "$SCRIPT_DIR\Tools\Zircolite\zircolite.exe"
 
 # Archive Password
 $script:PASSWORD = "MemProcFS"
+
+# MemProcFS Logfile
+New-Item "$SCRIPT_DIR\Logs" -ItemType Directory -Force | Out-Null
+$script:MemProcFSLogfile = "$SCRIPT_DIR\Logs\MemProcFS.log"
 
 # Process Whitelist (Forensic Mode)
 # https://github.com/ufrisk/MemProcFS/wiki/_CommandLine#-forensic-process-skip
@@ -328,7 +346,16 @@ Function Header {
 
 # Windows Title
 $script:DefaultWindowsTitle = $Host.UI.RawUI.WindowTitle
-$Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+$Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.1 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+
+# Check if MemProcFS.exe exists
+if (!(Test-Path "$($MemProcFS)"))
+{
+    Write-Host "[Error] MemProcFS.exe NOT found." -ForegroundColor Red
+    Write-Host "        Note: Please run 'Updater.ps1' to install MemProcFS-Analyzer (incl. all dependencies)." -ForegroundColor Red
+    $Host.UI.RawUI.WindowTitle = "$DefaultWindowsTitle"
+    Exit
+}
 
 # Check if the PowerShell script is being run with admin rights
 if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
@@ -373,13 +400,13 @@ else
 
 # Function Get-FileSize
 Function script:Get-FileSize {
-Param ([long]$Size)
-If ($Size -gt 1TB) {[string]::Format("{0:0.00} TB", $Size / 1TB)}
-ElseIf ($Size -gt 1GB) {[string]::Format("{0:0.00} GB", $Size / 1GB)}
-ElseIf ($Size -gt 1MB) {[string]::Format("{0:0.00} MB", $Size / 1MB)}
-ElseIf ($Size -gt 1KB) {[string]::Format("{0:0.00} KB", $Size / 1KB)}
-ElseIf ($Size -gt 0) {[string]::Format("{0:0.00} Bytes", $Size)}
-Else {""}
+    Param ([long]$Size)
+    If ($Size -gt 1TB) {[string]::Format("{0:0.00} TB", $Size / 1TB)}
+    ElseIf ($Size -gt 1GB) {[string]::Format("{0:0.00} GB", $Size / 1GB)}
+    ElseIf ($Size -gt 1MB) {[string]::Format("{0:0.00} MB", $Size / 1MB)}
+    ElseIf ($Size -gt 1KB) {[string]::Format("{0:0.00} KB", $Size / 1KB)}
+    ElseIf ($Size -gt 0) {[string]::Format("{0:0.00} Bytes", $Size)}
+    Else {""}
 }
 
 # Add the required MessageBox class (Windows PowerShell)
@@ -403,6 +430,7 @@ Function Show-UserInterface
     $Checkbox2 = New-Object 'System.Windows.Forms.CheckBox'
     $Checkbox3 = New-Object 'System.Windows.Forms.CheckBox'
     $Checkbox4 = New-Object 'System.Windows.Forms.CheckBox'
+    $CheckboxOfflineMode = New-Object 'System.Windows.Forms.CheckBox'
     $StatusBar = New-Object 'System.Windows.Forms.StatusBar'
     $StatusBarPanel1 = New-Object 'System.Windows.Forms.StatusBarPanel'
     $LabelMemoryDump = New-Object 'System.Windows.Forms.Label'
@@ -462,7 +490,7 @@ Function Show-UserInterface
 
     $CheckForUpdatesToolStripMenuItem_Click={
 
-        $CurrentVersion = "1.0"
+        $CurrentVersion = "1.1.0"
 
         $StatusBar.Text = "Checking latest release on GitHub ..."
 
@@ -495,7 +523,7 @@ Function Show-UserInterface
             # Up-To-Date
             if ($CurrentVersion -eq $LatestRelease)
             {
-                $MessageBody = "MemProcFS-Analyzer v$CurrentVersion`nCopyright (c) 2021-2023 Martin Willing`n`nYou are using the latest version of MemProcFS-Analyzer."
+                $MessageBody = "MemProcFS-Analyzer v$CurrentVersion`nCopyright (c) 2021-2024 Martin Willing`n`nYou are using the latest version of MemProcFS-Analyzer."
                 $MessageTitle = "MemProcFS-Analyzer"
                 $ButtonType = "OK"
                 $MessageIcon = "Info"
@@ -506,7 +534,7 @@ Function Show-UserInterface
             # Beta-Tester
             if ($CurrentVersion -gt $LatestRelease)
             {
-                $MessageBody = "MemProcFS-Analyzer v$CurrentVersion`nCopyright (c) 2021-2023 Martin Willing`n`nHello Beta-Tester. Happy Testing! ;-)"
+                $MessageBody = "MemProcFS-Analyzer v$CurrentVersion`nCopyright (c) 2021-2024 Martin Willing`n`nHello Beta-Tester. Happy Testing! ;-)"
                 $MessageTitle = "MemProcFS-Analyzer"
                 $ButtonType = "OK"
                 $MessageIcon = "Info"
@@ -546,7 +574,7 @@ Function Show-UserInterface
 	}
 
     $AboutToolStripMenuItem_Click = {
-        $MessageBody = "MemProcFS-Analyzer v1.0`nCopyright (c) 2021-2023 Martin Willing"
+        $MessageBody = "MemProcFS-Analyzer v1.1`nCopyright (c) 2021-2024 Martin Willing"
         $MessageTitle = "MemProcFS-Analyzer"
         $ButtonType = "OK"
         $MessageIcon = "Info"
@@ -613,6 +641,21 @@ Function Show-UserInterface
         }
     }
 
+    $CheckboxOfflineMode_CheckedChanged =
+    {
+        if($CheckboxOfflineMode.Checked -eq $true)
+	    {
+            # Offline Mode - Enabled
+            $script:OfflineMode = "Enabled"
+        }
+
+        if($CheckboxOfflineMode.Checked -eq $false)
+        {
+            # Offline Mode - Disabled
+            $script:OfflineMode = $null
+        }
+    }
+
     $Form_StateCorrection_Load =
     {
         $FormMemProcFSAnalyzer.WindowState = $InitialFormWindowState
@@ -632,6 +675,7 @@ Function Show-UserInterface
             $Checkbox2.remove_CheckedChanged($Checkbox2_CheckedChanged)
             $Checkbox3.remove_CheckedChanged($Checkbox3_CheckedChanged)
             $Checkbox4.remove_CheckedChanged($Checkbox4_CheckedChanged)
+            $CheckboxOfflineMode.remove_CheckedChanged($CheckboxOfflineMode_CheckedChanged)
             $ButtonBrowse1.remove_Click($ButtonBrowseMemory_Click)
             $ButtonBrowse2.remove_Click($ButtonBrowsePagefile_Click)
             $ButtonStart.remove_MouseClick($ButtonStart_Click)
@@ -661,6 +705,7 @@ Function Show-UserInterface
     $FormMemProcFSAnalyzer.Controls.Add($Checkbox2)
     $FormMemProcFSAnalyzer.Controls.Add($Checkbox3)
     $FormMemProcFSAnalyzer.Controls.Add($Checkbox4)
+    $FormMemProcFSAnalyzer.Controls.Add($CheckboxOfflineMode)
     $FormMemProcFSAnalyzer.Controls.Add($StatusBar)
     $FormMemProcFSAnalyzer.Controls.Add($LabelMemoryDump)
     $FormMemProcFSAnalyzer.Controls.Add($LabelPageFile)
@@ -681,7 +726,7 @@ Function Show-UserInterface
     $FormMemProcFSAnalyzer.MinimizeBox = $False
     $FormMemProcFSAnalyzer.Name = 'FormMemProcFSAnalyzer'
     $FormMemProcFSAnalyzer.StartPosition = 'CenterScreen'
-    $FormMemProcFSAnalyzer.Text = 'MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR'
+    $FormMemProcFSAnalyzer.Text = 'MemProcFS-Analyzer v1.1 - Automated Forensic Analysis of Windows Memory Dumps for DFIR'
     $FormMemProcFSAnalyzer.TopLevel = $True
     $FormMemProcFSAnalyzer.TopMost = $True
     $FormMemProcFSAnalyzer.Add_Shown({$FormMemProcFSAnalyzer.Activate()})
@@ -722,6 +767,16 @@ Function Show-UserInterface
 	$Checkbox4.UseVisualStyleBackColor = $True
     $Checkbox4.add_CheckedChanged($Checkbox4_CheckedChanged)
 
+    # CheckBoxOfflineMode
+    $CheckboxOfflineMode.Location = New-Object System.Drawing.Point(339, 200)
+    $CheckboxOfflineMode.Name = 'CheckboxOfflineMode'
+    $CheckboxOfflineMode.Size = New-Object System.Drawing.Size(92, 24)
+    $CheckboxOfflineMode.TabIndex = 13
+    $CheckboxOfflineMode.Text = 'Offline Mode'
+    $CheckboxOfflineMode.UseVisualStyleBackColor = $True
+    $CheckboxOfflineMode.add_CheckedChanged($CheckboxOfflineMode_CheckedChanged)
+    $ToolTip1.SetToolTip($CheckboxOfflineMode, 'Offline Mode')
+    
     # Status Bar
     $StatusBar.Location = New-Object System.Drawing.Point(0, 240)
     $StatusBar.Name = 'StatusBar'
@@ -803,12 +858,12 @@ Function Show-UserInterface
     $OpenFileDialog1.Filter = 'Memory Dump Files (*.001;*.bin;*.dmp;*.img;*.mem;*.raw;*.vmem)|*.001;*.bin;*.dmp;*.img;*.mem;*.raw;*.vmem|All Files (*.*)|*.*'
     $OpenFileDialog1.InitialDirectory = "::{20D04FE0-3AEA-1069-A2D8-08002B30309D}" # MyComputer
     $OpenFileDialog1.ReadOnlyChecked = $True
-    $OpenFileDialog1.Title = 'MemProcFS-Analyzer v1.0 - Select your Raw Physical Memory Dump'
+    $OpenFileDialog1.Title = 'MemProcFS-Analyzer v1.1.0 - Select your Raw Physical Memory Dump'
 
     # OpenFileDialog2
     $OpenFileDialog2.Filter = 'Page Files (*.sys)|*.sys|All Files (*.*)|*.*'
     $OpenFileDialog2.ReadOnlyChecked = $True
-    $OpenFileDialog2.Title = 'MemProcFS-Analyzer v1.0 - Select your pagefile.sys (Optional)'
+    $OpenFileDialog2.Title = 'MemProcFS-Analyzer v1.1.0 - Select your pagefile.sys (Optional)'
 
     # ButtonStart
     $ButtonStart.DialogResult = 'OK'
@@ -985,8 +1040,8 @@ Write-Host "$Logo"
 
 # Header
 Write-Output ""
-Write-Output "MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
-Write-Output "(c) 2021-2023 Martin Willing at Lethal-Forensics (https://lethal-forensics.com/)"
+Write-Output "MemProcFS-Analyzer v1.1 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+Write-Output "(c) 2021-2024 Martin Willing at Lethal-Forensics (https://lethal-forensics.com/)"
 Write-Output ""
 
 # Analysis date (ISO 8601)
@@ -997,1443 +1052,6 @@ Write-Output ""
 }
 
 #endregion Header
-
-#############################################################################################################################################################################################
-#############################################################################################################################################################################################
-
-#region Updater
-
-Function Updater {
-
-Function InternetConnectivityCheck {
-
-# Internet Connectivity Check (Vista+)
-$NetworkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]‘{DCB00C01-570F-4A9B-8D69-199FDBA5723B}’)).IsConnectedToInternet
-
-# Offline
-if (!($NetworkListManager -eq "True"))
-{
-    Write-Host "[Error] Your computer is NOT connected to the Internet." -ForegroundColor Red
-    $Host.UI.RawUI.WindowTitle = "$DefaultWindowsTitle"
-    Exit
-}
-
-# Online
-if ($NetworkListManager -eq "True")
-{
-    # Check if GitHub is reachable
-    if (!(Test-NetConnection -ComputerName github.com -Port 443).TcpTestSucceeded)
-    {
-        Write-Host "[Error] github.com is NOT reachable. Please check your network connection and try again." -ForegroundColor Red
-        $Host.UI.RawUI.WindowTitle = "$DefaultWindowsTitle"
-        Exit
-    }
-
-    # Check if Backblaze B2 Platform is reachable
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/AmcacheParser.zip"
-    $StatusCode = (Invoke-WebRequest -Uri $URL -UseBasicParsing -DisableKeepAlive | Select-Object StatusCode).StatusCode
-    if ($StatusCode -ne "200") 
-    {
-        Write-Host "[Error] f001.backblazeb2.com is NOT reachable. Please check your network connection and try again." -ForegroundColor Red
-        $Host.UI.RawUI.WindowTitle = "$DefaultWindowsTitle"
-        Exit
-    }
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-MemProcFS {
-
-# Check Current Version of MemProcFS
-if (Test-Path "$($MemProcFS)")
-{
-    if (Test-Path "$SCRIPT_DIR\Tools\MemProcFS\Version.txt")
-    {
-        [version]$CurrentVersion = Get-Content "$SCRIPT_DIR\Tools\MemProcFS\Version.txt"
-        Write-Output "[Info]  Current Version: MemProcFS v$CurrentVersion"
-    }
-}
-else
-{
-    Write-Output "[Info]  MemProcFS NOT found."
-    $CurrentVersion = ""
-}
-
-# Determining latest release on GitHub
-$Repository = "ufrisk/MemProcFS"
-$Releases = "https://api.github.com/repos/$Repository/releases"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$Response = (Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json)[0]
-$Published = $Response.published_at
-$Download = ($Response.assets | Select-Object -ExpandProperty browser_download_url | Select-String -Pattern "win_x64" | Out-String).Trim()
-$ReleaseDate = $Published.split('T')[0]
-$Version = $Download | ForEach-Object{($_ -split "_")[4]} | ForEach-Object{($_ -split "-")[0]} | ForEach-Object{($_ -replace "v","")}
-
-if ($CurrentVersion)
-{
-    Write-Output "[Info]  Latest Release:  MemProcFS v$Version ($ReleaseDate)"
-}
-else
-{
-    Write-Output "[Info]  Latest Release: MemProcFS v$Version ($ReleaseDate)"
-}
-
-# Check if MemProcFS needs to be downloaded/updated
-if ($CurrentVersion -ne $Version -Or $null -eq $CurrentVersion)
-{
-    # Download latest release from GitHub
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $Zip = "MemProcFS.zip"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $Download -OutFile "$SCRIPT_DIR\$Zip"
-
-    if (Test-Path "$SCRIPT_DIR\$Zip")
-    {
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        Expand-Archive -Path "$SCRIPT_DIR\$Zip" -DestinationPath "$SCRIPT_DIR\Tools\MemProcFS" -Force
-
-        # Remove Downloaded Archive
-        Start-Sleep 5
-        Remove-Item "$SCRIPT_DIR\$Zip" -Force
-
-        # New Version
-        $CurrentVersion = ([System.Diagnostics.FileVersionInfo]::GetVersionInfo($MemProcFS).FileVersion).SubString(0,5)
-        & $MemProcFS | Out-File "$SCRIPT_DIR\Tools\MemProcFS\help.txt"
-        Get-Content "$SCRIPT_DIR\Tools\MemProcFS\help.txt" | Select-String -Pattern "COMMAND LINE REFERENCE:" | ForEach-Object{($_ -split "v")[1]} | ForEach-Object{($_ -split "COMMAND LINE REFERENCE:")[0]} | Out-File "$SCRIPT_DIR\Tools\MemProcFS\Version.txt"
-    } 
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of MemProcFS." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-YaraCustomRules {
-
-# Check Current Version of YARA Custom Rules
-if (Test-Path "$SCRIPT_DIR\yara\*")
-{
-    if (Test-Path "$SCRIPT_DIR\yara\README.md")
-    {
-        $Content = Get-Content "$SCRIPT_DIR\yara\README.md" | Select-String -Pattern "Last updated:"
-        $Pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}"
-        $CurrentVersion = [regex]::Matches($Content, $Pattern).Value
-        Write-Output "[Info]  Current Version of YARA Custom Rules: $CurrentVersion"
-    }
-    else
-    {
-        Write-Output "[Info]  README.md NOT found."
-    }
-}
-else
-{
-    Write-Output "[Info]  YARA Custom Rules NOT found."
-    $CurrentVersion = ""
-}
-
-# Determining latest update on GitHub
-$WebRequest = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/evild3ad/yara/main/README.md"
-$Content = $WebRequest.Content.Split([Environment]::NewLine) | Select-String -Pattern "Last updated:"
-$Pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}"
-$LatestUpdate = [regex]::Matches($Content, $Pattern).Value
-Write-Output "[Info]  Latest Update: $LatestUpdate"
-
-# Check if YARA Custom Rules need to be downloaded/updated
-if ($CurrentVersion -lt $LatestUpdate -Or $null -eq $CurrentVersion)
-{
-    # Download latest YARA Custom Rules from GitHub
-    Write-Output "[Info]  Downloading YARA Custom Rules ..."
-    Invoke-WebRequest "https://github.com/evild3ad/yara/archive/refs/heads/main.zip" -OutFile "$SCRIPT_DIR\yara.zip"
-
-    if (Test-Path "$SCRIPT_DIR\yara.zip")
-    {
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\yara")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\yara" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\yara" -Force
-        }
-
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        Expand-Archive -Path "$SCRIPT_DIR\yara.zip" -DestinationPath "$SCRIPT_DIR" -Force
-
-        # Rename Unpacked Directory
-        Start-Sleep 10
-        Rename-Item "$SCRIPT_DIR\yara-main" "$SCRIPT_DIR\yara" -Force
-
-        # Remove Downloaded Archive
-        Start-Sleep 5
-        Remove-Item "$SCRIPT_DIR\yara.zip" -Force
-    }
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent YARA Custom Rules." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-Dokany {
-
-# Check Current Version of Dokany File System Library
-$Dokany = "$env:SystemDrive\Windows\System32\dokan2.dll"
-if (Test-Path "$($Dokany)")
-{
-    $CurrentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($Dokany).FileVersion
-    $LastWriteTime = ((Get-Item $Dokany).LastWriteTime).ToString("yyyy-MM-dd")
-    Write-Output "[Info]  Current Version: Dokany File System Library v$CurrentVersion ($LastWriteTime)"
-}
-else
-{
-    Write-Output "[Info]  Dokany File System Library NOT found."
-    $CurrentVersion = ""
-}
-
-# Determining latest release of DokanSetup.exe on GitHub
-# Note: Needs possibly a restart of the computer.
-$Repository = "dokan-dev/dokany"
-$Releases = "https://api.github.com/repos/$Repository/releases"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$Response = (Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json)[0]
-$Tag = $Response.tag_name
-$Published = $Response.published_at
-$ReleaseDate = $Published.split('T')[0]
-
-if ($CurrentVersion)
-{
-    Write-Output "[Info]  Latest Release:  Dokany File System Library $Tag ($ReleaseDate)"
-}
-else
-{
-    Write-Output "[Info]  Latest Release: Dokany File System Library $Tag ($ReleaseDate)"
-}
-
-# Check if Dokany File System Library needs to be downloaded/updated
-$LatestRelease = $Tag.Substring(1)
-if ($CurrentVersion -ne $LatestRelease -Or $null -eq $CurrentVersion)
-{
-    Write-Host "[Error] Please download/install the latest release of Dokany File System Library manually:" -ForegroundColor Red
-    Write-Host "        https://github.com/dokan-dev/dokany/releases/latest (DokanSetup.exe)" -ForegroundColor Red
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of Dokany File System Library." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-Elasticsearch {
-
-# Elasticsearch
-# https://github.com/elastic/elasticsearch
-
-# Check Current Version of Elasticsearch
-if (Test-Path "$($Elasticsearch)")
-{
-    $CurrentVersion = & $Elasticsearch --version | ForEach-Object{($_ -split "\s+")[1]} | ForEach-Object{($_ -replace ",","")}
-    Write-Output "[Info]  Current Version: Elasticsearch v$CurrentVersion"
-    Start-Sleep 1
-}
-else
-{
-    Write-Output "[Info]  Elasticsearch NOT found."
-    $CurrentVersion = ""
-}
-
-# Determining latest release of Elasticsearch on GitHub
-$Repository = "elastic/elasticsearch"
-$Releases = "https://api.github.com/repos/$Repository/releases"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$Response = (Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json)
-$Versions = $Response.tag_name | Where-Object{($_ -notmatch "-rc")} | ForEach-Object{($_ -replace "v","")}
-$Latest = ($Versions | ForEach-Object{[System.Version]$_ } | Sort-Object -Descending | Select-Object -First 1).ToString()
-$Item = $Response | Where-Object{($_.tag_name -eq "v$Latest")}
-$Tag = $Item.tag_name
-$Published = $Item.published_at
-$ReleaseDate = $Published.split('T')[0]
-
-if ($CurrentVersion)
-{
-    Write-Output "[Info]  Latest Release:  Elasticsearch $Tag ($ReleaseDate)"
-}
-else
-{
-    Write-Output "[Info]  Latest Release: Elasticsearch $Tag ($ReleaseDate)"
-}
-
-# Check if Elasticsearch needs to be downloaded/updated
-$LatestRelease = $Tag.Substring(1)
-if ($CurrentVersion -ne $LatestRelease -Or $null -eq $CurrentVersion)
-{
-    # Download latest release from elastic.co
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $Download = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$LatestRelease-windows-x86_64.zip"
-    $Zip = "Elasticsearch.zip"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $Download -OutFile "$SCRIPT_DIR\Tools\$Zip"
-
-    if (Test-Path "$SCRIPT_DIR\Tools\$Zip")
-    {
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\Tools\Elasticsearch")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\Elasticsearch" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\Tools\Elasticsearch" -Force
-        }
-
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        Expand-Archive -Path "$SCRIPT_DIR\Tools\$Zip" -DestinationPath "$SCRIPT_DIR\Tools" -Force
-
-        # Rename Unpacked Directory
-        Start-Sleep 10
-        Rename-Item "$SCRIPT_DIR\Tools\elasticsearch-$LatestRelease" "$SCRIPT_DIR\Tools\Elasticsearch" -Force
-
-        # Remove Downloaded Archive
-        Start-Sleep 5
-        Remove-Item "$SCRIPT_DIR\Tools\$Zip" -Force
-    } 
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of Elasticsearch." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-Kibana {
-
-# Kibana
-# https://github.com/elastic/kibana
-
-# Check Current Version of Kibana
-if (Test-Path "$($Kibana)")
-{
-    $CurrentVersion = & $Kibana --version | Select-Object -Last 1
-    Write-Output "[Info]  Current Version: Kibana v$CurrentVersion"
-    Start-Sleep 1
-}
-else
-{
-    Write-Output "[Info]  Kibana NOT found."
-    $CurrentVersion = ""
-}
-
-# Determining latest release of Kibana on GitHub
-$Repository = "elastic/kibana"
-$Releases = "https://api.github.com/repos/$Repository/releases"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$Response = (Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json)
-$Versions = $Response.tag_name | Where-Object{($_ -notmatch "-rc")} | ForEach-Object{($_ -replace "v","")}
-$Latest = ($Versions | ForEach-Object{[System.Version]$_ } | Sort-Object -Descending | Select-Object -First 1).ToString()
-$Item = $Response | Where-Object{($_.tag_name -eq "v$Latest")}
-$Tag = $Item.tag_name
-$Published = $Item.published_at
-$ReleaseDate = $Published.split('T')[0]
-
-if ($CurrentVersion)
-{
-    Write-Output "[Info]  Latest Release:  Kibana $Tag ($ReleaseDate)"
-}
-else
-{
-    Write-Output "[Info]  Latest Release: Kibana $Tag ($ReleaseDate)"
-}
-
-# Check if Kibana needs to be downloaded/updated
-$LatestRelease = $Tag.Substring(1)
-if ($CurrentVersion -ne $LatestRelease -Or $null -eq $CurrentVersion)
-{
-    # Download latest release from elastic.co
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $Download = "https://artifacts.elastic.co/downloads/kibana/kibana-$LatestRelease-windows-x86_64.zip"
-    $Zip = "Kibana.zip"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $Download -OutFile "$SCRIPT_DIR\Tools\$Zip"
-
-    if (Test-Path "$SCRIPT_DIR\Tools\$Zip")
-    {
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\Tools\Kibana")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\Kibana" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\Tools\Kibana" -Force
-        }
-
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        if (Test-Path "$($7za)")
-        {
-            $DestinationPath = "$SCRIPT_DIR\Tools"
-            & $7za x "$SCRIPT_DIR\Tools\$Zip" "-o$DestinationPath" > $null 2>&1
-        }
-        else
-        {
-            Write-Host "[Error] 7za.exe NOT found." -ForegroundColor Red
-            Stop-Transcript
-            $Host.UI.RawUI.WindowTitle = "$DefaultWindowsTitle"
-            Exit
-        }
-
-        # Rename Unpacked Directory
-        Start-Sleep 10
-        Rename-Item "$SCRIPT_DIR\Tools\kibana-$LatestRelease" "$SCRIPT_DIR\Tools\Kibana" -Force
-
-        # Remove Downloaded Archive
-        Start-Sleep 5
-        Remove-Item "$SCRIPT_DIR\Tools\$Zip" -Force
-    } 
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of Kibana." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-AmcacheParser {
-
-# AmcacheParser (.NET 6)
-# https://ericzimmerman.github.io
-
-# Check Current Version and SHA1 of AmcacheParser
-if (Test-Path "$($AmcacheParser)")
-{
-    # Current Version
-    $CurrentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($AmcacheParser).FileVersion
-    Write-Output "[Info]  Current Version: AmcacheParser v$CurrentVersion"
-
-    # SHA1
-    if (Test-Path "$SCRIPT_DIR\Tools\AmcacheParser\SHA1.txt")
-    {
-        $CurrentSHA1 = Get-Content "$SCRIPT_DIR\Tools\AmcacheParser\SHA1.txt"
-    }
-    else
-    {
-        $CurrentSHA1 = ""
-    }
-
-    # Determining latest release of AmcacheParser
-    $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/AmcacheParser.zip"
-    $Headers = (Invoke-WebRequest -Uri $URL -UseBasicParsing -Method Head).Headers
-    $LatestSHA1 = $Headers["x-bz-content-sha1"]
-}
-else
-{
-    Write-Output "[Info]  AmcacheParser NOT found."
-    $CurrentSHA1 = ""
-}
-
-if ($null -eq $CurrentSHA1 -or $CurrentSHA1 -ne $LatestSHA1)
-{
-    # Download latest release from Backblaze
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/AmcacheParser.zip"
-    $Zip = "AmcacheParser.zip"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $URL -OutFile "$SCRIPT_DIR\Tools\$Zip"
-
-    if (Test-Path "$SCRIPT_DIR\Tools\$Zip")
-    {
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\Tools\AmcacheParser")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\AmcacheParser" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\Tools\AmcacheParser" -Force
-        }
-
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        Expand-Archive -Path "$SCRIPT_DIR\Tools\$Zip" -DestinationPath "$SCRIPT_DIR\Tools\AmcacheParser" -Force
-
-        # Calculate SHA1 of AmcacheParser.zip
-        Start-Sleep 5
-        (Get-FileHash -Path "$SCRIPT_DIR\Tools\$Zip" -Algorithm SHA1).Hash | Out-File "$SCRIPT_DIR\Tools\AmcacheParser\SHA1.txt"
-
-        # Remove Downloaded Archive
-        Remove-Item "$SCRIPT_DIR\Tools\$Zip" -Force
-    }
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of AmcacheParser." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-AppCompatCacheParser {
-
-# AppCompatCacheParser (.NET 6)
-# https://ericzimmerman.github.io
-
-# Check Current Version and SHA1 of AppCompatCacheParser
-if (Test-Path "$($AppCompatCacheParser)")
-{
-    # Current Version
-    $CurrentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($AppCompatCacheParser).FileVersion
-    Write-Output "[Info]  Current Version: AppCompatCacheParser v$CurrentVersion"
-
-    # SHA1
-    if (Test-Path "$SCRIPT_DIR\Tools\AppCompatCacheParser\SHA1.txt")
-    {
-        $CurrentSHA1 = Get-Content "$SCRIPT_DIR\Tools\AppCompatCacheParser\SHA1.txt"
-    }
-    else
-    {
-        $CurrentSHA1 = ""
-    }
-
-    # Determining latest release of AppCompatCacheParser
-    $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/AppCompatCacheParser.zip"
-    $Headers = (Invoke-WebRequest -Uri $URL -UseBasicParsing -Method Head).Headers
-    $LatestSHA1 = $Headers["x-bz-content-sha1"]
-}
-else
-{
-    Write-Output "[Info]  AppCompatCacheParser NOT found."
-    $CurrentSHA1 = ""
-}
-
-if ($null -eq $CurrentSHA1 -or $CurrentSHA1 -ne $LatestSHA1)
-{
-    # Download latest release from Backblaze
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/AppCompatCacheParser.zip"
-    $Zip = "AppCompatCacheParser.zip"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $URL -OutFile "$SCRIPT_DIR\Tools\$Zip"
-
-    if (Test-Path "$SCRIPT_DIR\Tools\$Zip")
-    {
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\Tools\AppCompatCacheParser")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\AppCompatCacheParser" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\Tools\AppCompatCacheParser" -Force
-        }
-
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        Expand-Archive -Path "$SCRIPT_DIR\Tools\$Zip" -DestinationPath "$SCRIPT_DIR\Tools\AppCompatCacheParser" -Force
-
-        # Calculate SHA1 of AppCompatCacheParser.zip
-        Start-Sleep 5
-        (Get-FileHash -Path "$SCRIPT_DIR\Tools\$Zip" -Algorithm SHA1).Hash | Out-File "$SCRIPT_DIR\Tools\AppCompatCacheParser\SHA1.txt"
-
-        # Remove Downloaded Archive
-        Remove-Item "$SCRIPT_DIR\Tools\$Zip" -Force
-    }
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of AppCompatCacheParser." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-Entropy {
-
-# entropy
-# https://github.com/merces/entropy
-
-# Check Current Version of entropy.exe
-if (Test-Path "$($entropy)")
-{
-    # Current Version
-    if (Test-Path "$SCRIPT_DIR\Tools\entropy\Version.txt")
-    {
-        $CurrentVersion = Get-Content "$SCRIPT_DIR\Tools\entropy\Version.txt"
-        $LastWriteTime = ((Get-Item $entropy).LastWriteTime).ToString("yyyy-MM-dd")
-        Write-Output "[Info]  Current Version: entropy v$CurrentVersion ($LastWriteTime)"
-    }
-    else
-    {
-        $CurrentVersion = ""
-    }
-}
-else
-{
-    Write-Output "[Info]  entropy.exe NOT found."
-    $CurrentVersion = ""
-}
-
-# Determining latest release on GitHub
-$Repository = "merces/entropy"
-$Latest = "https://api.github.com/repos/$Repository/releases/latest"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$Response = (Invoke-WebRequest -Uri $Latest -UseBasicParsing | ConvertFrom-Json)[0]
-$Tag = $Response.tag_name
-$Published = $Response.published_at
-$Download = ($Response.assets | Select-Object -ExpandProperty browser_download_url | Select-String -Pattern "-win64" | Out-String).Trim()
-$ReleaseDate = $Published.split('T')[0]
-$LatestRelease = $Tag.Substring(1)
-
-if ($CurrentVersion)
-{
-    Write-Output "[Info]  Latest Release:  entropy $Tag ($ReleaseDate)"
-}
-else
-{
-    Write-Output "[Info]  Latest Release: entropy $Tag ($ReleaseDate)"
-}
-
-# Check if entropy.exe needs to be downloaded/updated
-if ($CurrentVersion -ne $LatestRelease -Or $null -eq $CurrentVersion)
-{
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $Zip = "entropy.zip"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $Download -OutFile "$SCRIPT_DIR\$Zip"
-
-    if (Test-Path "$SCRIPT_DIR\$Zip")
-    {
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\Tools\entropy")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\entropy" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\Tools\entropy" -Force
-        }
-
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        Expand-Archive -Path "$SCRIPT_DIR\$Zip" -DestinationPath "$SCRIPT_DIR\Tools" -Force
-
-        # Version
-        Write-Output "$LatestRelease" | Out-File "$SCRIPT_DIR\Tools\entropy\Version.txt"
-
-        # Remove Downloaded Archive
-        Start-Sleep 5
-        Remove-Item "$SCRIPT_DIR\$Zip" -Force
-    }
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of entropy." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-EvtxECmd {
-
-# EvtxECmd (.NET 6)
-# https://ericzimmerman.github.io
-
-# Check Current Version and SHA1 of EvtxECmd
-if (Test-Path "$($EvtxECmd)")
-{
-    # Current Version
-    $CurrentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($EvtxECmd).FileVersion
-    Write-Output "[Info]  Current Version: EvtxECmd v$CurrentVersion"
-
-    # SHA1
-    if (Test-Path "$SCRIPT_DIR\Tools\EvtxECmd\SHA1.txt")
-    {
-        $CurrentSHA1 = Get-Content "$SCRIPT_DIR\Tools\EvtxECmd\SHA1.txt"
-    }
-    else
-    {
-        $CurrentSHA1 = ""
-    }
-
-    # Determining latest release of EvtxECmd
-    $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/EvtxECmd.zip"
-    $Headers = (Invoke-WebRequest -Uri $URL -UseBasicParsing -Method Head).Headers
-    $LatestSHA1 = $Headers["x-bz-content-sha1"]
-}
-else
-{
-    Write-Output "[Info]  EvtxECmd NOT found."
-    $CurrentSHA1 = ""
-}
-
-if ($null -eq $CurrentSHA1 -or $CurrentSHA1 -ne $LatestSHA1)
-{
-    # Download latest release from Backblaze
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/EvtxECmd.zip"
-    $Zip = "EvtxECmd.zip"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $URL -OutFile "$SCRIPT_DIR\Tools\$Zip"
-
-    if (Test-Path "$SCRIPT_DIR\Tools\$Zip")
-    {
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\Tools\EvtxECmd")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\EvtxECmd" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\Tools\EvtxECmd" -Force
-        }
-
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        Expand-Archive -Path "$SCRIPT_DIR\Tools\$Zip" -DestinationPath "$SCRIPT_DIR\Tools" -Force
-
-        # Calculate SHA1 of EvtxECmd.zip
-        Start-Sleep 5
-        (Get-FileHash -Path "$SCRIPT_DIR\Tools\$Zip" -Algorithm SHA1).Hash | Out-File "$SCRIPT_DIR\Tools\EvtxECmd\SHA1.txt"
-
-        # Remove Downloaded Archive
-        Remove-Item "$SCRIPT_DIR\Tools\$Zip" -Force
-    }
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of EvtxECmd." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-ImportExcel {
-
-# ImportExcel
-# https://github.com/dfinke/ImportExcel
-
-# Check if PowerShell module 'ImportExcel' exists
-if (Get-Module -ListAvailable -Name ImportExcel) 
-{
-    # Check if multiple versions of PowerShell module 'ImportExcel' exist
-    $Modules = (Get-Module -ListAvailable -Name ImportExcel | Measure-Object).Count
-
-    if ($Modules -eq "1")
-    {
-        # Check Current Version
-        $CurrentVersion = (Get-Module -ListAvailable -Name ImportExcel).Version.ToString()
-        Write-Output "[Info]  Current Version: ImportExcel v$CurrentVersion"
-    }
-    else
-    {
-        Write-Host "[Info]  Multiple installed versions of PowerShell module 'ImportExcel' found. Uninstalling ..."
-        Uninstall-Module -Name ImportExcel -AllVersions -ErrorAction SilentlyContinue
-        $CurrentVersion = $null
-    }
-}
-else
-{
-    Write-Output "[Info]  PowerShell module 'ImportExcel' NOT found."
-    $CurrentVersion = $null
-}
-
-# Determining latest release on GitHub
-$Repository = "dfinke/ImportExcel"
-$Releases = "https://api.github.com/repos/$Repository/releases"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$Response = (Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json)[0]
-$Tag = $Response.tag_name
-$Published = $Response.published_at
-$ReleaseDate = $Published.split('T')[0]
-$LatestRelease = $Tag.Substring(1)
-
-if ($CurrentVersion)
-{
-    Write-Output "[Info]  Latest Release:  ImportExcel $Tag ($ReleaseDate)"
-}
-else
-{
-    Write-Output "[Info]  Latest Release: ImportExcel $Tag ($ReleaseDate)"
-}
-
-# Check if ImportExcel needs to be installed
-if ($null -eq $CurrentVersion)
-{
-    Write-Output "[Info]  Installing ImportExcel v$LatestRelease ..."
-    Install-Module -Name ImportExcel -Scope CurrentUser -Repository PSGallery -Force
-    $CurrentVersion = (Get-Module -ListAvailable -Name ImportExcel).Version.ToString()
-}
-
-# Check if ImportExcel needs to be updated
-if ($CurrentVersion -ne $LatestRelease)
-{
-    # Update PowerShell module 'ImportExcel'
-    try
-    {
-        Write-Output "[Info]  Updating PowerShell module 'ImportExcel' ..."
-        Uninstall-Module -Name ImportExcel -AllVersions -ErrorAction SilentlyContinue
-        Install-Module -Name ImportExcel -Scope CurrentUser -Repository PSGallery -Force
-    }
-    catch
-    {
-        Write-Output "PowerShell module 'ImportExcel' is in use. Please close PowerShell session, and run MemProcFS-Analyzer.ps1 again."
-    }   
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of ImportExcel." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-IPinfo {
-
-# IPinfo CLI
-# https://github.com/ipinfo/cli
-
-# Check Current Version of IPinfo CLI
-if (Test-Path "$($IPinfo)")
-{
-    $CurrentVersion = & $IPinfo version
-    $LastWriteTime = ((Get-Item $IPinfo).LastWriteTime).ToString("yyyy-MM-dd")
-    Write-Output "[Info]  Current Version: IPinfo CLI v$CurrentVersion ($LastWriteTime)"
-}
-else
-{
-    Write-Output "[Info]  IPinfo CLI NOT found."
-    $CurrentVersion = ""
-}
-
-# Determining latest release on GitHub
-$Repository = "ipinfo/cli"
-$Releases = "https://api.github.com/repos/$Repository/releases"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$Response = (Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json)
-
-$Asset=0
-while($true) {
-  $Asset++
-  $Check = $Response[$Asset].assets | Select-Object @{Name="browser_download_orl"; Expression={$_.browser_download_url}} | Select-String -Pattern "ipinfo_" -Quiet
-  if ($Check -eq "True" )
-  {
-    Break
-  }
-}
-
-$TagName = $Response[$Asset].tag_name
-$Tag = $TagName.Split("-")[1] 
-$Published = $Response[$Asset].published_at
-$Download = ($Response[$Asset].assets | Select-Object -ExpandProperty browser_download_url | Select-String -Pattern "windows_amd64" | Out-String).Trim()
-$ReleaseDate = $Published.split('T')[0]
-
-if ($CurrentVersion)
-{
-    Write-Output "[Info]  Latest Release:  IPinfo CLI v$Tag ($ReleaseDate)"
-}
-else
-{
-    Write-Output "[Info]  Latest Release: IPinfo CLI v$Tag ($ReleaseDate)"
-}
-
-# Check if IPinfo CLI needs to be downloaded/updated
-if ($CurrentVersion -ne $Tag -Or $null -eq $CurrentVersion)
-{
-    # Download latest release from GitHub
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $Zip = "IPinfo.zip"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $Download -OutFile "$SCRIPT_DIR\$Zip"
-
-    if (Test-Path "$SCRIPT_DIR\$Zip")
-    {
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\Tools\IPinfo")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\IPinfo" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\Tools\IPinfo" -Force
-        }
-
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        Expand-Archive -Path "$SCRIPT_DIR\$Zip" -DestinationPath "$SCRIPT_DIR\Tools\IPinfo" -Force
-
-        # Remove Downloaded Archive
-        Start-Sleep 5
-        Remove-Item "$SCRIPT_DIR\$Zip" -Force
-
-        # Rename Executable
-        if (Test-Path "$SCRIPT_DIR\Tools\IPinfo\ipinfo_*")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\IPinfo\ipinfo_*.exe" | Rename-Item -NewName {"ipinfo.exe"}
-        }
-    } 
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of IPinfo CLI." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-jq {
-
-# jq - Command-line JSON processor
-# https://github.com/stedolan/jq
-
-# Check Current Version of jq
-if (Test-Path "$($jq)")
-{
-    $CurrentVersion = & $jq --version | ForEach-Object{($_ -split "-")[1]}
-    Write-Output "[Info]  Current Version: jq v$CurrentVersion"
-}
-else
-{
-    Write-Output "[Info]  jq-win64.exe NOT found."
-    $CurrentVersion = ""
-}
-
-# Determining latest stable release on GitHub
-$Repository = "stedolan/jq"
-$Latest = "https://api.github.com/repos/$Repository/releases/latest"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$Response = (Invoke-WebRequest -Uri $Latest -UseBasicParsing | ConvertFrom-Json)[0]
-$Tag = $Response.tag_name | ForEach-Object{($_ -split "-")[1]}
-$Published = $Response.published_at
-$Download = ($Response.assets | Select-Object -ExpandProperty browser_download_url | Select-String -Pattern "jq-win64.exe" | Out-String).Trim()
-$ReleaseDate = $Published.split('T')[0]
-
-if ($CurrentVersion)
-{
-    Write-Output "[Info]  Latest Release:  jq v$Tag ($ReleaseDate)"
-}
-else
-{
-    Write-Output "[Info]  Latest Release: jq v$Tag ($ReleaseDate)"
-}
-
-# Check if jq needs to be downloaded/updated
-if ($CurrentVersion -ne $Tag -Or $null -eq $CurrentVersion)
-{
-    if (Test-Path "$SCRIPT_DIR\Tools\jq\jq-win64.exe")
-    {
-        Get-ChildItem -Path "$SCRIPT_DIR\Tools\jq" -Recurse | Remove-Item -Force -Recurse
-    }
-    else
-    {
-        New-Item "$SCRIPT_DIR\Tools\jq" -ItemType Directory -Force | Out-Null
-    }
-
-    # Download latest release from GitHub
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $EXE = "jq-win64.exe"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $Download -OutFile "$SCRIPT_DIR\Tools\jq\$EXE"
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of jq." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-lnk_parser {
-
-# lnk_parser
-# https://github.com/AbdulRhmanAlfaifi/lnk_parser
-
-# Check Current Version of lnk_parser
-if (Test-Path "$($lnk_parser)")
-{
-    $CurrentVersion = & $lnk_parser --version | ForEach-Object{($_ -split "\s+")[1]}
-    $LastWriteTime = ((Get-Item $lnk_parser).LastWriteTime).ToString("yyyy-MM-dd")
-    Write-Output "[Info]  Current Version: lnk_parser v$CurrentVersion ($LastWriteTime)"
-}
-else
-{
-    Write-Output "[Info]  lnk_parser_x86_64.exe NOT found."
-    $CurrentVersion = ""
-}
-
-# Determining latest release on GitHub
-$Repository = "AbdulRhmanAlfaifi/lnk_parser"
-$Latest = "https://api.github.com/repos/$Repository/releases/latest"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$Response = (Invoke-WebRequest -Uri $Latest -UseBasicParsing | ConvertFrom-Json)[0]
-$Tag = $Response.tag_name
-$Published = $Response.published_at
-$Download = ($Response.assets | Select-Object -ExpandProperty browser_download_url | Select-String -Pattern "lnk_parser_x86_64.exe" | Out-String).Trim()
-$ReleaseDate = $Published.split('T')[0]
-
-if ($CurrentVersion)
-{
-    Write-Output "[Info]  Latest Release:  lnk_parser $Tag ($ReleaseDate)"
-}
-else
-{
-    Write-Output "[Info]  Latest Release: lnk_parser $Tag ($ReleaseDate)"
-}
-
-# Check if lnk_parser needs to be downloaded/updated
-$LatestRelease = $Tag.Substring(1)
-if ($CurrentVersion -ne $LatestRelease -Or $null -eq $CurrentVersion)
-{
-    if (Test-Path "$SCRIPT_DIR\Tools\lnk_parser\lnk_parser_x86_64.exe")
-    {
-        Get-ChildItem -Path "$SCRIPT_DIR\Tools\lnk_parser" -Recurse | Remove-Item -Force -Recurse
-    }
-    else
-    {
-        New-Item "$SCRIPT_DIR\Tools\lnk_parser" -ItemType Directory -Force | Out-Null
-    }
-    
-    # Download latest release from GitHub
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $EXE = "lnk_parser_x86_64.exe"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $Download -OutFile "$SCRIPT_DIR\Tools\lnk_parser\$EXE"
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of lnk_parser." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-RECmd {
-
-# RECmd (.NET 6)
-# https://ericzimmerman.github.io
-
-# Check Current Version and SHA1 of RECmd
-if (Test-Path "$($RECmd)")
-{
-    # Current Version
-    $CurrentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($RECmd).FileVersion
-    Write-Output "[Info]  Current Version: RECmd v$CurrentVersion"
-
-    # SHA1
-    if (Test-Path "$SCRIPT_DIR\Tools\RECmd\SHA1.txt")
-    {
-        $CurrentSHA1 = Get-Content "$SCRIPT_DIR\Tools\RECmd\SHA1.txt"
-    }
-    else
-    {
-        $CurrentSHA1 = ""
-    }
-
-    # Determining latest release of RECmd
-    $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/RECmd.zip"
-    $Headers = (Invoke-WebRequest -Uri $URL -UseBasicParsing -Method Head).Headers
-    $LatestSHA1 = $Headers["x-bz-content-sha1"]
-}
-else
-{
-    Write-Output "[Info]  RECmd NOT found."
-    $CurrentSHA1 = ""
-}
-
-if ($null -eq $CurrentSHA1 -or $CurrentSHA1 -ne $LatestSHA1)
-{
-    # Download latest release from Backblaze
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/RECmd.zip"
-    $Zip = "RECmd.zip"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $URL -OutFile "$SCRIPT_DIR\Tools\$Zip"
-
-    if (Test-Path "$SCRIPT_DIR\Tools\$Zip")
-    {
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\Tools\RECmd")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\RECmd" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\Tools\RECmd" -Force
-        }
-
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        Expand-Archive -Path "$SCRIPT_DIR\Tools\$Zip" -DestinationPath "$SCRIPT_DIR\Tools" -Force
-
-        # Calculate SHA1 of RECmd.zip
-        Start-Sleep 5
-        (Get-FileHash -Path "$SCRIPT_DIR\Tools\$Zip" -Algorithm SHA1).Hash | Out-File "$SCRIPT_DIR\Tools\RECmd\SHA1.txt"
-
-        # Remove Downloaded Archive
-        Remove-Item "$SCRIPT_DIR\Tools\$Zip" -Force
-    }
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of RECmd." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-SBECmd {
-
-# SBECmd (.NET 6)
-# https://ericzimmerman.github.io
-
-# Check Current Version and SHA1 of SBECmd
-if (Test-Path "$($SBECmd)")
-{
-    # Current Version
-    $CurrentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($SBECmd).FileVersion
-    Write-Output "[Info]  Current Version: SBECmd v$CurrentVersion"
-
-    # SHA1
-    if (Test-Path "$SCRIPT_DIR\Tools\SBECmd\SHA1.txt")
-    {
-        $CurrentSHA1 = Get-Content "$SCRIPT_DIR\Tools\SBECmd\SHA1.txt"
-    }
-    else
-    {
-        $CurrentSHA1 = ""
-    }
-
-    # Determining latest release of SBECmd
-    $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/SBECmd.zip"
-    $Headers = (Invoke-WebRequest -Uri $URL -UseBasicParsing -Method Head).Headers
-    $LatestSHA1 = $Headers["x-bz-content-sha1"]
-}
-else
-{
-    Write-Output "[Info]  SBECmd NOT found."
-    $CurrentSHA1 = ""
-}
-
-if ($null -eq $CurrentSHA1 -or $CurrentSHA1 -ne $LatestSHA1)
-{
-    # Download latest release from Backblaze
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $ProgressPreference = 'SilentlyContinue'
-    $URL = "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/SBECmd.zip"
-    $Zip = "SBECmd.zip"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $URL -OutFile "$SCRIPT_DIR\Tools\$Zip"
-
-    if (Test-Path "$SCRIPT_DIR\Tools\$Zip")
-    {
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\Tools\SBECmd")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\SBECmd" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\Tools\SBECmd" -Force
-        }
-
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        Expand-Archive -Path "$SCRIPT_DIR\Tools\$Zip" -DestinationPath "$SCRIPT_DIR\Tools\SBECmd" -Force
-
-        # Calculate SHA1 of SBECmd.zip
-        Start-Sleep 5
-        (Get-FileHash -Path "$SCRIPT_DIR\Tools\$Zip" -Algorithm SHA1).Hash | Out-File "$SCRIPT_DIR\Tools\SBECmd\SHA1.txt"
-
-        # Remove Downloaded Archive
-        Remove-Item "$SCRIPT_DIR\Tools\$Zip" -Force
-    }
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of SBECmd." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-XSV {
-
-# xsv
-# https://github.com/BurntSushi/xsv
-
-# Check Current Version of xsv
-if (Test-Path "$($xsv)")
-{
-    $CurrentVersion = & $xsv --version
-    $LastWriteTime = ((Get-Item $xsv).LastWriteTime).ToString("yyyy-MM-dd")
-    Write-Output "[Info]  Current Version: xsv v$CurrentVersion ($LastWriteTime)"
-}
-else
-{
-    Write-Output "[Info]  xsv.exe NOT found."
-    $CurrentVersion = ""
-}
-
-# Determining latest release on GitHub
-$Repository = "BurntSushi/xsv"
-$Releases = "https://api.github.com/repos/$Repository/releases/latest"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$Response = (Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json)
-$Tag = $Response.tag_name
-$Published = $Response.published_at
-$Download = ($Response.assets | Select-Object -ExpandProperty browser_download_url | Select-String -Pattern "-x86_64-pc-windows-msvc" | Out-String).Trim()
-$ReleaseDate = $Published.split('T')[0]
-
-if ($CurrentVersion)
-{
-    Write-Output "[Info]  Latest Release:  xsv v$Tag ($ReleaseDate)"
-}
-else
-{
-    Write-Output "[Info]  Latest Release: xsv v$Tag ($ReleaseDate)"
-}
-
-# Check if xsv needs to be downloaded/updated
-if ($CurrentVersion -ne $Tag -Or $null -eq $CurrentVersion)
-{
-    # Download latest release from GitHub
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $Zip = "xsv.zip"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $Download -OutFile "$SCRIPT_DIR\$Zip"
-
-    if (Test-Path "$SCRIPT_DIR\$Zip")
-    {
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\Tools\xsv")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\xsv" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\Tools\xsv" -Force
-        }
-
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        Expand-Archive -Path "$SCRIPT_DIR\$Zip" -DestinationPath "$SCRIPT_DIR\Tools\xsv" -Force
-
-        # Remove Downloaded Archive
-        Start-Sleep 5
-        Remove-Item "$SCRIPT_DIR\$Zip" -Force
-    }
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of xsv." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-Yara {
-
-# YARA
-# https://github.com/VirusTotal/yara
-
-# Check Current Version of YARA
-if (Test-Path "$($yara64)")
-{
-    $CurrentVersion = & $yara64 --version
-    $LastWriteTime = ((Get-Item $yara64).LastWriteTime).ToString("yyyy-MM-dd")
-    Write-Output "[Info]  Current Version: YARA v$CurrentVersion ($LastWriteTime)"
-}
-else
-{
-    Write-Output "[Info]  yara64.exe NOT found."
-    $CurrentVersion = ""
-}
-
-# Determining latest release on GitHub
-$Repository = "VirusTotal/yara"
-$Latest = "https://api.github.com/repos/$Repository/releases/latest"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$Response = (Invoke-WebRequest -Uri $Latest -UseBasicParsing | ConvertFrom-Json)[0]
-$Tag = $Response.tag_name
-$Published = $Response.published_at
-$Download = ($Response.assets | Select-Object -ExpandProperty browser_download_url | Select-String -Pattern "-win64" | Out-String).Trim()
-$ReleaseDate = $Published.split('T')[0]
-
-if ($CurrentVersion)
-{
-    Write-Output "[Info]  Latest Release:  YARA $Tag ($ReleaseDate)"
-}
-else
-{
-    Write-Output "[Info]  Latest Release: YARA $Tag ($ReleaseDate)"
-}
-
-# Check if YARA needs to be downloaded/updated
-$LatestRelease = $Tag.Substring(1)
-if ($CurrentVersion -ne $LatestRelease -Or $null -eq $CurrentVersion)
-{
-    # Download latest release from GitHub
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $Zip = "yara64.zip"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $Download -OutFile "$SCRIPT_DIR\$Zip"
-
-    if (Test-Path "$SCRIPT_DIR\$Zip")
-    {
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\Tools\YARA")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\YARA" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\Tools\YARA" -Force
-        }
-
-        # Unpacking Archive File
-        Write-Output "[Info]  Extracting Files ..."
-        Expand-Archive -Path "$SCRIPT_DIR\$Zip" -DestinationPath "$SCRIPT_DIR\Tools\YARA" -Force
-
-        # Remove Downloaded Archive
-        Start-Sleep 5
-        Remove-Item "$SCRIPT_DIR\$Zip" -Force
-    }
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of YARA." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-Function Get-Zircolite {
-
-# Check Current Version of Zircolite
-if (Test-Path "$($Zircolite)")
-{
-    $MyLocation = $pwd
-    Set-Location "$SCRIPT_DIR\Tools\Zircolite"
-    $CurrentVersion = (& $Zircolite --version 2>&1 | Select-String -Pattern "Zircolite -" | ForEach-Object{($_ -split "\s+")[-1]}).Substring(1)
-    Set-Location "$MyLocation"
-    Write-Output "[Info]  Current Version: Zircolite v$CurrentVersion"
-
-    # zircolite.log
-    if (Test-Path "$SCRIPT_DIR\Tools\Zircolite\zircolite.log")
-    {
-        Remove-Item -Path "$SCRIPT_DIR\Tools\Zircolite\zircolite.log" -Force
-    }
-}
-else
-{
-    Write-Output "[Info]  Zircolite NOT found."
-    $CurrentVersion = ""
-}
-
-# Determining latest stable release on GitHub
-$Repository = "https://api.github.com/repos/wagga40/Zircolite/releases"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-
-$Release=0
-while($false) {
-    $Release++
-    $Check = (Invoke-WebRequest -Uri $Repository -UseBasicParsing | ConvertFrom-Json)[$Release].prerelease
-    if ($Check -eq "False" )
-    {
-        $Release
-        Break
-    }
-}
-    
-$Response = (Invoke-WebRequest -Uri $Repository -UseBasicParsing | ConvertFrom-Json)[$Release]
-$Tag = $Response.tag_name
-$Published = $Response.published_at
-$Download = ($Response.assets | Select-Object -ExpandProperty browser_download_url | Select-String -Pattern "zircolite_win10_x64" | Out-String).Trim()
-$LatestRelease = $Published.split('T')[0]
-
-if ($CurrentVersion)
-{
-    Write-Output "[Info]  Latest Release:  Zircolite v$Tag ($LatestRelease)"
-}
-else
-{
-    Write-Output "[Info]  Latest Release: Zircolite v$Tag ($LatestRelease)"
-}
-
-# Check if Zircolite needs to be updated
-if ($CurrentVersion -ne $Tag -Or $null -eq $CurrentVersion)
-{
-    # Download latest release from GitHub
-    Write-Output "[Info]  Dowloading Latest Release ..."
-    $7Zip = "Zircolite.7z"
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $Download -OutFile "$SCRIPT_DIR\Tools\$7Zip"
-
-    if (Test-Path "$SCRIPT_DIR\Tools\$7Zip")
-    {
-        # Unblock Archive File
-        Unblock-File -Path "$SCRIPT_DIR\Tools\$7Zip"
-
-        # Delete Directory Content and Remove Directory
-        if (Test-Path "$SCRIPT_DIR\Tools\Zircolite")
-        {
-            Get-ChildItem -Path "$SCRIPT_DIR\Tools\Zircolite" -Recurse | Remove-Item -Force -Recurse
-            Remove-Item "$SCRIPT_DIR\Tools\Zircolite" -Force
-        }
-
-        # Unpacking Archive File
-        if (Test-Path "$($7za)")
-        {
-            Write-Output "[Info]  Extracting Files ..."
-            & $7za x "$SCRIPT_DIR\Tools\$7Zip" "-o$SCRIPT_DIR\Tools" 2>&1 | Out-Null
-        }
-        else
-        {
-            Write-Output "[Info]  7-Zip is NOT installed."
-        }
-
-        # Rename Unpacked Directory
-        Start-Sleep 5
-        Rename-Item "$SCRIPT_DIR\Tools\zircolite_win10" "$SCRIPT_DIR\Tools\Zircolite" -Force
-
-        # Remove Downloaded Archive
-        Start-Sleep 5
-        Remove-Item "$SCRIPT_DIR\Tools\$7Zip" -Force
-    }
-}
-else
-{
-    Write-Host "[Info]  You are running the most recent version of Zircolite." -ForegroundColor Green
-}
-
-}
-
-#############################################################################################################################################################################################
-
-# Installer/Updater
-InternetConnectivityCheck
-Get-MemProcFS
-Get-YaraCustomRules
-Get-Dokany
-Get-Elasticsearch
-Get-Kibana
-Get-AmcacheParser
-Get-AppCompatCacheParser
-Get-Entropy
-Get-EvtxECmd
-Get-ImportExcel
-Get-IPinfo
-Get-jq
-Get-lnk_parser
-Get-RECmd
-Get-SBECmd
-Get-XSV
-Get-Yara
-Get-Zircolite
-
-}
-
-#endregion Updater
 
 #############################################################################################################################################################################################
 #############################################################################################################################################################################################
@@ -2480,6 +1098,12 @@ Function MemProcFS {
 # MemProcFS
 # https://github.com/ufrisk/MemProcFS
 
+# Remove existing MemProcFS Logfile
+if (Test-Path "$($MemProcFSLogfile)")
+{
+    Remove-Item -Path "$MemProcFSLogfile" -Force
+}
+
 # Mount the physical memory dump file with a corresponding Pagefile and enable forensic mode
 if (Test-Path "$($MemProcFS)")
 {
@@ -2494,7 +1118,7 @@ if (Test-Path "$($MemProcFS)")
                 $MemorySize = Get-FileSize((Get-Item "$MemoryDump").Length)
                 Write-Output "[Info]  Physical Memory Dump File Size: $MemorySize"
 
-                $PagefileSize = Get-FileSize((Get-Item "$Pagefile").Length)
+                $PagefileSize = Get-FileSize((Get-Item -Force "$Pagefile").Length)
                 Write-Output "[Info]  Pagefile Size: $PagefileSize"
                 New-Item "$OUTPUT_FOLDER" -ItemType Directory -Force | Out-Null
                 $Mount = $DriveLetter -replace ":", ""
@@ -2503,9 +1127,18 @@ if (Test-Path "$($MemProcFS)")
                 # Check if a Custom Yara rule or Yara index file was provided
                 if ($null -eq $YaraRules)
                 {
-                    Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+                    # Offline Mode
+                    if ($OfflineMode -eq "Enabled")
+                    {
+                        Write-Output "[Info]  MemProcFS Forensic Analysis initiated [Offline-Mode] ..."
+                    }
+                    else
+                    {
+                        Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+                    }
+
                     Write-Output "[Info]  Processing $MemoryDump incl. Pagefile [approx. 10-45 min] ..."
-                    Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -pagefile0 `"$Pagefile`" -forensic 4"
+                    Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -pagefile0 `"$Pagefile`" -disable-python -forensic 4 -loglevel forensic:5 -v -logfile `"$MemProcFSLogfile`""
                 }
                 else
                 {
@@ -2514,20 +1147,39 @@ if (Test-Path "$($MemProcFS)")
                         # Check if Process Skiplist is inactive
                         if ($null -eq $ForensicProcessWhitelist)
                         {
+                            # Offline Mode
+                            if ($OfflineMode -eq "Enabled")
+                            {
+                                Write-Output "[Info]  MemProcFS Forensic Analysis initiated [Offline-Mode] ..."
+                            }
+                            else
+                            {
+                                Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+                            }
+
                             $Count_YaraRules = (Get-Content -Path $YaraRules | Select-String -Pattern "^include" | Measure-Object).Count
-                            Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
                             Write-Output "[Info]  YARA scan initialized with $Count_YaraRules rules ..."
                             Write-Output "[Info]  Processing $MemoryDump incl. Pagefile [approx. 10-45 min] ..."
-                            Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -pagefile0 `"$Pagefile`" -forensic-yara-rules `"$YaraRules`" -forensic 4 -loglevel forensic:5"
+                            Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -pagefile0 `"$Pagefile`" -disable-python -disable-yara-builtin -forensic-yara-rules `"$YaraRules`" -forensic 4 -loglevel forensic:5 -v -logfile `"$MemProcFSLogfile`""
                         }
                         else
                         {
                             $Count_YaraRules = (Get-Content -Path $YaraRules | Select-String -Pattern "^include" | Measure-Object).Count
                             $Count_ProcessSkip = ($ForensicProcessWhitelist.Split(",") | Where-Object {$_.Trim() -ne "" }).Count
-                            Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+
+                            # Offline Mode
+                            if ($OfflineMode -eq "Enabled")
+                            {
+                                Write-Output "[Info]  MemProcFS Forensic Analysis initiated [Offline-Mode] ..."
+                            }
+                            else
+                            {
+                                Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+                            }
+
                             Write-Output "[Info]  YARA scan initialized with $Count_YaraRules rules ($Count_ProcessSkip Process Names will be skipped) ..."
                             Write-Output "[Info]  Processing $MemoryDump incl. Pagefile [approx. 10-45 min] ..."
-                            Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -pagefile0 `"$Pagefile`" -forensic-yara-rules `"$YaraRules`" -forensic 4 -loglevel forensic:5 -forensic-process-skip `"$ForensicProcessWhitelist`""
+                            Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -pagefile0 `"$Pagefile`" -disable-python -disable-yara-builtin -forensic-yara-rules `"$YaraRules`" -forensic 4 -loglevel forensic:5 -forensic-process-skip `"$ForensicProcessWhitelist`""
                         }
                     }
                 }
@@ -2555,7 +1207,6 @@ if (Test-Path "$($MemProcFS)")
     if ((Test-Path "$($MemoryDump)") -and (!("$($Pagefile)")))
     {
         Write-Output "[Info]  Mounting the Physical Memory Dump file as $DriveLetter ..."
-
         $MemorySize = Get-FileSize((Get-Item "$MemoryDump").Length)
         Write-Output "[Info]  Physical Memory Dump File Size: $MemorySize"
         New-Item "$OUTPUT_FOLDER" -ItemType Directory -Force | Out-Null
@@ -2565,9 +1216,18 @@ if (Test-Path "$($MemProcFS)")
         # Check if a Custom Yara rule or Yara index file was provided
         if ($null -eq $YaraRules)
         {
-            Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+            # Offline Mode
+            if ($OfflineMode -eq "Enabled")
+            {
+                Write-Output "[Info]  MemProcFS Forensic Analysis initiated [Offline-Mode] ..."
+            }
+            else
+            {
+                Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+            }
+
             Write-Output "[Info]  Processing $MemoryDump [approx. 1-10 min] ..."
-            Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -forensic 4 -forensic-process-skip `"$ForensicProcessWhitelist`""
+            Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -disable-python -forensic 4 -loglevel forensic:5 -v -logfile `"$MemProcFSLogfile`" -forensic-process-skip `"$ForensicProcessWhitelist`""
         }
         else
         {
@@ -2576,20 +1236,38 @@ if (Test-Path "$($MemProcFS)")
                 # Check if Process Skiplist is inactive
                 if ($null -eq $ForensicProcessWhitelist)
                 {
+                    # Offline Mode
+                    if ($OfflineMode -eq "Enabled")
+                    {
+                        Write-Output "[Info]  MemProcFS Forensic Analysis initiated [Offline-Mode] ..."
+                    }
+                    else
+                    {
+                        Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+                    }
+
                     $Count_YaraRules = (Get-Content -Path $YaraRules | Select-String -Pattern "^include" | Measure-Object).Count
-                    Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
                     Write-Output "[Info]  YARA scan initialized with $Count_YaraRules rules ..."
                     Write-Output "[Info]  Processing $MemoryDump [approx. 1-10 min] ..."
-                    Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -forensic-yara-rules `"$YaraRules`" -forensic 4 -loglevel forensic:5"
+                    Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -disable-python -disable-yara-builtin -forensic-yara-rules `"$YaraRules`" -forensic 4 -loglevel forensic:5 -v -logfile `"$MemProcFSLogfile`""
                 }
                 else
                 {
+                    # Offline Mode
+                    if ($OfflineMode -eq "Enabled")
+                    {
+                        Write-Output "[Info]  MemProcFS Forensic Analysis initiated [Offline-Mode] ..."
+                    }
+                    else
+                    {
+                        Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
+                    }
+
                     $Count_YaraRules = (Get-Content -Path $YaraRules | Select-String -Pattern "^include" | Measure-Object).Count
                     $Count_ProcessSkip = ($ForensicProcessWhitelist.Split(",") | Where-Object {$_.Trim() -ne "" }).Count
-                    Write-Output "[Info]  MemProcFS Forensic Analysis initiated ..."
                     Write-Output "[Info]  YARA scan initialized with $Count_YaraRules rules ($Count_ProcessSkip Process Names will be skipped) ..."
                     Write-Output "[Info]  Processing $MemoryDump [approx. 1-10 min] ..."
-                    Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -forensic-yara-rules `"$YaraRules`" -forensic 4 -loglevel forensic:5 -forensic-process-skip `"$ForensicProcessWhitelist`""
+                    Start-Process -FilePath "$MemProcFS" -ArgumentList "-mount $Mount -device `"$MemoryDump`" -disable-python -disable-yara-builtin -forensic-yara-rules `"$YaraRules`" -forensic 4 -loglevel forensic:5 -v -logfile `"$MemProcFSLogfile`" -forensic-process-skip `"$ForensicProcessWhitelist`""
                 }
             }
         }
@@ -2922,6 +1600,14 @@ if (Test-Path "$($MemProcFS)")
         # Collecting Evidence Files
         Write-Output "[Info]  Collecting Evidence Files ..."
 
+        # FS_Sys_Sysinfo
+        # https://github.com/ufrisk/MemProcFS/wiki/FS_Sys_Sysinfo
+        if (Test-Path "$DriveLetter\sys\sysinfo\sysinfo.txt")
+        {
+            New-Item "$OUTPUT_FOLDER\sys\sysinfo" -ItemType Directory -Force | Out-Null
+            Copy-Item -Path "$DriveLetter\sys\sysinfo\sysinfo.txt" -Destination "$OUTPUT_FOLDER\sys\sysinfo\sysinfo.txt"
+        }
+
         # FS_FindEvil
         # https://github.com/ufrisk/MemProcFS/wiki/FS_FindEvil
         #
@@ -3066,6 +1752,16 @@ if (Test-Path "$($MemProcFS)")
             Write-Output "        Note: FindEvil is only available on 64-bit Windows 11, 10 and 8.1."
         }
 
+        # Check if YARA Index was succesfully initialized
+        # https://github.com/VirusTotal/yara/blob/master/libyara/include/yara/error.h
+        if (Test-Path "$MemProcFSLogfile")
+        {
+            if (Get-Content -Path "$MemProcFSLogfile" | Select-String -Pattern "yr_initialize\(\) failed with error code 3" -Quiet)
+            {
+                Write-Host "[Error] YARA Index was NOT successfully initialized: Error Code 3" -ForegroundColor Red
+            }
+        }
+        
         # FS_Forensic_Yara
         # https://github.com/ufrisk/MemProcFS/wiki/FS_Forensic_Yara
         if (Test-Path "$DriveLetter\forensic\yara\*.txt")
@@ -3078,16 +1774,24 @@ if (Test-Path "$($MemProcFS)")
             {
                 if (Test-Path "$DriveLetter\forensic\yara\match-count.txt")
                 {
-                    [int]$Count = Get-Content -Path "$DriveLetter\forensic\yara\match-count.txt"
-                    if ($Count -gt 0)
+                    [int]$Total = Get-Content -Path "$DriveLetter\forensic\yara\match-count.txt"
+                    if ($Total -gt 0)
                     {
-                        Write-Host "[Alert] $Count YARA rule matches" -ForegroundColor Red
+                        Write-Host "[Alert] $Total YARA rule matches" -ForegroundColor Red
                 
                         # Result
                         if (Test-Path "$DriveLetter\forensic\yara\result.txt")
                         {
                             (Get-Content -Path "$DriveLetter\forensic\yara\result.txt" | Select-String -Pattern "threat_name" | Sort-Object -Unique | ForEach-Object{($_ -split "threat_name:")[1]}).Trim() | Out-File "$OUTPUT_FOLDER\forensic\yara\threat_name.txt"
-                            (Get-Content "$OUTPUT_FOLDER\forensic\yara\threat_name.txt") -replace "^", "        "  | Write-Host -ForegroundColor Red
+                            (Get-Content -Path "$DriveLetter\forensic\yara\result.txt" | Select-String -Pattern "threat_name" | ForEach-Object{($_ -split "threat_name:")[1]}).Trim() | Sort-Object | Out-File "$OUTPUT_FOLDER\forensic\yara\threat_name_all.txt"
+                            
+                            $Threats = Get-Content "$OUTPUT_FOLDER\forensic\yara\threat_name.txt"
+
+                            foreach ($ThreatName in $Threats)
+                            {
+                                $Count = (Get-Content "$OUTPUT_FOLDER\forensic\yara\threat_name_all.txt" | Select-String -Pattern "$ThreatName" | Measure-Object).Count
+                                Write-Host "        $ThreatName ($Count)" -ForegroundColor Red
+                            }
                         }
                     }
                     else
@@ -3097,6 +1801,138 @@ if (Test-Path "$($MemProcFS)")
                 }
             }
         }
+
+        Function Get-MPLogs {
+
+        # Microsoft Protection Logs
+        if ((Test-Path "$DriveLetter\forensic\files\ROOT\ProgramData\Microsoft\Windows Defender\Support\*MPLog-*.log") -or (Test-Path "$DriveLetter\forensic\files\ROOT\ProgramData\Microsoft\Windows Defender\Support\*MPDetection-*.log"))
+        {
+            # Step #1 - Collecting MPLogs (MPLogs-[8 digits]-[6 digits].log --> MPLogs-[date]-[time].log)
+            Write-Output "[Info]  Collecting Microsoft Protection Logs (MPLogs) ..."
+            New-Item "$OUTPUT_FOLDER\MPLogs\Dirty" -ItemType Directory -Force | Out-Null
+
+            # MPLogs
+            if (Test-Path "$DriveLetter\forensic\files\ROOT\ProgramData\Microsoft\Windows Defender\Support\*MPLog-*.log")
+            {
+                Copy-Item "$DriveLetter\forensic\files\ROOT\ProgramData\Microsoft\Windows Defender\Support\*MPLog-*.log" -Destination "$OUTPUT_FOLDER\MPLogs\Dirty"
+                
+                # Count
+                $Count = (Get-ChildItem -Path "$OUTPUT_FOLDER\MPLogs\Dirty" -Filter "*MPLog-*.log" | Measure-Object).Count
+                Write-Output "[Info]  $Count MPLog(s) found"
+            }
+
+            # MPDetection
+            if (Test-Path "$DriveLetter\forensic\files\ROOT\ProgramData\Microsoft\Windows Defender\Support\*MPDetection-*.log")
+            {
+                Copy-Item "$DriveLetter\forensic\files\ROOT\ProgramData\Microsoft\Windows Defender\Support\*MPDetection-*.log" -Destination "$OUTPUT_FOLDER\MPLogs\Dirty"
+            }
+
+            # Step #2 - Removing Null Bytes
+
+            # MPLogs
+            if (Test-Path "$OUTPUT_FOLDER\MPLogs\Dirty\*MPLog-*.log")
+            {
+                Write-Output "[Info]  Recovery of Microsoft Protection Logs (MPLogs) initiated ..."
+                New-Item "$OUTPUT_FOLDER\MPLogs\Clean" -ItemType Directory -Force | Out-Null
+
+                $MPLogs = (Get-ChildItem "$OUTPUT_FOLDER\MPLogs\Dirty" -Filter "*MPLog-*.log" -File -Force -ErrorAction SilentlyContinue).FullName
+
+                ForEach( $MPLog in $MPLogs )
+                {
+                    $FileName = $MPLog.Split('\')[-1]
+                    Get-Content "$MPLog" -Encoding Byte | Where-Object {$_ -ne 0x00} | Set-Content "$OUTPUT_FOLDER\MPLogs\Clean\$FileName" -Encoding Byte
+                }
+            }
+
+            # MPDetection
+            if (Test-Path "$OUTPUT_FOLDER\MPLogs\Dirty\*MPDetection-*.log")
+            {
+                New-Item "$OUTPUT_FOLDER\MPLogs\Clean" -ItemType Directory -Force | Out-Null
+
+                $MPDetectionLogs = (Get-ChildItem "$OUTPUT_FOLDER\MPLogs\Dirty" -Filter "*MPDetection-*.log" -File -Force -ErrorAction SilentlyContinue).FullName
+
+                ForEach( $MPDetectionLog in $MPDetectionLogs )
+                {
+                    $FileName = $MPDetectionLog.Split('\')[-1]
+                    Get-Content "$MPDetectionLog" -Encoding Byte | Where-Object {$_ -ne 0x00} | Set-Content "$OUTPUT_FOLDER\MPLogs\Clean\$FileName" -Encoding Byte
+                }
+            }
+
+            # Step #3 - CSV
+            # https://gist.github.com/Qazeer/5ad40f6e98362520290d13f3015f79ec
+            if (Test-Path "$OUTPUT_FOLDER\MPLogs\Clean\*MPLog-*.log")
+            {
+                Write-Output "[Info]  Converting Microsoft Protection Logs (MPLogs) to CSV ..."
+                New-Item "$OUTPUT_FOLDER\MPLogs\CSV" -ItemType Directory -Force | Out-Null
+
+                $MPLogs = (Get-ChildItem "$OUTPUT_FOLDER\MPLogs\Clean" -Filter "*MPLog-*.log" -File -Force -ErrorAction SilentlyContinue).FullName
+
+                ForEach( $MPLog in $MPLogs )
+                {
+                    $BaseName = ($MPLog.Split('\')[-1]).split('.')[0]
+                    $LogFile = Get-Item -Path $MPLog
+                    $LogData = $LogFile | Get-Content -Encoding UTF8 -Raw
+                    $LogOutput = New-Object System.Collections.ArrayList
+                    $LogEntries = $LogData -split "(?m)^(?=\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)"
+
+                    Foreach ($LogEntry in $LogEntries)
+                    {
+                        if ($null -eq $LogEntry -or "" -eq $LogEntry.Trim()) { continue }
+
+                        $LogExtract = $LogEntry | Select-String -Pattern "^(?<Timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*?)\s(?<Provider>\[.*?]|\S+?:)?\s?(?<Message>(?s).*)$"
+
+                        if ($LogExtract.Matches.Count -eq 0) {
+                            continue
+                        }
+
+                        $Timestamp = $LogExtract.Matches[0].Groups['Timestamp'].Value
+                        $Category  = $LogExtract.Matches[0].Groups['Category'].Value
+                        $Message   = $LogExtract.Matches[0].Groups['Message'].Value.Trim()
+
+                        $null = $Provider -match '^\[?(?<ProviderExtracted>.*?)]?:?$'
+                        $Category = if ($Matches.Contains("ProviderExtracted")) { $Matches["ProviderExtracted"] }
+
+                        $null = $LogOutput.Add([PSCustomObject] @{
+                            Timestamp = $Timestamp
+                            Category  = $Category
+                            Message   = $Message
+                        })
+                    }
+
+                    $LogOutput | Export-Csv -NoTypeInformation "$OUTPUT_FOLDER\MPLogs\CSV\$BaseName.csv"
+                }
+            }
+
+            # Step #4 - XLSX
+            if (Test-Path "$OUTPUT_FOLDER\MPLogs\CSV\*MPLog-*.csv")
+            {
+                Write-Output "[Info]  Creating Excel SpreadSheets(s) ..."
+                New-Item "$OUTPUT_FOLDER\MPLogs\XLSX" -ItemType Directory -Force | Out-Null
+
+                $MPLogs = (Get-ChildItem "$OUTPUT_FOLDER\MPLogs\CSV" -Filter "*MPLog-*.csv" -File -Force -ErrorAction SilentlyContinue).FullName
+                
+                ForEach( $MPLog in $MPLogs )
+                {
+                    if([int](& $xsv count "$MPLog") -gt 0)
+                    {
+                        $BaseName = ($MPLog.Split('\')[-1]).split('.')[0]
+                        $Import = Import-Csv "$MPLog" -Delimiter "," | Select-Object @{Name="Timestamp";Expression={([DateTime]::Parse($_.Timestamp).ToString("yyyy-MM-dd HH:mm:ss"))}},Provider,Message | Sort-Object { $_.Timestamp -as [datetime] } -Descending
+                        $Import | Export-Excel -Path "$OUTPUT_FOLDER\MPLogs\XLSX\$BaseName.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "MPLogs" -CellStyleSB {
+                        param($WorkSheet)
+                        # BackgroundColor and FontColor for specific cells of TopRow
+                        $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                        Set-Format -Address $WorkSheet.Cells["A1:C1"] -BackgroundColor $BackgroundColor -FontColor White
+                        # HorizontalAlignment "Center" of columns A-B
+                        $WorkSheet.Cells["A:B"].Style.HorizontalAlignment="Center"
+                        }
+                    }
+                }
+            }
+        }
+
+        }
+
+        Get-MPLogs
 
         # FS_Forensic_Files
         # https://github.com/ufrisk/MemProcFS/wiki/FS_Forensic_Files
@@ -3244,6 +2080,24 @@ if (Test-Path "$($MemProcFS)")
                 }
             }
 
+            # prefetch.csv --> Prefetch Information
+            if (Test-Path "$OUTPUT_FOLDER\forensic\csv\prefetch.csv")
+            {
+                if([int](& $xsv count "$OUTPUT_FOLDER\forensic\csv\prefetch.csv") -gt 0)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\prefetch.csv" -Delimiter ","
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\prefetch.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Prefetch" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:M1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns B-C and E-M
+                    $WorkSheet.Cells["B:C"].Style.HorizontalAlignment="Center"
+                    $WorkSheet.Cells["E:M"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
+
             # process.csv --> Process Information
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\process.csv")
             {
@@ -3353,6 +2207,23 @@ if (Test-Path "$($MemProcFS)")
             }
 
             # timeline_ntfs.csv --> \forensic\timeline\timeline-reverse.csv
+
+            # timeline_prefetch.csv --> Prefetch Timeline
+            if (Test-Path "$OUTPUT_FOLDER\forensic\csv\timeline_prefetch.csv")
+            {
+                if((Get-Item "$OUTPUT_FOLDER\forensic\csv\timeline_prefetch.csv").length -gt 0kb)
+                {
+                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\csv\timeline_prefetch.csv" -Delimiter "," | Select-Object Time, Type, Action, PID, Value32, Value64, Text | Sort-Object { $_.Time -as [datetime] } -Descending
+                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\xlsx\timeline_prefetch.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "timeline_prefetch" -CellStyleSB {
+                    param($WorkSheet)
+                    # BackgroundColor and FontColor for specific cells of TopRow
+                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                    Set-Format -Address $WorkSheet.Cells["A1:G1"] -BackgroundColor $BackgroundColor -FontColor White
+                    # HorizontalAlignment "Center" of columns A-F
+                    $WorkSheet.Cells["A:F"].Style.HorizontalAlignment="Center"
+                    }
+                }
+            }
 
             # timeline_process.csv --> Process Timeline
             if (Test-Path "$OUTPUT_FOLDER\forensic\csv\timeline_process.csv")
@@ -3650,20 +2521,6 @@ if (Test-Path "$($MemProcFS)")
             { 
                 Copy-Item "$DriveLetter\sys\net\netstat.txt" -Destination "$OUTPUT_FOLDER\sys\net\netstat.txt"
 
-                # IPv4
-                # https://ipinfo.io/bogon
-                New-Item "$OUTPUT_FOLDER\sys\net\IPv4" -ItemType Directory -Force | Out-Null
-                $IPv4 = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
-                $Private = "^(192\.168|10\.|172\.1[6789]\.|172\.2[0-9]\.|172\.3[01]\.)"
-                $Special = "^(0\.0\.0\.0|127\.0\.0\.1|169\.254\.|224\.0\.0)"
-                Get-Content "$OUTPUT_FOLDER\sys\net\netstat.txt" | Select-String -Pattern $IPv4 -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Unique -Property { [System.Version]$_ } | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPv4-All.txt"
-                Get-Content "$OUTPUT_FOLDER\sys\net\netstat.txt" | Select-String -Pattern $IPv4 -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Unique -Property { [System.Version]$_ } | Where-Object {$_ -notmatch $Private} | Where-Object {$_ -notmatch $Special} | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt"
-
-                # Count
-                $Total = (Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4-All.txt" | Measure-Object).Count
-                $Count = (Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | Measure-Object).Count
-                Write-Output "[Info]  $Count IPv4 addresses found ($Total)"
-
                 # CSV
                 if (Test-Path "$DriveLetter\forensic\json\general.json")
                 {
@@ -3768,91 +2625,22 @@ if (Test-Path "$($MemProcFS)")
                     }
                 }
 
-                # IPinfo CLI (50000 requests per month)
-                if (Test-Path "$($IPinfo)")
-                {
-                    if (Test-Path "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt")
-                    {
-                        if ((Get-Item "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt").Length -gt 0kb)
-                        {
-                            # Internet Connectivity Check (Vista+)
-                            $NetworkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]‘{DCB00C01-570F-4A9B-8D69-199FDBA5723B}’)).IsConnectedToInternet
+                # IPv4
+                # https://ipinfo.io/bogon
+                New-Item "$OUTPUT_FOLDER\sys\net\IPv4" -ItemType Directory -Force | Out-Null
+                $IPv4 = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+                $Private = "^(192\.168|10\.|172\.1[6789]\.|172\.2[0-9]\.|172\.3[01]\.)"
+                $Special = "^(0\.0\.0\.0|127\.0\.0\.1|169\.254\.|224\.0\.0)"
+                Get-Content "$OUTPUT_FOLDER\sys\net\netstat.txt" | Select-String -Pattern $IPv4 -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Unique -Property { [System.Version]$_ } | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPv4-All.txt"
+                Get-Content "$OUTPUT_FOLDER\sys\net\netstat.txt" | Select-String -Pattern $IPv4 -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Unique -Property { [System.Version]$_ } | Where-Object {$_ -notmatch $Private} | Where-Object {$_ -notmatch $Special} | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt"
 
-                            if (!($NetworkListManager -eq "True"))
-                            {
-                                Write-Host "[Error] Your computer is NOT connected to the Internet. IP addresses cannot be checked via IPinfo API." -ForegroundColor Red
-                            }
-                            else
-                            {
-                                # Check if IPinfo.io is reachable
-                                if (!(Test-Connection -ComputerName ipinfo.io -Count 1 -Quiet))
-                                {
-                                    Write-Host "[Error] ipinfo.io is NOT reachable. IP addresses cannot be checked via IPinfo API." -ForegroundColor Red
-                                }
-                                else
-                                {
-                                    New-Item "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\TXT" -ItemType Directory -Force | Out-Null
-                                    New-Item "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\JSON" -ItemType Directory -Force | Out-Null
-
-                                    $List = Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt"
-
-                                    ForEach ($IPv4 in $List)
-                                    {
-                                        # TXT
-                                        & $IPinfo "$IPv4" | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\TXT\$IPv4.txt"
-
-                                        # JSON
-                                        & $IPinfo "$IPv4" --json | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\JSON\$IPv4.json"
-                                    }
-
-                                    # Map IPs
-                                    # https://ipinfo.io/map
-                                    Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo map | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\Map.txt"
-
-                                    # Access Token
-                                    # https://ipinfo.io/signup?ref=cli
-                                    if (!("$IPInfoToken" -eq "access_token"))
-                                    {
-                                        # Summarize IPs
-                                        # https://ipinfo.io/summarize-ips
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo summarize -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\Summary.txt"
-
-                                        # CSV
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | & $IPinfo --csv -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\IPinfo.csv"
-
-                                        # XLSX
-                                        if (Get-Module -ListAvailable -Name ImportExcel)
-                                        {
-                                            if (Test-Path "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\IPinfo.csv")
-                                            {
-                                                if([int](& $xsv count "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\IPinfo.csv") -gt 0)
-                                                {
-                                                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\IPinfo.csv" -Delimiter "," | Sort-Object {$_.ip -as [Version]}
-                                                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\sys\net\IPv4\IPinfo\IPinfo.xlsx" -NoNumberConversion * -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "IPinfo" -CellStyleSB {
-                                                    param($WorkSheet)
-                                                    # BackgroundColor and FontColor for specific cells of TopRow
-                                                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
-                                                    Set-Format -Address $WorkSheet.Cells["A1:AI1"] -BackgroundColor $BackgroundColor -FontColor White
-                                                    # HorizontalAlignment "Center" of columns A-I and K-AI
-                                                    $WorkSheet.Cells["A:I"].Style.HorizontalAlignment="Center"
-                                                    $WorkSheet.Cells["K:AI"].Style.HorizontalAlignment="Center"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    Write-Output "[Info]  ipinfo.exe NOT found."
-                }
+                # Count
+                $Total = (Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4-All.txt" | Measure-Object).Count
+                $Count = (Get-Content "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | Measure-Object).Count
+                Write-Output "[Info]  $Count IPv4 addresses found ($Total)"
 
                 # IPv6
-                # IPv6 Bogon Ranges --> https://ipinfo.io/bogon
+                # https://ipinfo.io/bogon
                 New-Item "$OUTPUT_FOLDER\sys\net\IPv6" -ItemType Directory -Force | Out-Null
                 $IPv6 = ":(?::[a-f\d]{1,4}){0,5}(?:(?::[a-f\d]{1,4}){1,2}|:(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})))|[a-f\d]{1,4}:(?:[a-f\d]{1,4}:(?:[a-f\d]{1,4}:(?:[a-f\d]{1,4}:(?:[a-f\d]{1,4}:(?:[a-f\d]{1,4}:(?:[a-f\d]{1,4}:(?:[a-f\d]{1,4}|:)|(?::(?:[a-f\d]{1,4})?|(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))))|:(?:(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))|[a-f\d]{1,4}(?::[a-f\d]{1,4})?|))|(?::(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))|:[a-f\d]{1,4}(?::(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))|(?::[a-f\d]{1,4}){0,2})|:))|(?:(?::[a-f\d]{1,4}){0,2}(?::(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))|(?::[a-f\d]{1,4}){1,2})|:))|(?:(?::[a-f\d]{1,4}){0,3}(?::(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))|(?::[a-f\d]{1,4}){1,2})|:))|(?:(?::[a-f\d]{1,4}){0,4}(?::(?:(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))|(?::[a-f\d]{1,4}){1,2})|:))"
                 $Bogon = "^(::1|::ffff:0:0|100::|2001:10::|2001:db8::|fc00::|fe80::|fec0::|ff00::)"
@@ -3864,76 +2652,246 @@ if (Test-Path "$($MemProcFS)")
                 $Count = (Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | Measure-Object).Count
                 Write-Output "[Info]  $Count IPv6 addresses found ($Total)"
 
+                # IP.txt
+                Write-Output "IPAddress" | Out-File "$OUTPUT_FOLDER\sys\net\IP.txt" # Header
+
+                # IPv4.txt
+                if (Test-Path "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt")
+                {
+                    if ((Get-Item "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt").Length -gt 0kb)
+                    {
+                        Get-Content -Path "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | Out-File "$OUTPUT_FOLDER\sys\net\IP.txt" -Append
+                    }
+                }
+
+                # IPv6.txt
+                if (Test-Path "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt")
+                {
+                    if ((Get-Item "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt").Length -gt 0kb)
+                    {
+                        Get-Content -Path "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | Out-File "$OUTPUT_FOLDER\sys\net\IP.txt" -Append
+                    }
+                }
+
                 # IPinfo CLI (50000 requests per month)
                 if (Test-Path "$($IPinfo)")
                 {
-                    if (Test-Path "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt")
+                    if (Test-Path "$OUTPUT_FOLDER\sys\net\IP.txt")
                     {
-                        if ((Get-Item "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt").Length -gt 0kb)
+                        if ((Get-Item "$OUTPUT_FOLDER\sys\net\IP.txt").Length -gt 0kb)
                         {
-                            # Internet Connectivity Check (Vista+)
-                            $NetworkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]‘{DCB00C01-570F-4A9B-8D69-199FDBA5723B}’)).IsConnectedToInternet
-
-                            if (!($NetworkListManager -eq "True"))
+                            # Offline Mode
+                            if ($OfflineMode -eq "Enabled")
                             {
-                                Write-Host "[Error] Your computer is NOT connected to the Internet. IP addresses cannot be checked via IPinfo API." -ForegroundColor Red
+                                Write-Output "[Info]  IP Data Enrichment w/ IPinfo.io will be skipped [Offline-Mode] ..."
                             }
                             else
                             {
-                                # Check if IPinfo.io is reachable
-                                if (!(Test-Connection -ComputerName ipinfo.io -Count 1 -Quiet))
+                                # Internet Connectivity Check (Vista+)
+                                $NetworkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]‘{DCB00C01-570F-4A9B-8D69-199FDBA5723B}’)).IsConnectedToInternet
+
+                                if (!($NetworkListManager -eq "True"))
                                 {
-                                    Write-Host "[Error] ipinfo.io is NOT reachable. IP addresses cannot be checked via IPinfo API." -ForegroundColor Red
+                                    Write-Host "[Error] Your computer is NOT connected to the Internet. IP addresses cannot be checked via IPinfo API." -ForegroundColor Red
                                 }
                                 else
                                 {
-                                    New-Item "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\TXT" -ItemType Directory -Force | Out-Null
-                                    New-Item "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\JSON" -ItemType Directory -Force | Out-Null
-
-                                    $List = Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt"
-
-                                    $Index = 0
-
-                                    ForEach ($IPv6 in $List)
+                                    # Check if IPinfo.io is reachable
+                                    if (!(Test-Connection -ComputerName ipinfo.io -Count 1 -Quiet))
                                     {
-                                        # TXT
-                                        & $IPinfo "$IPv6" | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\TXT\$Index.txt"
-
-                                        # JSON
-                                        & $IPinfo "$IPv6" --json | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\JSON\$Index.json"
-
-                                        $Index++
+                                        Write-Host "[Error] ipinfo.io is NOT reachable. IP addresses cannot be checked via IPinfo API." -ForegroundColor Red
                                     }
-
-                                    # Map IPs
-                                    # https://ipinfo.io/map
-                                    Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo map | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\Map.txt"
-
-                                    if (!("$IPInfoToken" -eq "access_token"))
+                                    else
                                     {
-                                        # Summarize IPs
-                                        # https://ipinfo.io/summarize-ips
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo summarize -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\Summary.txt"
+                                        # Map IPs
+                                        # https://ipinfo.io/map
+                                        New-Item "$OUTPUT_FOLDER\sys\net\IPinfo" -ItemType Directory -Force | Out-Null
+                                        Get-Content "$OUTPUT_FOLDER\sys\net\IP.txt" | & $IPinfo map | Out-File "$OUTPUT_FOLDER\sys\net\IPinfo\Map.txt"
 
-                                        # CSV
-                                        Get-Content "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | & $IPinfo --csv -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\IPinfo.csv"
-
-                                        # XLSX
-                                        if (Get-Module -ListAvailable -Name ImportExcel)
+                                        # Access Token
+                                        # https://ipinfo.io/signup?ref=cli
+                                        if (!("$IPInfoToken" -eq "access_token"))
                                         {
-                                            if (Test-Path "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\IPinfo.csv")
+                                            # Summarize IPs
+                                            # https://ipinfo.io/summarize-ips
+
+                                            # TXT --> lists VPNs
+                                            Get-Content "$OUTPUT_FOLDER\sys\net\IP.txt" | & $IPinfo summarize -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPinfo\Summary.txt"
+
+                                            # CSV
+                                            Get-Content "$OUTPUT_FOLDER\sys\net\IP.txt" | & $IPinfo --csv -t $IPInfoToken | Out-File "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo.csv"
+
+                                            # Custom CSV (Free)
+                                            if (Test-Path "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo.csv")
                                             {
-                                                if([int](& $xsv count "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\IPinfo.csv") -gt 0)
+                                                if([int](& $xsv count "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo.csv") -gt 0)
                                                 {
-                                                    $IMPORT = Import-Csv "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\IPinfo.csv" -Delimiter "," | Sort-Object ip
-                                                    $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\sys\net\IPv6\IPinfo\IPinfo.xlsx" -NoNumberConversion * -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "IPinfo" -CellStyleSB {
-                                                    param($WorkSheet)
-                                                    # BackgroundColor and FontColor for specific cells of TopRow
-                                                    $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
-                                                    Set-Format -Address $WorkSheet.Cells["A1:AI1"] -BackgroundColor $BackgroundColor -FontColor White
-                                                    # HorizontalAlignment "Center" of columns A-I and K-AI
-                                                    $WorkSheet.Cells["A:I"].Style.HorizontalAlignment="Center"
-                                                    $WorkSheet.Cells["K:AI"].Style.HorizontalAlignment="Center"
+                                                    $IPinfoRecords = Import-Csv "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo.csv" -Delimiter "," -Encoding UTF8
+                                
+                                                    $CustomCsv = @()
+
+                                                    ForEach($IPinfoRecord in $IPinfoRecords)
+                                                    {
+                                                        $Line = [PSCustomObject]@{
+                                                            "IP"           = $IPinfoRecord.ip
+                                                            "City"         = $IPinfoRecord.city
+                                                            "Region"       = $IPinfoRecord.region
+                                                            "Country"      = $IPinfoRecord.country
+                                                            "Country Name" = $IPinfoRecord.country_name
+                                                            "EU"           = $IPinfoRecord.isEU
+                                                            "Location"     = $IPinfoRecord.loc
+                                                            "ASN"          = $IPinfoRecord | Select-Object -ExpandProperty org | ForEach-Object{($_ -split "\s+")[0]}
+                                                            "OrgName"      = $IPinfoRecord | Select-Object -ExpandProperty org | ForEach-Object {$_ -replace "^AS[0-9]+ "}
+                                                            "Postal Code"  = $IPinfoRecord.postal
+                                                            "Timezone"     = $IPinfoRecord.timezone
+                                                        }
+
+                                                        $CustomCsv += $Line
+                                                    }
+
+                                                    $CustomCsv | Sort-Object {$_.IP -as [Version]} | Export-Csv -Path "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo-Custom.csv" -NoTypeInformation -Encoding UTF8
+                                                }
+                                            }
+
+                                            # Custom XLSX (Free)
+                                            if (Get-Module -ListAvailable -Name ImportExcel)
+                                            {
+                                                if (Test-Path "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo-Custom.csv")
+                                                {
+                                                    if([int](& $xsv count "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo-Custom.csv") -gt 0)
+                                                    {
+                                                        $IMPORT = Import-Csv "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo-Custom.csv" -Delimiter "," | Sort-Object {$_.IP -as [Version]}
+                                                        $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo-Custom.xlsx" -NoNumberConversion * -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -IncludePivotTable -PivotTableName "PivotTable" -PivotRows "Country Name" -PivotData @{"IP"="Count"} -WorkSheetname "IPinfo (Free)" -CellStyleSB {
+                                                        param($WorkSheet)
+                                                        # BackgroundColor and FontColor for specific cells of TopRow
+                                                        $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                                        Set-Format -Address $WorkSheet.Cells["A1:K1"] -BackgroundColor $BackgroundColor -FontColor White
+                                                        # HorizontalAlignment "Center" of columns A-K
+                                                        $WorkSheet.Cells["A:K"].Style.HorizontalAlignment="Center"
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            # XLSX (Free)
+                                            if (Get-Module -ListAvailable -Name ImportExcel)
+                                            {
+                                                if (Test-Path "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo.csv")
+                                                {
+                                                    if([int](& $xsv count "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo.csv") -gt 0)
+                                                    {
+                                                        $IMPORT = Import-Csv "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo.csv" -Delimiter "," -Encoding UTF8 | Select-Object ip,city,region,country,country_name,isEU,loc,org,postal,timezone | Sort-Object {$_.ip -as [Version]}
+                                                        $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo.xlsx" -NoNumberConversion * -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "IPinfo" -CellStyleSB {
+                                                        param($WorkSheet)
+                                                        # BackgroundColor and FontColor for specific cells of TopRow
+                                                        $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                                        Set-Format -Address $WorkSheet.Cells["A1:J1"] -BackgroundColor $BackgroundColor -FontColor White
+                                                        # HorizontalAlignment "Center" of columns A-J
+                                                        $WorkSheet.Cells["A:J"].Style.HorizontalAlignment="Center"
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            # Create HashTable and import 'IPinfo-Custom.csv'
+                                            $script:HashTable = @{}
+                                            if (Test-Path "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo-Custom.csv")
+                                            {
+                                                if([int](& $xsv count "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo-Custom.csv") -gt 0)
+                                                {
+                                                    Import-Csv "$OUTPUT_FOLDER\sys\net\IPinfo\IPinfo-Custom.csv" -Delimiter "," -Encoding UTF8 | ForEach-Object { $HashTable[$_.IP] = $_.City,$_.Region,$_.Country,$_."Country Name",$_.EU,$_.Location,$_.ASN,$_.OrgName,$_."Postal Code",$_.Timezone }
+
+                                                    # Count Ingested Properties
+                                                    $Count = $HashTable.Count
+                                                    Write-Output "[Info]  Initializing 'IPinfo-Custom.csv' Lookup Table ($Count) ..."
+                                                }
+                                            }
+
+                                            # IP Data Enrichment w/ IPinfo.io
+                                            if (Test-Path "$OUTPUT_FOLDER\sys\net\CSV\net-custom.csv")
+                                            {
+                                                if([int](& $xsv count "$OUTPUT_FOLDER\sys\net\CSV\net-custom.csv") -gt 0)
+                                                {
+                                                    $Records = Import-Csv -Path "$OUTPUT_FOLDER\sys\net\CSV\net-custom.csv" -Delimiter "`t" -Encoding UTF8
+
+                                                    # CSV
+                                                    $Results = @()
+                                                    ForEach($Record in $Records)
+                                                    {
+                                                        $Source = $Record.Source | & $IPinfo grepip -o
+                                                        $Destination = $Record.Destination | & $IPinfo grepip -o
+
+                                                        # Check if HashTable contains Source IP
+                                                        if($HashTable.ContainsKey("$Source"))
+                                                        {
+                                                            $SrcCountryName = $HashTable["$Source"][3]
+                                                            $SrcASN         = $HashTable["$Source"][6]
+                                                            $SrcOrgName     = $HashTable["$Source"][7]
+                                                        }
+                                                        else
+                                                        {
+                                                            $SrcCountryName = ""
+                                                            $SrcASN         = ""
+                                                            $SrcOrgName     = ""
+                                                        }
+
+                                                        # Check if HashTable contains Destination IP
+                                                        if($HashTable.ContainsKey("$Destination"))
+                                                        {
+                                                            $DstCountryName = $HashTable["$Destination"][3]
+                                                            $DstASN         = $HashTable["$Destination"][6]
+                                                            $DstOrgName     = $HashTable["$Destination"][7]
+                                                        }
+                                                        else
+                                                        {
+                                                            $DstCountryName = ""
+                                                            $DstASN         = ""
+                                                            $DstOrgName     = ""
+                                                        }
+                                                        
+                                                        $Line = [PSCustomObject]@{
+                                                            "Process"        = $Record.Process
+                                                            "PID"            = $Record.PID
+                                                            "Protocol"       = $Record.Protocol
+                                                            "State"          = $Record.State
+                                                            "Src IP"         = $Record.Source
+                                                            "Src Port"       = $Record.SrcPort
+                                                            "Src Country"    = $SrcCountryName
+                                                            "Src ASN"        = $SrcASN
+                                                            "Src OrgName"    = $SrcOrgName
+                                                            "Dst IP"         = $Record.Destination
+                                                            "Dst Port"       = $Record.DstPort
+                                                            "Dst Country"    = $DstCountryName
+                                                            "Dst ASN"        = $DstASN
+                                                            "Dst OrgName"    = $DstOrgName
+                                                            "Time"           = $Record.Time
+                                                            "Object Address" = $Record."Object Address"
+                                                            "Process Path"   = $Record."Process Path"
+                                                        }
+
+                                                        $Results += $Line
+                                                    }
+
+                                                    $Results | Export-Csv -Path "$OUTPUT_FOLDER\sys\net\CSV\net-enriched.csv" -NoTypeInformation -Encoding UTF8
+                                                }
+                                            }
+
+                                            # XLSX
+                                            if (Get-Module -ListAvailable -Name ImportExcel)
+                                            {
+                                                if (Test-Path "$OUTPUT_FOLDER\sys\net\CSV\net-enriched.csv")
+                                                {
+                                                    if([int](& $xsv count "$OUTPUT_FOLDER\sys\net\CSV\net-enriched.csv") -gt 0)
+                                                    {
+                                                        $IMPORT = Import-Csv "$OUTPUT_FOLDER\sys\net\CSV\net-enriched.csv" -Delimiter "," | Sort-Object { $_.CreationDate -as [datetime] } -Descending
+                                                        $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\sys\net\XLSX\net-enriched.xlsx" -NoHyperLinkConversion * -NoNumberConversion * -FreezePane 2,5 -BoldTopRow -AutoSize -AutoFilter -IncludePivotTable -PivotTableName "PivotTable" -WorkSheetname "IP Data Enrichment" -CellStyleSB {
+                                                        param($WorkSheet)
+                                                        # BackgroundColor and FontColor for specific cells of TopRow
+                                                        $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
+                                                        Set-Format -Address $WorkSheet.Cells["A1:Q1"] -BackgroundColor $BackgroundColor -FontColor White
+                                                        # HorizontalAlignment "Center" of columns A-Q
+                                                        $WorkSheet.Cells["A:Q"].Style.HorizontalAlignment="Center"
+                                                        }
                                                     }
                                                 }
                                             }
@@ -3947,58 +2905,6 @@ if (Test-Path "$($MemProcFS)")
                 else
                 {
                     Write-Output "[Info]  ipinfo.exe NOT found."
-                }
-            }
-
-            # IP.txt
-
-            # IPv4
-            if (Test-Path "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt")
-            {
-                if ((Get-Item "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt").Length -gt 0kb)
-                {
-                    Get-Content -Path "$OUTPUT_FOLDER\sys\net\IPv4\IPv4.txt" | Out-File "$OUTPUT_FOLDER\sys\net\IP.txt"
-                }
-            }
-
-            # IPv6
-            if (Test-Path "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt")
-            {
-                if ((Get-Item "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt").Length -gt 0kb)
-                {
-                    Get-Content -Path "$OUTPUT_FOLDER\sys\net\IPv6\IPv6.txt" | Out-File "$OUTPUT_FOLDER\sys\net\IP.txt" -Append
-                }
-            }
-
-            # IPinfo CLI (50000 requests per month)
-            if (Test-Path "$($IPinfo)")
-            {
-                if (Test-Path "$OUTPUT_FOLDER\sys\net\IP.txt")
-                {
-                    if ((Get-Item "$OUTPUT_FOLDER\sys\net\IP.txt").Length -gt 0kb)
-                    {
-                        # Internet Connectivity Check (Vista+)
-                        $NetworkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]‘{DCB00C01-570F-4A9B-8D69-199FDBA5723B}’)).IsConnectedToInternet
-
-                        if (!($NetworkListManager -eq "True"))
-                        {
-                            Write-Host "[Error] Your computer is NOT connected to the Internet. IP addresses cannot be checked via IPinfo API." -ForegroundColor Red
-                        }
-                        else
-                        {
-                            # Check if IPinfo.io is reachable
-                            if (!(Test-Connection -ComputerName ipinfo.io -Count 1 -Quiet))
-                            {
-                                Write-Host "[Error] ipinfo.io is NOT reachable. IP addresses cannot be checked via IPinfo API." -ForegroundColor Red
-                            }
-                            else
-                            {
-                                # Map IPs
-                                New-Item "$OUTPUT_FOLDER\sys\net\IPinfo" -ItemType Directory -Force | Out-Null
-                                Get-Content "$OUTPUT_FOLDER\sys\net\IP.txt" | & $IPinfo map | Out-File "$OUTPUT_FOLDER\sys\net\IPinfo\Map.txt"
-                            }
-                        }
-                    }
                 }
             }
 
@@ -4319,7 +3225,7 @@ if (Test-Path "$($MemProcFS)")
                         Unblock-File -Path "$SCRIPT_DIR\Scripts\Get-ProcessTree\Get-ProcessTree.ps1"
                         Start-Process -FilePath "powershell" -NoNewWindow -ArgumentList "-NoProfile", "-File", "$SCRIPT_DIR\Scripts\Get-ProcessTree\Get-ProcessTree.ps1", "-CSVPath", "$OUTPUT_FOLDER\sys\proc\CSV\proc.csv"
                         Start-Sleep -Seconds 3
-                        $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+                        $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.1 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
                     }
                 }
             }
@@ -7059,15 +5965,15 @@ if (Test-Path "$($MemProcFS)")
 
         # FS_Web (Web Browser History: Google Chrome, Microsoft Edge and Firefox)
         # https://github.com/ufrisk/MemProcFS/wiki/FS_Web
-        if (Test-Path "$DriveLetter\misc\web\web.txt")
+        if (Test-Path "$DriveLetter\forensic\web\web.txt")
         {
-            New-Item "$OUTPUT_FOLDER\misc\web" -ItemType Directory -Force | Out-Null
-            Copy-Item -Path "$DriveLetter\misc\web\web.txt" -Destination "$OUTPUT_FOLDER\misc\web\web-draft.txt"
-            Add-Content -Path "$OUTPUT_FOLDER\misc\web\web.txt" -Encoding utf8 -Value (Get-Content -Path "$OUTPUT_FOLDER\misc\web\web-draft.txt")
-            Remove-Item -Path "$OUTPUT_FOLDER\misc\web\web-draft.txt" -Force
+            New-Item "$OUTPUT_FOLDER\forensic\web" -ItemType Directory -Force | Out-Null
+            Copy-Item -Path "$DriveLetter\forensic\web\web.txt" -Destination "$OUTPUT_FOLDER\forensic\web\web-draft.txt"
+            Add-Content -Path "$OUTPUT_FOLDER\forensic\web\web.txt" -Encoding UTF8 -Value (Get-Content -Path "$OUTPUT_FOLDER\forensic\web\web-draft.txt")
+            Remove-Item -Path "$OUTPUT_FOLDER\forensic\web\web-draft.txt" -Force
 
             # Count URL (w/ thousands separators)
-            $Count = (Get-Content "$OUTPUT_FOLDER\misc\web\web.txt" | Measure-Object).Count -2
+            $Count = (Get-Content "$OUTPUT_FOLDER\forensic\web\web.txt" | Measure-Object).Count -2
             $URL = '{0:N0}' -f $Count
             Write-Output "[Info]  Processing Web History Information (Records: $URL) ..."
 
@@ -7098,18 +6004,18 @@ if (Test-Path "$($MemProcFS)")
                         "Info"         = $info.info
                         }
 
-                    } | Select-Object "Index","Timestamp","Process Name","PID","Type","URL","Info" | Export-Csv -Path "$OUTPUT_FOLDER\misc\web\web.csv" -Delimiter "," -NoTypeInformation -Encoding UTF8
+                    } | Select-Object "Index","Timestamp","Process Name","PID","Type","URL","Info" | Export-Csv -Path "$OUTPUT_FOLDER\forensic\web\web.csv" -Delimiter "," -NoTypeInformation -Encoding UTF8
                 }
 
                 # XLSX
                 if (Get-Module -ListAvailable -Name ImportExcel)
                 {
-                    if (Test-Path "$OUTPUT_FOLDER\misc\web\web.csv")
+                    if (Test-Path "$OUTPUT_FOLDER\forensic\web\web.csv")
                     {
-                        if([int](& $xsv count "$OUTPUT_FOLDER\misc\web\web.csv") -gt 0)
+                        if([int](& $xsv count "$OUTPUT_FOLDER\forensic\web\web.csv") -gt 0)
                         {
-                            $IMPORT = Import-Csv "$OUTPUT_FOLDER\misc\web\web.csv" -Delimiter ","
-                            $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\misc\web\web.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Web History" -CellStyleSB {
+                            $IMPORT = Import-Csv "$OUTPUT_FOLDER\forensic\web\web.csv" -Delimiter ","
+                            $IMPORT | Export-Excel -Path "$OUTPUT_FOLDER\forensic\web\web.xlsx" -FreezeTopRow -BoldTopRow -AutoSize -AutoFilter -WorkSheetname "Web History" -CellStyleSB {
                             param($WorkSheet)
                             # BackgroundColor and FontColor for specific cells of TopRow
                             $BackgroundColor = [System.Drawing.Color]::FromArgb(50,60,220)
@@ -7291,6 +6197,23 @@ if (Test-Path "$($MemProcFS)")
 #############################################################################################################################################################################################
         
         Function Get-Prefetch {
+
+        # FS_Forensic_Prefetch
+        # https://github.com/ufrisk/MemProcFS/wiki/FS_Forensic_Prefetch
+        if (Test-Path "$DriveLetter\forensic\prefetch\*.pf")
+        {
+            # Collection
+            New-Item "$OUTPUT_FOLDER\forensic\prefetch" -ItemType Directory -Force | Out-Null
+            Copy-Item -Path "$DriveLetter\forensic\prefetch\*" -Destination "$OUTPUT_FOLDER\forensic\prefetch"
+
+            # Count recovered Prefetch File(s)
+            if (Test-Path "$OUTPUT_FOLDER\forensic\prefetch\00-prefetch-summary.txt")
+            {
+                [int]$Count = (Get-Content -Path "$OUTPUT_FOLDER\forensic\prefetch\00-prefetch-summary.txt" | Select-String -Pattern "\.pf" | Measure-Object).Count -2
+                $Files = '{0:N0}' -f $Count
+                Write-Output "[Info]  $Files Prefetch File(s) recovered"
+            }
+        }
 
         # Prefetch Files
         if (Test-Path "$OUTPUT_FOLDER\forensic\timeline\CSV\timeline.csv") 
@@ -7508,7 +6431,15 @@ if (Test-Path "$($MemProcFS)")
 
         }
 
-        Update-EvtxECmd
+        # Offline Mode
+        if ($OfflineMode -eq "Enabled")
+        {
+            Write-Output "[Info]  Updating Event Log Maps will be skipped [Offline-Mode] ..."
+        }
+        else
+        {
+            Update-EvtxECmd
+        }
 
         Function Invoke-EvtxECmd {
 
@@ -7531,7 +6462,7 @@ if (Test-Path "$($MemProcFS)")
                 }
 
                 # Windows Title (Default)
-                $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+                $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.1 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
             }
         }
         else
@@ -7550,55 +6481,62 @@ if (Test-Path "$($MemProcFS)")
         # Zircolite
         if (Test-Path "$($Zircolite)")
         {
-            # Update
-            Write-Output "[Info]  Updating SIGMA Rulesets ... "
-            New-Item "$OUTPUT_FOLDER\EventLogs\Zircolite" -ItemType Directory -Force | Out-Null
-            $MyLocation = $pwd
-            Set-Location "$SCRIPT_DIR\Tools\Zircolite"
-            & $Zircolite --update-rules 2>&1 | Out-File "$OUTPUT_FOLDER\EventLogs\Zircolite\Update-draft.txt"
-            Set-Location "$MyLocation"
-
-            # No newer rulesets found
-            if (Test-Path "$OUTPUT_FOLDER\EventLogs\Zircolite\Update-draft.txt")
+            # Offline Mode
+            if ($OfflineMode -eq "Enabled")
             {
-                if (Get-Content "$OUTPUT_FOLDER\EventLogs\Zircolite\Update-draft.txt" | Select-String -Patter "No newer rulesets found" -Quiet)
+                Write-Output "[Info]  Updating SIGMA Rulesets will be skipped [Offline-Mode] ..."
+            }
+            else
+            {
+                # Update
+                Write-Output "[Info]  Updating SIGMA Rulesets ..."
+                $MyLocation = $pwd
+                Set-Location "$SCRIPT_DIR\Tools\Zircolite"
+                & $Zircolite --update-rules 2>&1 | Out-File "$SCRIPT_DIR\Tools\Zircolite\Update-draft.log"
+                Set-Location "$MyLocation"
+
+                # No newer rulesets found
+                if (Test-Path "$SCRIPT_DIR\Tools\Zircolite\Update-draft.log")
                 {
-                    Write-Output "[Info]  No newer rulesets found"
+                    if (Get-Content "$SCRIPT_DIR\Tools\Zircolite\Update-draft.log" | Select-String -Pattern "No newer rulesets found" -Quiet)
+                    {
+                        Write-Output "[Info]  No newer rulesets found"
+                    }
                 }
-            }
 
-            # Updated
-            if (Test-Path "$OUTPUT_FOLDER\EventLogs\Zircolite\Update-draft.txt")
-            {
-                if (Get-Content "$OUTPUT_FOLDER\EventLogs\Zircolite\Update-draft.txt" | Select-String -Patter "Updated :" -Quiet)
+                # Updated
+                if (Test-Path "$SCRIPT_DIR\Tools\Zircolite\Update-draft.log")
                 {
-                    Write-Output "[Info]  SIGMA Rulesets updated."
+                    if (Get-Content "$SCRIPT_DIR\Tools\Zircolite\Update-draft.log" | Select-String -Pattern "Updated :" -Quiet)
+                    {
+                        Write-Output "[Info]  SIGMA Rulesets updated."
+                    }
                 }
-            }
 
-            # Remove ANSI Control Characters
-            if (Test-Path "$OUTPUT_FOLDER\EventLogs\Zircolite\Update-draft.txt")
-            {
-                Get-Content "$OUTPUT_FOLDER\EventLogs\Zircolite\Update-draft.txt" | ForEach-Object { $_ -replace "\x1b\[[0-9;]*m" } | Out-File "$OUTPUT_FOLDER\EventLogs\Zircolite\Update.txt"
-                Remove-Item "$OUTPUT_FOLDER\EventLogs\Zircolite\Update-draft.txt"
-            }
+                # Remove ANSI Control Characters
+                if (Test-Path "$SCRIPT_DIR\Tools\Zircolite\Update-draft.log")
+                {
+                    Get-Content "$SCRIPT_DIR\Tools\Zircolite\Update-draft.log" | ForEach-Object { $_ -replace "\x1b\[[0-9;]*m" } | Out-File "$SCRIPT_DIR\Tools\Zircolite\Update.log"
+                    Remove-Item "$SCRIPT_DIR\Tools\Zircolite\Update-draft.log"
+                }
 
-            # Remove empty lines and add line breaks where needed
-            $Clean = Get-Content "$OUTPUT_FOLDER\EventLogs\Zircolite\Update.txt" | ForEach-Object{($_ -replace "^   ","")} | Where-Object {$_.Trim()} | ForEach-Object {($_ -replace "Finished in", "`nFinished in")} | ForEach-Object {($_ -replace "Sysmon Linux =-", "Sysmon Linux =-`n")}
-            @("") + ($Clean) | Set-Content "$OUTPUT_FOLDER\EventLogs\Zircolite\Update.txt"
+                # Remove empty lines and add line breaks where needed
+                $Clean = Get-Content "$SCRIPT_DIR\Tools\Zircolite\Update.log" | ForEach-Object{($_ -replace "^   ","")} | Where-Object {$_.Trim()} | ForEach-Object {($_ -replace "Finished in", "`nFinished in")} | ForEach-Object {($_ -replace "Sysmon Linux =-", "Sysmon Linux =-`n")}
+                @("") + ($Clean) | Set-Content "$SCRIPT_DIR\Tools\Zircolite\Update.log"
 
-            # Cleaning up
-            if (Test-Path "$OUTPUT_FOLDER\EventLogs\Zircolite\Update.txt")
-            {
-                $Filter = @("^zircolite_win10\.exe","MemProcFS-Analyzer-v.*\.ps1","^\+","\+ CategoryInfo          : NotSpecified:","\+ FullyQualifiedErrorId : NativeCommandError","^tmp-rules-")
-                $Clean = Get-Content "$OUTPUT_FOLDER\EventLogs\Zircolite\Update.txt" | Select-String -Pattern $Filter -NotMatch 
-                $Clean | Set-Content "$OUTPUT_FOLDER\EventLogs\Zircolite\Update.txt"
-            }
+                # Cleaning up
+                if (Test-Path "$SCRIPT_DIR\Tools\Zircolite\Update.log")
+                {
+                    $Filter = @("^zircolite\.exe","MemProcFS-Analyzer-v.*\.ps1","^\+","\+ CategoryInfo          : NotSpecified:","\+ FullyQualifiedErrorId : NativeCommandError","^tmp-rules-")
+                    $Clean = Get-Content "$SCRIPT_DIR\Tools\Zircolite\Update.log" | Select-String -Pattern $Filter -NotMatch 
+                    $Clean | Set-Content "$SCRIPT_DIR\Tools\Zircolite\Update.log"
+                }
 
-            # zircolite.log
-            if (Test-Path "$SCRIPT_DIR\Tools\Zircolite\zircolite.log")
-            {
-                Remove-Item -Path "$SCRIPT_DIR\Tools\Zircolite\zircolite.log" -Force
+                # zircolite.log
+                if (Test-Path "$SCRIPT_DIR\Tools\Zircolite\zircolite.log")
+                {
+                    Remove-Item -Path "$SCRIPT_DIR\Tools\Zircolite\zircolite.log" -Force
+                }
             }
         }
 
@@ -7616,6 +6554,7 @@ if (Test-Path "$($MemProcFS)")
             if (Test-Path "$OUTPUT_FOLDER\EventLogs\EventLogs\*.evtx") 
             {
                 Write-Output "[Info]  Processing Windows Event Logs w/ Zircolite ... "
+                New-Item "$OUTPUT_FOLDER\EventLogs\Zircolite" -ItemType Directory -Force | Out-Null
 
                 $StartTime_Zircolite = (Get-Date)
 
@@ -7655,8 +6594,11 @@ if (Test-Path "$($MemProcFS)")
                     }
 
                     # Remove empty lines and add line breaks where needed
-                    $Clean = Get-Content "$OUTPUT_FOLDER\EventLogs\Zircolite\Zircolite.txt" | Where-Object {$_.Trim()} | ForEach-Object {($_ -replace "Finished in", "`nFinished in")} | ForEach-Object {($_ -replace "Sysmon Linux =-", "Sysmon Linux =-`n")}
-                    @("") + ($Clean) | Set-Content "$OUTPUT_FOLDER\EventLogs\Zircolite\Zircolite.txt"
+                    if (Test-Path "$OUTPUT_FOLDER\EventLogs\Zircolite\Zircolite.txt")
+                    {
+                        $Clean = Get-Content "$OUTPUT_FOLDER\EventLogs\Zircolite\Zircolite.txt" | Where-Object {$_.Trim()} | ForEach-Object {($_ -replace "Finished in", "`nFinished in")} | ForEach-Object {($_ -replace "Sysmon Linux =-", "Sysmon Linux =-`n")}
+                        @("") + ($Clean) | Set-Content "$OUTPUT_FOLDER\EventLogs\Zircolite\Zircolite.txt"
+                    }
 
                     # Cleaning up
                     if (Test-Path "$OUTPUT_FOLDER\EventLogs\Zircolite\Zircolite.txt")
@@ -7825,7 +6767,7 @@ if (Test-Path "$($MemProcFS)")
         }
         else
         {
-            Write-Host "[Error] zircolite_win10.exe NOT found." -ForegroundColor Red
+            Write-Host "[Error] zircolite.exe NOT found." -ForegroundColor Red
         }
 
         # Results
@@ -8199,7 +7141,7 @@ if (Test-Path "$($MemProcFS)")
             }
 
             # EventLogOverview.csv
-            $EventArray  | Export-Csv "$OUTPUT_FOLDER\EventLogs\EventLogOverview.csv" -NoTypeInformation
+            $EventArray | Export-Csv "$OUTPUT_FOLDER\EventLogs\EventLogOverview.csv" -NoTypeInformation
 
             # EventLogOverview.xlsx
             if (Get-Module -ListAvailable -Name ImportExcel) 
@@ -9571,7 +8513,7 @@ if (Test-Path "$($MemProcFS)")
                     # Stats
                     if (Test-Path "$OUTPUT_FOLDER\Registry\RegistryASEPs\RegistryASEPs.log")
                     {
-                        $Total = Get-Content "$OUTPUT_FOLDER\Registry\RegistryASEPs\RegistryASEPs.log" | Select-String -Pattern "key/value pairs"
+                        [string]$Total = (Get-Content "$OUTPUT_FOLDER\Registry\RegistryASEPs\RegistryASEPs.log" | Select-String -Pattern "key/value pairs" | Out-String).Trim()
                         Write-Output "[Info]  $Total"
                     }
 
@@ -9748,7 +8690,6 @@ if ((Get-MpComputerStatus).RealTimeProtectionEnabled)
 Function ClamAVUpdate {
 
 # ClamAVUpdate
-New-Item "$OUTPUT_FOLDER\ClamAV" -ItemType Directory -Force | Out-Null
 
 # freshclam.conf
 if (!(Test-Path "C:\Program Files\ClamAV\freshclam.conf"))
@@ -9773,48 +8714,56 @@ if (!(Test-Path "C:\Program Files\ClamAV\clamd.conf"))
 # Update
 if (Test-Path "$($freshclam)")
 {
-    # Internet Connectivity Check (Vista+)
-    $NetworkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]‘{DCB00C01-570F-4A9B-8D69-199FDBA5723B}’)).IsConnectedToInternet
+    if ($null -eq $OfflineMode)
+    {  
+        # Internet Connectivity Check (Vista+)
+        $NetworkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]‘{DCB00C01-570F-4A9B-8D69-199FDBA5723B}’)).IsConnectedToInternet
 
-    if (!($NetworkListManager -eq "True"))
-    {
-        Write-Host "[Error] Your computer is NOT connected to the Internet. ClamAV cannot check for any updates." -ForegroundColor Red
-    }
-    else
-    {
-        # Check if clamav.net is reachable
-        if (!(Test-Connection -ComputerName clamav.net -Count 1 -Quiet))
+        if (!($NetworkListManager -eq "True"))
         {
-            Write-Host "[Error] clamav.net is NOT reachable. ClamAV cannot check for any updates." -ForegroundColor Red
+            Write-Host "[Error] Your computer is NOT connected to the Internet. ClamAV cannot check for any updates." -ForegroundColor Red
         }
         else
         {
-            Write-Output "[Info]  Checking for ClamAV Updates ..."
-            & $freshclam > "$OUTPUT_FOLDER\ClamAV\Update.txt" 2> "$OUTPUT_FOLDER\ClamAV\Warning.txt"
-
-            # Update ClamAV Engine
-            if (Select-String -Pattern "WARNING: Your ClamAV installation is OUTDATED!" -Path "$OUTPUT_FOLDER\ClamAV\Warning.txt" -Quiet)
+            # Check if clamav.net is reachable
+            if (!(Test-Connection -ComputerName clamav.net -Count 1 -Quiet))
             {
-                Write-Host "[Info]  WARNING: Your ClamAV installation is OUTDATED!" -ForegroundColor Red
-
-                if (Select-String -Pattern "Recommended version:" -Path "$OUTPUT_FOLDER\ClamAV\Warning.txt" -Quiet)
-                {
-                    $WARNING = Get-Content "$OUTPUT_FOLDER\ClamAV\Warning.txt" | Select-String -Pattern "Recommended version:"
-                    Write-Host "[Info]  $WARNING" -ForegroundColor Red
-                }
-            }
-
-            # Update Signature Databases
-            $Count = (Get-Content "$OUTPUT_FOLDER\ClamAV\Update.txt" | Select-String -Pattern "is up to date" | Measure-Object).Count
-            if ($Count -match "3")
-            {
-                Write-Output "[Info]  All ClamAV Virus Databases (CVD) are up-to-date."
+                Write-Host "[Error] clamav.net is NOT reachable. ClamAV cannot check for any updates." -ForegroundColor Red
             }
             else
             {
-                Write-Output "[Info]  Updating ClamAV Virus Databases (CVD) ... "
+                Write-Output "[Info]  Checking for ClamAV Updates ..."
+                New-Item "$OUTPUT_FOLDER\ClamAV" -ItemType Directory -Force | Out-Null
+                & $freshclam > "$OUTPUT_FOLDER\ClamAV\Update.txt" 2> "$OUTPUT_FOLDER\ClamAV\Warning.txt"
+
+                # Update ClamAV Engine
+                if (Select-String -Pattern "WARNING: Your ClamAV installation is OUTDATED!" -Path "$OUTPUT_FOLDER\ClamAV\Warning.txt" -Quiet)
+                {
+                    Write-Host "[Info]  WARNING: Your ClamAV installation is OUTDATED!" -ForegroundColor Red
+
+                    if (Select-String -Pattern "Recommended version:" -Path "$OUTPUT_FOLDER\ClamAV\Warning.txt" -Quiet)
+                    {
+                        $WARNING = Get-Content "$OUTPUT_FOLDER\ClamAV\Warning.txt" | Select-String -Pattern "Recommended version:"
+                        Write-Host "[Info]  $WARNING" -ForegroundColor Red
+                    }
+                }
+
+                # Update Signature Databases
+                $Count = (Get-Content "$OUTPUT_FOLDER\ClamAV\Update.txt" | Select-String -Pattern "is up to date" | Measure-Object).Count
+                if ($Count -match "3")
+                {
+                    Write-Output "[Info]  All ClamAV Virus Databases (CVD) are up-to-date."
+                }
+                else
+                {
+                    Write-Output "[Info]  Updating ClamAV Virus Databases (CVD) ... "
+                }
             }
         }
+    }
+    else
+    {
+        Write-Output "[Info]  ClamAV Updates will be skipped [Offline-Mode] ..."
     }
 }
 else
@@ -9829,6 +8778,7 @@ if (Test-Path "$($clamscan)")
     $EngineVersion = $Version.Split('/')[0]
     $Patch = $Version.Split('/')[1]
     Write-Output "[Info]  Engine Version: $EngineVersion (#$Patch)"
+    New-Item "$OUTPUT_FOLDER\ClamAV" -ItemType Directory -Force | Out-Null
     $Version | Out-File "$OUTPUT_FOLDER\ClamAV\Version.txt"
 }
 else
@@ -9872,6 +8822,7 @@ if (Test-Path "$($clamd)")
 
         # ClamAV Daemon Scan (Multi-Threaded)
         Write-Output "[Info]  Custom scan w/ ClamAV is running [time-consuming task] ..."
+        New-Item "$OUTPUT_FOLDER\ClamAV" -ItemType Directory -Force | Out-Null
         $LogFile = "$OUTPUT_FOLDER\ClamAV\LogFile.txt"
         Start-Process -FilePath "$clamdscan" -ArgumentList "$ScanPath1 $ScanPath2 --quiet --multiscan --log=$LogFile" -WindowStyle Minimized -Wait
         Stop-Process -Name "clamdscan" -ErrorAction SilentlyContinue
@@ -11696,7 +10647,7 @@ if (Test-Path "$OUTPUT_FOLDER\EventLogs\EventLogs\Microsoft-Windows-VHDMP-Operat
             & $EvtxECmd -f "$OUTPUT_FOLDER\EventLogs\VHDMP\Microsoft-Windows-VHDMP-Operational.evtx" --csv "$OUTPUT_FOLDER\EventLogs\VHDMP\CSV" --csvf "EvtxECmd.csv" > "$OUTPUT_FOLDER\EventLogs\VHDMP\EvtxECmd.log" 2> $null
 
             # Windows Title (Default)
-            $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.0 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
+            $Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer v1.1 - Automated Forensic Analysis of Windows Memory Dumps for DFIR"
 
             # Stats
             if (Get-Content "$OUTPUT_FOLDER\EventLogs\VHDMP\EvtxECmd.log" | Select-String -Pattern "^Total event log records found:" -Quiet)
@@ -11911,7 +10862,7 @@ if (!(Test-Path "$($entropy)"))
     Write-Host "[Error] entropy.exe NOT found." -ForegroundColor Red
 }
 
-$Modules = Get-ChildItem -Path "$DriveLetter\pid\*\modules\*.exe\pefile.dll" | ForEach-Object { $_.FullName } # lsass.exe.exe --> StackOverflowException (themida.img)
+$Modules = Get-ChildItem -Path "$DriveLetter\pid\*\modules\*.exe\pefile.dll" | ForEach-Object { $_.FullName }
 $Modules | Out-File "$OUTPUT_FOLDER\sys\modules\Modules-List.txt"
 
 $Modules | Foreach-Object {
@@ -12091,7 +11042,7 @@ $Time_Modules = ($EndTime_Modules-$StartTime_Modules)
 
 Function Invoke-1768 {
 
-# 1768.py v.0.0.20 (2023-10-15)
+# 1768.py v.0.0.21 (2024-05-22)
 # https://blog.didierstevens.com/?s=1768.py
 # https://github.com/DidierStevens/DidierStevensSuite/blob/master/1768.py
 if ((Test-Path "$SCRIPT_DIR\Scripts\1768\1768.py") -and (Test-Path "$SCRIPT_DIR\Scripts\1768\1768.json"))
@@ -12257,6 +11208,12 @@ if (!($null -eq $ForensicTimelineXLSX))
     Remove-Variable -Name "ForensicTimelineXLSX" -Scope Script
 }
 
+# OfflineMode
+if (!($null -eq $OfflineMode))
+{
+    Remove-Variable -Name "OfflineMode" -Scope Script
+}
+
 # YaraRules
 if (!($null -eq $YaraRules))
 {
@@ -12280,7 +11237,6 @@ $Host.UI.RawUI.WindowTitle = "$DefaultWindowsTitle"
 
 # Main
 Header
-Updater
 #Elasticsearch
 MicrosoftDefender
 MemProcFS
@@ -12298,7 +11254,7 @@ KrollBatch
 #LNK_Hunt
 ImageMount
 Modules
-#Invoke-1768
+Invoke-1768
 SecureArchive
 Footer
 

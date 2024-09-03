@@ -1,6 +1,6 @@
 Description: Kroll RECmd Batch File
 Author: Andrew Rathbun
-Version: 1.21
+Version: 1.22
 Id: ecc582d5-a1b1-4256-ae64-ca2263b8f971
 Keys:
 #
@@ -2079,6 +2079,16 @@ Keys:
         Comment: "Program execution upon successful user logon"
 
 # https://docs.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys
+
+    -
+        Description: RunNotification
+        HiveType: NTUSER
+        Category: Autoruns
+        KeyPath: Software\Microsoft\Windows\CurrentVersion\RunNotification
+        Recursive: false
+        Comment: "New in Windows 11, compare with other more researched Autoruns artifacts"
+
+# new in Windows 11, more research needed
 
 # Autoruns -> Startup Programs (SOFTWARE\NTUSER)
 

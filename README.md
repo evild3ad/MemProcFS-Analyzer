@@ -14,7 +14,7 @@ Features:
 * Update-Info when there's a new version of ClamAV or a new Dokany File System Library Bundle available  
 * Pagefile Support
 * OS Fingerprinting  
-* Scan w/ Custom YARA rules (incl. 318 rules by e.g. [Chronicle](https://github.com/chronicle/GCTI/tree/main/YARA) and [Elastic Security](https://github.com/elastic/protections-artifacts))  
+* Scan w/ Custom YARA rules (incl. 376 rules by e.g. [Chronicle](https://github.com/chronicle/GCTI/tree/main/YARA) and [Elastic Security](https://github.com/elastic/protections-artifacts))  
 * Multi-Threaded scan w/ ClamAV for Windows  
 * Collection of infected files detected by ClamAV for further analysis (PW: infected)
 * Collection of injected modules detected by MemProcFS PE_INJECT for further analysis (PW: infected)
@@ -39,11 +39,13 @@ Features:
 * Analyzing RecentDocs, Office Trusted Document w/ RECmd ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
 * Analyzing Registry w/ Kroll RECmd Batch File ([Kroll Batch File](https://github.com/EricZimmerman/RECmd/projects/1) by Andrew Rathbun)  
 * Analyzing Metadata of Recovered Process Modules (experimental)  
+* Analyzing Microsoft Protection Logs (experimental)  
 * Extracting Windows Shortcut Files (LNK)  
 * Hunting Malicious Windows Shortcut Files (LNK)
 * Integration of PowerShell module [ImportExcel](https://github.com/dfinke/ImportExcel) by Doug Finke
 * CSV output data for analysis w/ Timeline Explorer (e.g. timeline-reverse.csv, findevil.csv, web.csv)  
 * Collecting Evidence Files (Secure Archive Container &#8594; PW: MemProcFS)  
+* Offline-Mode  
 * and much more
 
 ## Download 
@@ -52,25 +54,23 @@ Download the latest version of **MemProcFS-Analyzer** from the [Releases](https:
 ## Usage  
 Launch Windows PowerShell (or Windows PowerShell ISE or Visual Studio Code w/ PSVersion: 5.1) as Administrator and open/run MemProcFS-Analyzer.ps1. 
 
-![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/01.png)  
-**Fig 1:** Select your Memory Snapshot and select your pagefile.sys (Optional)
+![First-Run](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/01.png)  
+**Fig 1:** MemProcFS-Analyzer.ps1 (First Run) &#8594; Updater.ps1
 
-![Auto-Install](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/02.png)  
-**Fig 2:** MemProcFS-Analyzer auto-installs dependencies (First Run)
+![Updater](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/01.png)  
+**Fig 2:** Updater.ps1 automatically installs/updates all dependencies (First Run)
+
+![File-Browser](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/01.png)  
+**Fig 3:** Select your Memory Snapshot and select your pagefile.sys (Optional)
 
 ![Microsoft-Internet-Symbol-Store](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/03.png)  
-**Fig 3:** Accept Terms of Use (First Run)  
+**Fig 4:** Accept Terms of Use (First Run)  
 
 ![MemProcFS](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/04.png)  
-**Fig 4:** If you find MemProcFS useful, please become a sponsor at: https://github.com/sponsors/ufrisk  
+**Fig 5:** If you find MemProcFS useful, please become a sponsor at: https://github.com/sponsors/ufrisk  
 
-![Mounted](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/05.png)  
-**Fig 5:** You can investigate the mounted memory dump by exploring drive letter
-
-![Auto-Update](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/06.png)  
-**Fig 6:** MemProcFS-Analyzer checks for updates (Second Run) 
-
-Note: It's recommended to uncomment/disable the "Updater" function after installation. Check out the "Main" in the bottom of the script.
+![MountPoint](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0bb85b553644a29675e4116133e7346b080d07a2/Screenshots/05.png)  
+**Fig 6:** You can investigate the mounted memory dump by exploring drive letter
 
 ![FindEvil](https://github.com/evild3ad/MemProcFS-Analyzer/blob/0780ec4a5fc62219e12791456f5f1e38d5b10b1a/Screenshots/07.png)  
 **Fig 7:** FindEvil feature and additional analytics
@@ -177,7 +177,7 @@ Notes:
 - [Elasticsearch Tips](https://github.com/evild3ad/MemProcFS-Analyzer/wiki/Elasticsearch)
 
 ## Dependencies
-7-Zip 23.01 Standalone Console (2023-06-20)  
+7-Zip 24.08 Standalone Console (2024-08-11)  
 https://www.7-zip.org/download.html  
 
 AmcacheParser v1.5.1.0 (.NET 6)  
@@ -186,13 +186,13 @@ https://ericzimmerman.github.io/
 AppCompatCacheParser v1.5.0.0 (.NET 6)  
 https://ericzimmerman.github.io/  
 
-ClamAV - Download &#8594; Windows &#8594; clamav-1.2.0.win.x64.msi (2023-08-28)  
+ClamAV - Download &#8594; Windows &#8594; clamav-1.4.0.win.x64.msi (2024-08-15)  
 https://www.clamav.net/downloads    
 
-Dokany Library Bundle v2.0.6.1000 (2022-10-02)  
+Dokany File System Library v2.2.0.1000 (2024-08-18)  
 https://github.com/dokan-dev/dokany/releases/latest &#8594; DokanSetup.exe  
 
-Elasticsearch 8.9.2 (2023-09-06)  
+Elasticsearch 8.15.0 (2024-08-08)  
 https://www.elastic.co/downloads/elasticsearch  
 
 entropy v1.1 (2023-07-28)  
@@ -201,22 +201,22 @@ https://github.com/merces/entropy
 EvtxECmd v1.5.0.0 (.NET 6)  
 https://ericzimmerman.github.io/  
 
-ImportExcel v7.8.6 (2023-10-12)   
+ImportExcel v7.8.9 (2024-06-21)  
 https://github.com/dfinke/ImportExcel  
 
-IPinfo CLI 3.1.1 (2023-10-02)    
+IPinfo CLI 3.3.1 (2024-03-01)    
 https://github.com/ipinfo/cli  
 
-jq v1.7 (2023-09-06)   
+jq v1.7.1 (2023-12-13)  
 https://github.com/stedolan/jq  
 
-Kibana 8.9.2 (2023-09-06)    
+Kibana 8.15.0 (2024-08-08)  
 https://www.elastic.co/downloads/kibana  
 
 lnk_parser v0.2.0 (2022-08-10)  
 https://github.com/AbdulRhmanAlfaifi/lnk_parser  
 
-MemProcFS v5.8.17 - The Memory Process File System (2023-08-20)    
+MemProcFS v5.11.4 - The Memory Process File System (2024-07-29)      
 https://github.com/ufrisk/MemProcFS  
 
 RECmd v2.0.0.0 (.NET 6)  
@@ -228,10 +228,10 @@ https://ericzimmerman.github.io/
 xsv v0.13.0 (2018-05-12)  
 https://github.com/BurntSushi/xsv  
 
-YARA v4.3.1 (2023-04-21)  
+YARA v4.5.1 (2024-05-25)  
 https://virustotal.github.io/yara/  
 
-Zircolite v2.9.10 (2023-07-15)  
+Zircolite v2.20.0 (2024-03-29)  
 https://github.com/wagga40/Zircolite  
 
 ## Links
@@ -239,4 +239,3 @@ https://github.com/wagga40/Zircolite
 [Demo of MemProcFS with Elasticsearch](https://www.youtube.com/watch?v=JcIlowlrvyI)  
 [Sponsor MemProcFS Project](https://github.com/sponsors/ufrisk)  
 [MemProcFS-Plugins](https://github.com/ufrisk/MemProcFS-Plugins)  
-[SANS FOR532 - Enterprise Memory Forensics In-Depth](https://www.sans.org/cyber-security-courses/enterprise-memory-forensics-in-depth/)  
