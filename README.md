@@ -139,7 +139,7 @@ https://github.com/dokan-dev/dokany/releases/latest
 2. Download and install the latest .NET 6 Desktop Runtime (Requirement for [EZTools](https://ericzimmerman.github.io/))  
 https://dotnet.microsoft.com/en-us/download/dotnet/6.0   
 
-3. Download and install the latest Windows package of ClamAV.  
+3. Download and install the latest Windows package of ClamAV &#8594; .msi  
 https://www.clamav.net/downloads#otherversions 
 
 4. First Time Set-Up of ClamAV  
