@@ -1,10 +1,10 @@
-﻿# MemProcFS-Analyzer Updater v0.1
+﻿# MemProcFS-Analyzer Updater v0.2
 #
 # @author:    Martin Willing
 # @copyright: Copyright (c) 2024 Martin Willing. All rights reserved.
 # @contact:   Any feedback or suggestions are always welcome and much appreciated - mwilling@lethal-forensics.com
 # @url:       https://lethal-forensics.com/
-# @date:      2024-09-02
+# @date:      2024-09-15
 #
 #
 # ██╗     ███████╗████████╗██╗  ██╗ █████╗ ██╗      ███████╗ ██████╗ ██████╗ ███████╗███╗   ██╗███████╗██╗ ██████╗███████╗
@@ -20,8 +20,13 @@
 # Release Date: 2024-09-02
 # Initial Release
 #
+# Version 0.2
+# Release Date: 2024-09-15
+# Added: Sync for RECmd Batch Files
+# Added: Check if the download of the packaged Zircolite binary was successful. Note: Some AV may not like the packaged binaries.
 #
-# Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.4780) and PowerShell 5.1 (5.1.19041.4780)
+#
+# Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.4894) and PowerShell 5.1 (5.1.19041.4894)
 # Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.4651) and PowerShell 7.4.5
 #
 #
@@ -30,7 +35,7 @@
 
 <#
 .SYNOPSIS
-  MemProcFS-Analyzer Updater v0.1 - Automated Installer/Updater for MemProcFS-Analyzer
+  MemProcFS-Analyzer Updater v0.2 - Automated Installer/Updater for MemProcFS-Analyzer
 
 .DESCRIPTION
   Updater.ps1 is a PowerShell script utilized to automate the installation and the update process of MemProcFS-Analyzer (incl. all dependencies).
@@ -142,7 +147,7 @@ $script:zircolite = "$SCRIPT_DIR\Tools\Zircolite\zircolite.exe"
 
 # Windows Title
 $DefaultWindowsTitle = $Host.UI.RawUI.WindowTitle
-$Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer Updater v0.1 - Automated Installer/Updater for MemProcFS-Analyzer"
+$Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer Updater v0.2 - Automated Installer/Updater for MemProcFS-Analyzer"
 
 # Check if the PowerShell script is being run with admin rights
 if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
@@ -172,7 +177,7 @@ Write-Output "$Logo"
 Write-Output ""
 
 # Header
-Write-Output "MemProcFS-Analyzer Updater v0.1 - Automated Installer/Updater for MemProcFS-Analyzer"
+Write-Output "MemProcFS-Analyzer Updater v0.2 - Automated Installer/Updater for MemProcFS-Analyzer"
 Write-Output "(c) 2024 Martin Willing at Lethal-Forensics (https://lethal-forensics.com/)"
 Write-Output ""
 
@@ -925,7 +930,7 @@ if (Test-Path "$SCRIPT_DIR\Tools\EvtxECmd\Maps")
     Get-ChildItem -Path "$SCRIPT_DIR\Tools\EvtxECmd\Maps" -Recurse | Remove-Item -Force -Recurse
 }
 
-# Sync for EvtxECmd Maps with GitHub
+# Sync for EvtxECmd Maps
 if (Test-Path "$($EvtxECmd)")
 {
     & $EvtxECmd --sync > "$SCRIPT_DIR\Tools\EvtxECmd\Maps.log" 2> $null
@@ -1309,7 +1314,7 @@ if (Test-Path "$($RECmd)")
 }
 else
 {
-    Write-Output "[Info]  RECmd NOT found."
+    Write-Output "[Info]  RECmd.exe NOT found."
     $CurrentETag = ""
 }
 
@@ -1346,6 +1351,35 @@ if ($null -eq $CurrentETag -or $CurrentETag -ne $LatestETag)
 else
 {
     Write-Host "[Info]  You are running the most recent version of RECmd." -ForegroundColor Green
+}
+
+# Sync for RECmd Batch Files
+if (Test-Path "$($RECmd)")
+{
+    Write-Output "[Info]  Updating RECmd Batch Files ... "
+    & $RECmd --sync > "$SCRIPT_DIR\Tools\RECmd\Sync.log" 2> $null
+
+    # No new batch files available
+    if (Test-Path "$SCRIPT_DIR\Tools\RECmd\Sync.log")
+    {
+        if (Get-Content "$SCRIPT_DIR\Tools\RECmd\Sync.log" | Select-String -Pattern "No new batch files available" -Quiet)
+        {
+            Write-Output "[Info]  No new RECmd Batch Files available."
+        }
+    }
+
+    # Updates found!
+    if (Test-Path "$SCRIPT_DIR\Tools\RECmd\Sync.log")
+    {
+        if (Get-Content "$SCRIPT_DIR\Tools\RECmd\Sync.log" | Select-String -Pattern "Updates found!" -Quiet)
+        {
+            Write-Output "[Info]  RECmd Batch Files updated."
+        }
+    }
+}
+else
+{
+    Write-Output "[Info]  RECmd.exe NOT found."
 }
 
 }
@@ -1679,7 +1713,14 @@ if ($CurrentVersion -ne $Tag -Or $null -eq $CurrentVersion)
 
         # Rename Unpacked Directory
         Start-Sleep 5
-        Rename-Item "$SCRIPT_DIR\Tools\zircolite_win" "$SCRIPT_DIR\Tools\Zircolite" -Force
+        if (Test-Path "$SCRIPT_DIR\Tools\zircolite_win")
+        {
+            Rename-Item "$SCRIPT_DIR\Tools\zircolite_win" "$SCRIPT_DIR\Tools\Zircolite" -Force
+        }
+        else
+        {
+            Write-Host "[Error] It seems that the packaged Zircolite binary was blocked by your AV!" -ForegroundColor Red
+        }
 
         # Rename Binary
         if (Test-Path "$SCRIPT_DIR\Tools\Zircolite\zircolite_*")
