@@ -186,13 +186,13 @@ https://ericzimmerman.github.io/
 AppCompatCacheParser v1.5.0.0 (.NET 6)  
 https://ericzimmerman.github.io/  
 
-ClamAV - Download &#8594; Windows &#8594; clamav-1.4.0.win.x64.msi (2024-08-15)  
+ClamAV - Download &#8594; Windows &#8594; clamav-1.4.1.win.x64.msi (2024-09-04)  
 https://www.clamav.net/downloads    
 
 Dokany File System Library v2.2.0.1000 (2024-08-18)  
 https://github.com/dokan-dev/dokany/releases/latest &#8594; DokanSetup.exe  
 
-Elasticsearch 8.15.0 (2024-08-08)  
+Elasticsearch 8.15.3 (2024-08-18)  
 https://www.elastic.co/downloads/elasticsearch  
 
 entropy v1.1 (2023-07-28)  
@@ -201,7 +201,7 @@ https://github.com/merces/entropy
 EvtxECmd v1.5.0.0 (.NET 6)  
 https://ericzimmerman.github.io/  
 
-ImportExcel v7.8.9 (2024-06-21)  
+ImportExcel v7.8.10 (2024-10-21)  
 https://github.com/dfinke/ImportExcel  
 
 IPinfo CLI 3.3.1 (2024-03-01)    
@@ -210,13 +210,13 @@ https://github.com/ipinfo/cli
 jq v1.7.1 (2023-12-13)  
 https://github.com/stedolan/jq  
 
-Kibana 8.15.0 (2024-08-08)  
+Kibana 8.15.3 (2024-08-18)  
 https://www.elastic.co/downloads/kibana  
 
 lnk_parser v0.2.0 (2022-08-10)  
 https://github.com/AbdulRhmanAlfaifi/lnk_parser  
 
-MemProcFS v5.11.4 - The Memory Process File System (2024-07-29)      
+MemProcFS v5.12.5 - The Memory Process File System (2024-10-09)      
 https://github.com/ufrisk/MemProcFS  
 
 RECmd v2.0.0.0 (.NET 6)  
@@ -228,10 +228,10 @@ https://ericzimmerman.github.io/
 xsv v0.13.0 (2018-05-12)  
 https://github.com/BurntSushi/xsv  
 
-YARA v4.5.1 (2024-05-25)  
+YARA v4.5.2 (2024-09-10)  
 https://virustotal.github.io/yara/  
 
-Zircolite v2.20.0 (2024-03-29)  
+Zircolite v2.30.1 (2024-10-13)  
 https://github.com/wagga40/Zircolite  
 
 ## Links

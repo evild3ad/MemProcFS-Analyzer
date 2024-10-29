@@ -1,10 +1,10 @@
-﻿# MemProcFS-Analyzer Updater v0.2
+﻿# MemProcFS-Analyzer Updater v0.3
 #
 # @author:    Martin Willing
-# @copyright: Copyright (c) 2024 Martin Willing. All rights reserved.
+# @copyright: Copyright (c) 2024 Martin Willing. All rights reserved. Licensed under the MIT license.
 # @contact:   Any feedback or suggestions are always welcome and much appreciated - mwilling@lethal-forensics.com
 # @url:       https://lethal-forensics.com/
-# @date:      2024-09-15
+# @date:      2024-10-29
 #
 #
 # ██╗     ███████╗████████╗██╗  ██╗ █████╗ ██╗      ███████╗ ██████╗ ██████╗ ███████╗███╗   ██╗███████╗██╗ ██████╗███████╗
@@ -25,9 +25,13 @@
 # Added: Sync for RECmd Batch Files
 # Added: Check if the download of the packaged Zircolite binary was successful. Note: Some AV may not like the packaged binaries.
 #
+# Version 0.3
+# Release Date: 2024-10-29
+# Added: ClamAV Update
 #
-# Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.4894) and PowerShell 5.1 (5.1.19041.4894)
-# Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.4651) and PowerShell 7.4.5
+#
+# Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.5011) and PowerShell 5.1 (5.1.19041.5007)
+# Tested on Windows 10 Pro (x64) Version 22H2 (10.0.19045.5011) and PowerShell 7.4.6
 #
 #
 #############################################################################################################################################################################################
@@ -35,7 +39,7 @@
 
 <#
 .SYNOPSIS
-  MemProcFS-Analyzer Updater v0.2 - Automated Installer/Updater for MemProcFS-Analyzer
+  MemProcFS-Analyzer Updater v0.3 - Automated Installer/Updater for MemProcFS-Analyzer
 
 .DESCRIPTION
   Updater.ps1 is a PowerShell script utilized to automate the installation and the update process of MemProcFS-Analyzer (incl. all dependencies).
@@ -147,7 +151,7 @@ $script:zircolite = "$SCRIPT_DIR\Tools\Zircolite\zircolite.exe"
 
 # Windows Title
 $DefaultWindowsTitle = $Host.UI.RawUI.WindowTitle
-$Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer Updater v0.2 - Automated Installer/Updater for MemProcFS-Analyzer"
+$Host.UI.RawUI.WindowTitle = "MemProcFS-Analyzer Updater v0.3 - Automated Installer/Updater for MemProcFS-Analyzer"
 
 # Check if the PowerShell script is being run with admin rights
 if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
@@ -177,7 +181,7 @@ Write-Output "$Logo"
 Write-Output ""
 
 # Header
-Write-Output "MemProcFS-Analyzer Updater v0.2 - Automated Installer/Updater for MemProcFS-Analyzer"
+Write-Output "MemProcFS-Analyzer Updater v0.3 - Automated Installer/Updater for MemProcFS-Analyzer"
 Write-Output "(c) 2024 Martin Willing at Lethal-Forensics (https://lethal-forensics.com/)"
 Write-Output ""
 
@@ -422,6 +426,94 @@ if ($CurrentVersion -ne $LatestRelease -Or $null -eq $CurrentVersion)
 else
 {
     Write-Host "[Info]  You are running the most recent version of Dokany File System Library." -ForegroundColor Green
+}
+
+}
+
+#############################################################################################################################################################################################
+
+Function ClamAVUpdate {
+
+# ClamAVUpdate
+
+# freshclam.conf
+if (!(Test-Path "C:\Program Files\ClamAV\freshclam.conf"))
+{
+    Write-Host "[Error] freshclam.conf is missing." -ForegroundColor Red
+    Write-Host "        https://docs.clamav.net/manual/Usage/Configuration.html#windows --> First Time Set-Up" -ForegroundColor Red
+}
+
+# clamd.conf
+if (!(Test-Path "C:\Program Files\ClamAV\clamd.conf"))
+{
+    Write-Host "[Error] clamd.conf is missing." -ForegroundColor Red
+    Write-Host "        https://docs.clamav.net/manual/Usage/Configuration.html#windows --> First Time Set-Up" -ForegroundColor Red
+}
+
+# Update
+if (Test-Path "$($freshclam)")
+{
+    # Internet Connectivity Check (Vista+)
+    $NetworkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]‘{DCB00C01-570F-4A9B-8D69-199FDBA5723B}’)).IsConnectedToInternet
+
+    if (!($NetworkListManager -eq "True"))
+    {
+        Write-Host "[Error] Your computer is NOT connected to the Internet. ClamAV cannot check for any updates." -ForegroundColor Red
+    }
+    else
+    {
+        # Check if clamav.net is reachable
+        if (!(Test-Connection -ComputerName clamav.net -Count 1 -Quiet))
+        {
+            Write-Host "[Error] clamav.net is NOT reachable. ClamAV cannot check for any updates." -ForegroundColor Red
+        }
+        else
+        {
+            Write-Output "[Info]  Checking for ClamAV Updates ..."
+            New-Item "$SCRIPT_DIR\Tools\ClamAV" -ItemType Directory -Force | Out-Null
+            & $freshclam > "$SCRIPT_DIR\Tools\ClamAV\Update.txt" 2> "$SCRIPT_DIR\Tools\ClamAV\Warning.txt"
+
+            # Update ClamAV Engine
+            if (Select-String -Pattern "WARNING: Your ClamAV installation is OUTDATED!" -Path "$SCRIPT_DIR\Tools\ClamAV\Warning.txt" -Quiet)
+            {
+                Write-Host "[Info]  WARNING: Your ClamAV installation is OUTDATED!" -ForegroundColor Red
+
+                if (Select-String -Pattern "Recommended version:" -Path "$SCRIPT_DIR\Tools\ClamAV\Warning.txt" -Quiet)
+                {
+                    $WARNING = Get-Content "$SCRIPT_DIR\Tools\ClamAV\Warning.txt" | Select-String -Pattern "Recommended version:"
+                    Write-Host "[Info]  $WARNING" -ForegroundColor Red
+                }
+            }
+
+            # Update Signature Databases
+            $Count = (Get-Content "$SCRIPT_DIR\Tools\ClamAV\Update.txt" | Select-String -Pattern "is up to date" | Measure-Object).Count
+            if ($Count -match "3")
+            {
+                Write-Output "[Info]  All ClamAV Virus Databases (CVD) are up-to-date."
+            }
+            else
+            {
+                Write-Output "[Info]  Updating ClamAV Virus Databases (CVD) ... "
+            }
+        }
+    }
+}
+else
+{
+    Write-Host "[Error] freshclam.exe NOT found." -ForegroundColor Red
+}
+
+# Engine Version
+if (Test-Path "$($clamscan)")
+{
+    $Version = & $clamscan -V
+    $EngineVersion = $Version.Split('/')[0]
+    $Patch = $Version.Split('/')[1]
+    Write-Output "[Info]  Engine Version: $EngineVersion (#$Patch)"
+}
+else
+{
+    Write-Host "[Error] clamscan.exe NOT found." -ForegroundColor Red
 }
 
 }
@@ -1804,6 +1896,7 @@ InternetConnectivityCheck
 Get-MemProcFS
 Get-YaraCustomRules
 Get-Dokany
+ClamAVUpdate
 Get-Elasticsearch
 Get-Kibana
 Get-AmcacheParser
