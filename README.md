@@ -14,7 +14,7 @@ Features:
 * Update-Info when there's a new version of ClamAV or a new Dokany File System Library Bundle available  
 * Pagefile Support
 * OS Fingerprinting  
-* Scan w/ Custom YARA rules (incl. 376 rules by e.g. [Chronicle](https://github.com/chronicle/GCTI/tree/main/YARA) and [Elastic Security](https://github.com/elastic/protections-artifacts))  
+* Scan w/ Custom YARA rules (incl. 391 rules by e.g. [Chronicle](https://github.com/chronicle/GCTI/tree/main/YARA) and [Elastic Security](https://github.com/elastic/protections-artifacts))  
 * Multi-Threaded scan w/ ClamAV for Windows  
 * Collection of infected files detected by ClamAV for further analysis (PW: infected)
 * Collection of injected modules detected by MemProcFS PE_INJECT for further analysis (PW: infected)
