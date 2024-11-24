@@ -1,4 +1,4 @@
-<img src="https://img.shields.io/badge/Language-Powershell-blue"> <img src="https://img.shields.io/badge/Maintenance%20Level-Actively%20Developed-brightgreen"> ![GitHub Release](https://img.shields.io/github/v/release/evild3ad/MemProcFS-Analyzer) <a href="https://twitter.com/Evild3ad79"><img src="https://img.shields.io/twitter/follow/Evild3ad79?style=social"></a>
+<a href="https://github.com/PowerShell/PowerShell"><img src="https://img.shields.io/badge/Language-Powershell-blue"></a> <img src="https://img.shields.io/badge/Maintenance%20Level-Actively%20Developed-brightgreen"> <a href="https://github.com/evild3ad/MemProcFS-Analyzer/releases/latest"><img src="https://img.shields.io/github/v/release/evild3ad/MemProcFS-Analyzer?label=Release"></a> <a href="https://twitter.com/Evild3ad79"><img src="https://img.shields.io/twitter/follow/Evild3ad79?style=social"></a>
 
 # MemProcFS-Analyzer
 MemProcFS-Analyzer.ps1 is a PowerShell script utilized to simplify the usage of MemProcFS and to optimize your memory analysis workflow.
@@ -29,7 +29,7 @@ Features:
 * Extracting Windows Event Log Files and processing w/ EvtxECmd &#8594; Timeline Explorer ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman) 
 * Event Log Overview  
 * Processing Windows Event Logs w/ [Zircolite](https://github.com/wagga40/Zircolite) - A standalone SIGMA-based detection tool for EVTX
-* Analyzing extracted Amcache.hve w/ Amcacheparser ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
+* Analyzing extracted Amcache.hve w/ AmcacheParser ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
 * Analyzing Application Compatibility Cache aka ShimCache w/ AppCompatcacheParser ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
 * Analyzing Syscache w/ RECmd ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
 * Analyzing UserAssist Artifacts w/ RECmd ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
@@ -37,7 +37,7 @@ Features:
 * Simple Prefetch View (based on Forensic Timeline)  
 * Analyzing Auto-Start Extensibility Points (ASEPs) w/ RECmd ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
 * Analyzing RecentDocs, Office Trusted Document w/ RECmd ([EZTools](https://ericzimmerman.github.io/) by Eric Zimmerman)  
-* Analyzing Registry w/ Kroll RECmd Batch File ([Kroll Batch File](https://github.com/EricZimmerman/RECmd/projects/1) by Andrew Rathbun)  
+* Analyzing Registry w/ RECmd DFIR Batch File ([DFIR Batch File](https://github.com/EricZimmerman/RECmd/blob/master/BatchExamples/DFIRBatch.md) by Andrew Rathbun)  
 * Analyzing Metadata of Recovered Process Modules (experimental)  
 * Analyzing Microsoft Protection Logs (experimental)  
 * Extracting Windows Shortcut Files (LNK)  
@@ -192,7 +192,7 @@ https://www.clamav.net/downloads
 Dokany File System Library v2.2.0.1000 (2024-08-18)  
 https://github.com/dokan-dev/dokany/releases/latest &#8594; DokanSetup.exe  
 
-Elasticsearch 8.15.3 (2024-08-18)  
+Elasticsearch 8.16.0 (2024-11-12)  
 https://www.elastic.co/downloads/elasticsearch  
 
 entropy v1.1 (2023-07-28)  
@@ -210,13 +210,13 @@ https://github.com/ipinfo/cli
 jq v1.7.1 (2023-12-13)  
 https://github.com/stedolan/jq  
 
-Kibana 8.15.3 (2024-08-18)  
+Kibana 8.16.0 (2024-11-12)  
 https://www.elastic.co/downloads/kibana  
 
 lnk_parser v0.2.0 (2022-08-10)  
 https://github.com/AbdulRhmanAlfaifi/lnk_parser  
 
-MemProcFS v5.12.5 - The Memory Process File System (2024-10-09)      
+MemProcFS v5.12.6 - The Memory Process File System (2024-10-09)      
 https://github.com/ufrisk/MemProcFS  
 
 RECmd v2.0.0.0 (.NET 6)  
